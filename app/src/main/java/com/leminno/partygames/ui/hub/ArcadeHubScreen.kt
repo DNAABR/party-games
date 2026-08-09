@@ -25,6 +25,7 @@ import com.leminno.partygames.data.GameCatalogRepository
 import com.leminno.partygames.ui.hub.components.GameCard
 import com.leminno.partygames.ui.hub.components.PreGameGuideSheet
 import com.leminno.partygames.ui.model.GameItem
+import com.leminno.partygames.data.model.GameCategory
 import com.leminno.partygames.ui.theme.*
 
 @Composable

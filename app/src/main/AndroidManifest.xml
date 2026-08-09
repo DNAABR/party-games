@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Permissions required for Party Games features & feedback -->
+    <!-- Network access for AI Gateway prompts & remote game features -->
     <uses-permission android:name="android.permission.INTERNET" />
+    
+    <!-- Haptic feedback for tactile gameplay responses -->
     <uses-permission android:name="android.permission.VIBRATE" />
+    
+    <!-- Optional microphone access for Decibel Scream audio challenge game -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="false" />
 
     <application
         android:allowBackup="true"

@@ -1,6 +1,6 @@
 package com.leminno.partygames.ui.games.connectfour
 
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,129 +14,113 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.leminno.partygames.ui.components.GameScaffold
 import com.leminno.partygames.ui.theme.*
 
 @Composable
 fun ConnectFourScreen(
+    viewModel: ConnectFourViewModel = viewModel(),
     onExitGame: () -> Unit
 ) {
     val context = LocalContext.current
     val haptics = remember { HapticFeedbackManager(context) }
+    val composeHaptics = LocalHapticFeedback.current
 
-    // 7 Columns x 6 Rows Board state (0 = Empty, 1 = Red P1, 2 = Yellow P2)
-    val grid = remember { mutableStateListOf(*Array(6) { IntArray(7) }) }
-    var isRedTurn by remember { mutableStateOf(true) }
-    var winnerPlayer by remember { mutableStateOf<Int?>(null) } // 1, 2, or null
+    val uiState by viewModel.uiState.collectAsState()
 
-    fun dropDisc(col: Int) {
-        if (winnerPlayer != null) return
-        for (row in 5 downTo 0) {
-            if (grid[row][col] == 0) {
-                grid[row][col] = if (isRedTurn) 1 else 2
-                haptics.performPop()
+    val turnColor by animateColorAsState(
+        targetValue = when {
+            uiState.winnerPlayer == 1 -> Color(0xFFFF0055)
+            uiState.winnerPlayer == 2 -> Color(0xFFFFD166)
+            uiState.isDraw -> Color.White
+            uiState.isRedTurn -> Color(0xFFFF0055)
+            else -> Color(0xFFFFD166)
+        },
+        label = "turnColor"
+    )
 
-                // Check Win
-                val targetPlayer = if (isRedTurn) 1 else 2
-                if (checkWin(grid, row, col, targetPlayer)) {
-                    winnerPlayer = targetPlayer
-                    haptics.performHeavyBurst()
-                } else {
-                    isRedTurn = !isRedTurn
-                }
-                break
-            }
-        }
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(BackgroundNavySlate)
-            .padding(20.dp)
+    GameScaffold(
+        title = "CONNECT FOUR 🔴🟡",
+        titleColor = Color(0xFFFF6B6B),
+        onExitGame = onExitGame
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Header Bar
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            // Turn Status Header
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(SurfaceGlassDark)
+                    .border(1.dp, turnColor, RoundedCornerShape(14.dp))
+                    .padding(horizontal = 18.dp, vertical = 8.dp)
             ) {
-                IconButton(onClick = onExitGame) {
-                    Text("❌", fontSize = 20.sp)
-                }
-
                 Text(
-                    text = "CONNECT FOUR 🟡",
-                    color = TextPrimary,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Black
+                    text = when {
+                        uiState.winnerPlayer != null -> "PLAYER ${uiState.winnerPlayer} WINS! 🏆"
+                        uiState.isDraw -> "IT'S A DRAW! 🤝"
+                        uiState.isRedTurn -> "RED TURN 🔴"
+                        else -> "YELLOW TURN 🟡"
+                    },
+                    color = turnColor,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
                 )
-
-                val turnColor = if (isRedTurn) Color(0xFFFF4D4D) else Color(0xFFFFD700)
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(turnColor.copy(alpha = 0.2f))
-                        .border(1.dp, turnColor, RoundedCornerShape(12.dp))
-                        .padding(horizontal = 10.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = if (winnerPlayer != null) "PLAYER $winnerPlayer WINS! 🏆" else if (isRedTurn) "RED TURN 🔴" else "YELLOW TURN 🟡",
-                        color = turnColor,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
             }
 
-            // 7x6 Game Board Container
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 6x7 Grid Board
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(7f / 6f)
                     .clip(RoundedCornerShape(20.dp))
                     .background(Color(0xFF1E293B))
-                    .border(2.dp, BorderGlassDefault, RoundedCornerShape(20.dp))
-                    .padding(10.dp)
+                    .border(3.dp, Color(0xFF334155), RoundedCornerShape(20.dp))
+                    .padding(12.dp)
             ) {
-                Column(
+                Row(
                     modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    for (row in 0 until 6) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                    for (col in 0..6) {
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                                .clickable {
+                                    haptics.performTick(composeHaptics)
+                                    viewModel.dropDisc(
+                                        col = col,
+                                        onWin = { haptics.performHeavyBurst() },
+                                        onDraw = { haptics.performWarningThud() }
+                                    )
+                                },
+                            verticalArrangement = Arrangement.SpaceBetween,
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            for (col in 0 until 7) {
-                                val cellVal = grid[row][col]
-                                val cellColor by animateColorAsState(
-                                    targetValue = when (cellVal) {
-                                        1 -> Color(0xFFFF4D4D)
-                                        2 -> Color(0xFFFFD700)
-                                        else -> Color(0xFF0F172A)
-                                    },
-                                    label = "cellColor"
-                                )
+                            for (row in 0..5) {
+                                val cellVal = uiState.grid[row][col]
+                                val cellColor = when (cellVal) {
+                                    1 -> Color(0xFFFF0055) // Red
+                                    2 -> Color(0xFFFFD166) // Yellow
+                                    else -> Color(0xFF0F172A) // Empty Slot
+                                }
 
                                 Box(
                                     modifier = Modifier
-                                        .weight(1f)
-                                        .aspectRatio(1f)
-                                        .padding(4.dp)
+                                        .size(36.dp)
                                         .clip(CircleShape)
                                         .background(cellColor)
                                         .border(1.dp, Color(0x33FFFFFF), CircleShape)
-                                        .clickable {
-                                            dropDisc(col)
-                                        }
                                 )
                             }
                         }
@@ -144,57 +128,22 @@ fun ConnectFourScreen(
                 }
             }
 
-            // Reset Game Button
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Bottom Reset Button
             Button(
                 onClick = {
-                    for (r in 0 until 6) {
-                        for (c in 0 until 7) {
-                            grid[r][c] = 0
-                        }
-                    }
-                    winnerPlayer = null
-                    isRedTurn = true
                     haptics.performPop()
+                    viewModel.resetGame()
                 },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6B6B)),
+                shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00F2FE))
+                    .height(52.dp)
             ) {
-                Text("RESTART MATCH 🔄", color = BackgroundObsidian, fontSize = 15.sp, fontWeight = FontWeight.Black)
+                Text("RESTART MATCH 🔄", color = Color.White, fontWeight = FontWeight.Black)
             }
         }
     }
-}
-
-private fun checkWin(board: List<IntArray>, row: Int, col: Int, player: Int): Boolean {
-    val directions = listOf(
-        Pair(0, 1),  // Horizontal
-        Pair(1, 0),  // Vertical
-        Pair(1, 1),  // Diagonal Down-Right
-        Pair(1, -1)  // Diagonal Down-Left
-    )
-
-    for ((dr, dc) in directions) {
-        var count = 1
-        // Positive direction
-        var r = row + dr
-        var c = col + dc
-        while (r in 0 until 6 && c in 0 until 7 && board[r][c] == player) {
-            count++
-            r += dr
-            c += dc
-        }
-        // Negative direction
-        r = row - dr
-        c = col - dc
-        while (r in 0 until 6 && c in 0 until 7 && board[r][c] == player) {
-            count++
-            r -= dr
-            c -= dc
-        }
-
-        if (count >= 4) return true
-    }
-    return false
 }

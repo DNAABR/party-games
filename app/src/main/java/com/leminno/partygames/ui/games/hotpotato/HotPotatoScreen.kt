@@ -71,9 +71,16 @@ fun HotPotatoScreen(
                 val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as? CameraManager
                 val cameraId = cameraManager?.cameraIdList?.firstOrNull()
                 if (cameraId != null) {
-                    cameraManager.setTorchMode(cameraId, true)
-                    delay(300L)
-                    cameraManager.setTorchMode(cameraId, false)
+                    val chars = cameraManager.getCameraCharacteristics(cameraId)
+                    val hasFlash = chars.get(android.hardware.camera2.CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
+                    if (hasFlash) {
+                        try {
+                            cameraManager.setTorchMode(cameraId, true)
+                            delay(300L)
+                        } finally {
+                            try { cameraManager.setTorchMode(cameraId, false) } catch (_: Exception) {}
+                        }
+                    }
                 }
             } catch (_: Exception) {}
         }
