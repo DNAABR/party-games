@@ -162,14 +162,150 @@ object GameCatalogRepository {
         ),
 
         // Phase 2 Expansion Games
-        GameItem("charades", "Charades", "Acting & motion guessing", "Act out words without speaking!", GameCategory.ACTION, SetupType.FOREHEAD_SENSOR, 2, 10, 5, false, null, emptyList()),
-        GameItem("i_want_to_be", "I Want to Be...", "Career clue guessing", "Give 3 subtle clues for your secret profession.", GameCategory.TRIVIA, SetupType.PASS_AND_PLAY, 3, 8, 5, false, null, emptyList()),
-        GameItem("two_truths_and_a_lie", "Two Truths & A Lie", "Spot the fake statement", "Can you trick your friends with a plausible lie?", GameCategory.TRIVIA, SetupType.PASS_AND_PLAY, 3, 10, 8, false, null, emptyList()),
-        GameItem("most_likely_to", "Most Likely To", "Group voting showdown", "Who is most likely to survive a zombie apocalypse?", GameCategory.TRIVIA, SetupType.PASS_AND_PLAY, 3, 12, 5, false, null, emptyList()),
-        GameItem("decibel_scream", "Decibel Scream", "Microphone volume party", "Compete in quiet whispers or max volume spikes!", GameCategory.ACTION, SetupType.PASS_AND_PLAY, 2, 8, 5, false, null, emptyList()),
-        GameItem("silent_library", "Silent Library", "Face control challenge", "Perform absurd tasks without cracking a smile!", GameCategory.ACTION, SetupType.PASS_AND_PLAY, 2, 8, 5, false, null, emptyList()),
-        GameItem("ultimate_ttt", "Power-Up Tic Tac Toe", "Strategic grid battle", "Tic Tac Toe upgraded with special power-ups!", GameCategory.BOARD, SetupType.PASS_AND_PLAY, 2, 2, 5, false, null, emptyList()),
-        GameItem("hand_cricket", "Hand Cricket", "Split-screen finger duel", "Simultaneous finger tap count showdown!", GameCategory.ACTION, SetupType.SPLIT_SCREEN, 2, 2, 5, false, null, emptyList()),
+        GameItem(
+            id = "charades",
+            title = "Charades",
+            tagLine = "Acting & motion guessing",
+            description = "Hold phone against forehead and act out words without speaking! Tilt down for Correct, tilt up to Skip.",
+            category = GameCategory.ACTION,
+            setupType = SetupType.FOREHEAD_SENSOR,
+            minPlayers = 2,
+            maxPlayers = 12,
+            estTimeMinutes = 5,
+            isMvp = true,
+            antiCheatNotice = "Keep screen facing away from the actor's eyes!",
+            rules = listOf(
+                GameRuleStep(1, "Forehead Position", "Place phone on forehead facing your teammates.", "📱"),
+                GameRuleStep(2, "Act Out Words", "Teammates act out the secret word without talking.", "🎭"),
+                GameRuleStep(3, "Tilt Sensor", "Tilt DOWN on correct guess, tilt UP to skip!", "↕️")
+            )
+        ),
+        GameItem(
+            id = "i_want_to_be",
+            title = "I Want to Be...",
+            tagLine = "Career clue guessing",
+            description = "Get a secret profession, reveal clues, and let your group guess your career before the timer expires!",
+            category = GameCategory.TRIVIA,
+            setupType = SetupType.PASS_AND_PLAY,
+            minPlayers = 3,
+            maxPlayers = 10,
+            estTimeMinutes = 5,
+            isMvp = true,
+            antiCheatNotice = "Use the 2-second hold-to-reveal card so nearby players can't peek!",
+            rules = listOf(
+                GameRuleStep(1, "Secret Role Reveal", "Hold screen for 2 seconds to view secret profession safely.", "🔒"),
+                GameRuleStep(2, "Give 3 Clues", "Give subtle clues without naming the profession.", "💡"),
+                GameRuleStep(3, "Guess & Score", "Players guess before 30-second timer runs out!", "⏱️")
+            )
+        ),
+        GameItem(
+            id = "two_truths_and_a_lie",
+            title = "Two Truths & A Lie",
+            tagLine = "Spot the fake statement",
+            description = "Active player enters 2 truths and 1 lie. Other players vote on which statement is fake to earn points!",
+            category = GameCategory.TRIVIA,
+            setupType = SetupType.PASS_AND_PLAY,
+            minPlayers = 3,
+            maxPlayers = 10,
+            estTimeMinutes = 8,
+            isMvp = true,
+            antiCheatNotice = "Enter statements privately before passing the phone.",
+            rules = listOf(
+                GameRuleStep(1, "Create Statements", "Type 2 true facts and 1 convincing lie.", "✍️"),
+                GameRuleStep(2, "Group Vote", "Pass phone and let players select the statement they think is a lie.", "🗳️"),
+                GameRuleStep(3, "Reveal & Tally", "Score points for spotting lies and tricking others!", "🏆")
+            )
+        ),
+        GameItem(
+            id = "most_likely_to",
+            title = "Most Likely To",
+            tagLine = "Group voting showdown",
+            description = "Read funny scenarios, count down '3, 2, 1', vote secretly, and reveal live animated percentage breakdowns!",
+            category = GameCategory.TRIVIA,
+            setupType = SetupType.PASS_AND_PLAY,
+            minPlayers = 3,
+            maxPlayers = 12,
+            estTimeMinutes = 5,
+            isMvp = true,
+            antiCheatNotice = "Cast secret votes on phone before group discussion!",
+            rules = listOf(
+                GameRuleStep(1, "Read Scenario", "App shows: 'Who is most likely to...'", "📜"),
+                GameRuleStep(2, "Secret Vote", "Each player selects who fits the prompt best.", "👆"),
+                GameRuleStep(3, "View Stats", "See live percentage charts of everyone's votes!", "📊")
+            )
+        ),
+        GameItem(
+            id = "decibel_scream",
+            title = "Decibel Scream",
+            tagLine = "Microphone volume party",
+            description = "Compete in quiet whisper challenges (<15dB), maximum sudden scream spikes, or steady hum control!",
+            category = GameCategory.ACTION,
+            setupType = SetupType.PASS_AND_PLAY,
+            minPlayers = 2,
+            maxPlayers = 10,
+            estTimeMinutes = 5,
+            isMvp = true,
+            antiCheatNotice = "Hold mic 6 inches from mouth during sound challenges!",
+            rules = listOf(
+                GameRuleStep(1, "Choose Mode", "Select Whisper (<15dB), Max Scream, or Steady Hum.", "🎙️"),
+                GameRuleStep(2, "Make Noise", "Perform challenge when countdown hits zero.", "🔊"),
+                GameRuleStep(3, "Check Gauge", "Live decibel meter measures peak volume!", "📈")
+            )
+        ),
+        GameItem(
+            id = "silent_library",
+            title = "Silent Library",
+            tagLine = "Face control challenge",
+            description = "Perform ridiculous tasks without cracking a smile while funny distracting sound effects play!",
+            category = GameCategory.ACTION,
+            setupType = SetupType.PASS_AND_PLAY,
+            minPlayers = 2,
+            maxPlayers = 10,
+            estTimeMinutes = 5,
+            isMvp = true,
+            antiCheatNotice = "No smiling or laughing — let the group decide if the player cracked!",
+            rules = listOf(
+                GameRuleStep(1, "Draw Task", "Active player receives a funny task card.", "🃏"),
+                GameRuleStep(2, "Hold Straight Face", "Perform task for 30 seconds with straight face.", "😐"),
+                GameRuleStep(3, "Distraction Wave", "App triggers funny sounds to break your focus!", "🦆")
+            )
+        ),
+        GameItem(
+            id = "ultimate_ttt",
+            title = "Power-Up Tic Tac Toe",
+            tagLine = "Strategic grid battle",
+            description = "Upgraded Tic-Tac-Toe with tactical Power-Up cards: Erase opponent cells, Shield grid cells, or Double Turn!",
+            category = GameCategory.BOARD,
+            setupType = SetupType.PASS_AND_PLAY,
+            minPlayers = 2,
+            maxPlayers = 2,
+            estTimeMinutes = 5,
+            isMvp = true,
+            antiCheatNotice = "Power-ups are limited to 1 per game round per player!",
+            rules = listOf(
+                GameRuleStep(1, "Place or Power-Up", "Tap cell to place mark OR deploy a Power-Up card.", "⚡"),
+                GameRuleStep(2, "Erase & Shield", "Use Erase to wipe cell, or Shield to lock your square.", "🛡️"),
+                GameRuleStep(3, "Connect Three", "First to align 3 symbols in a row wins!", "🎉")
+            )
+        ),
+        GameItem(
+            id = "hand_cricket",
+            title = "Hand Cricket",
+            tagLine = "Split-screen duel & online room",
+            description = "Simultaneous finger tap count (1 to 6) duel! Play 1v1 Split Screen or Team Match (Multi-Device / Online Room).",
+            category = GameCategory.ACTION,
+            setupType = SetupType.SPLIT_SCREEN,
+            minPlayers = 2,
+            maxPlayers = 12,
+            estTimeMinutes = 8,
+            isMvp = true,
+            antiCheatNotice = "In split-screen, tap your choice at the same time!",
+            rules = listOf(
+                GameRuleStep(1, "Select Mode", "Choose 1v1 Split-Screen or Team Match (Multi-Device / Online Room).", "📲"),
+                GameRuleStep(2, "Tap 1 to 6", "Batter & Bowler pick finger numbers simultaneously.", "🔢"),
+                GameRuleStep(3, "Runs vs OUT!", "Same number = OUT! Different numbers = Runs added to total!", "🏏")
+            )
+        ),
 
         // Phase 3 Games
         GameItem("mafia_werewolf", "Mafia / Werewolf", "Narrator mystery night", "App guides night cycles with audio masking.", GameCategory.MYSTERY, SetupType.PASS_AND_PLAY, 5, 16, 20, false, null, emptyList()),

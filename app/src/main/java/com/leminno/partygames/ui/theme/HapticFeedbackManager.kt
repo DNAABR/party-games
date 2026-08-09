@@ -1,5 +1,6 @@
 package com.leminno.partygames.ui.theme
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.os.VibrationEffect
@@ -8,6 +9,7 @@ import android.os.VibratorManager
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 
+@SuppressLint("MissingPermission")
 class HapticFeedbackManager(private val context: Context) {
 
     private val vibrator: Vibrator? by lazy {
