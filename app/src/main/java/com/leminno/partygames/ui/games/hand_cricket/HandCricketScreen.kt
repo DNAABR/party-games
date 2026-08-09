@@ -20,13 +20,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.leminno.partygames.data.remote.RemoteRoomRepository
+import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.RemoteRoomSetupSheet
+import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
-import kotlinx.coroutines.delay
-import kotlin.random.Random
+import kotlinx.coroutines.launch
 
 enum class HandCricketGameMode(val title: String, val subtitle: String, val icon: String) {
     SPLIT_SCREEN("1v1 Split Screen", "Same device facing opposite directions", "📲"),
-    TEAM_ROOM("Team Match / Online Room", "Multi-Device & >2 Players in Teams", "🌐")
+    TEAM_ROOM("Team Match / Online Room", "Multi-Device & Remote Players via Code/Link", "🌐")
 }
 
 @Composable
@@ -34,15 +37,18 @@ fun HandCricketScreen(
     onExitGame: () -> Unit
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val haptics = remember { HapticFeedbackManager(context) }
     val composeHaptics = LocalHapticFeedback.current
 
     var selectedGameMode by remember { mutableStateOf<HandCricketGameMode?>(null) }
+    var showRemoteSheet by remember { mutableStateOf(false) }
 
     // Multi-Device Online Room State
     var roomCode by remember { mutableStateOf("") }
     var isHost by remember { mutableStateOf(true) }
     var roomJoined by remember { mutableStateOf(false) }
+    var localPlayerId by remember { mutableStateOf("") }
 
     // Game state
     var isInnings1 by remember { mutableStateOf(true) }
@@ -61,37 +67,87 @@ fun HandCricketScreen(
     var matchGameOver by remember { mutableStateOf(false) }
     var winnerName by remember { mutableStateOf("") }
 
-    fun generateRoomCode(): String {
-        return (100000..999999).random().toString()
+    // Remote State Listener
+    LaunchedEffect(roomCode, roomJoined) {
+        if (roomJoined && roomCode.isNotBlank()) {
+            RemoteRoomRepository.observeRoom(roomCode).collect { room ->
+                if (room != null && room.gameState.isNotEmpty()) {
+                    val remoteP1 = (room.gameState["p1Choice"] as? Number)?.toInt()
+                    val remoteP2 = (room.gameState["p2Choice"] as? Number)?.toInt()
+
+                    if (remoteP1 != null) p1Choice = remoteP1
+                    if (remoteP2 != null) p2Choice = remoteP2
+
+                    if (remoteP1 != null && remoteP2 != null) {
+                        // Both made choice in remote game
+                        val bat = remoteP1
+                        val bowl = remoteP2
+
+                        if (bat == bowl) {
+                            haptics.performHeavyBurst()
+                            wicketsLost++
+                            roundResultText = "WICKET! OUT! 💥 Both picked $bat!"
+                            if (wicketsLost >= maxWickets) {
+                                if (isInnings1) {
+                                    innings1Target = batterScore + 1
+                                    batterScore = 0
+                                    wicketsLost = 0
+                                    isInnings1 = false
+                                    roundResultText = "INNINGS 1 OVER! Target: $innings1Target Runs!"
+                                } else {
+                                    matchGameOver = true
+                                    winnerName = if (batterScore >= innings1Target) team2Name else team1Name
+                                }
+                            }
+                        } else {
+                            haptics.performPop()
+                            batterScore += bat
+                            roundResultText = "+$bat Runs! (Bat: $bat, Bowl: $bowl)"
+                            if (!isInnings1 && batterScore >= innings1Target) {
+                                matchGameOver = true
+                                winnerName = team2Name
+                            }
+                        }
+
+                        // Host resets round choice after delay
+                        if (isHost) {
+                            scope.launch {
+                                kotlinx.coroutines.delay(1800)
+                                RemoteRoomRepository.updateGameState(
+                                    roomCode,
+                                    mapOf("p1Choice" to null, "p2Choice" to null)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
-    fun evaluateRound() {
+    fun evaluateLocalRound() {
         if (p1Choice != null && p2Choice != null) {
             val bat = p1Choice!!
             val bowl = p2Choice!!
 
             if (bat == bowl) {
-                // OUT!
                 haptics.performHeavyBurst()
                 wicketsLost++
                 roundResultText = "WICKET! OUT! 💥 Both picked $bat!"
 
                 if (wicketsLost >= maxWickets) {
                     if (isInnings1) {
-                        // Switch Innings
                         innings1Target = batterScore + 1
                         batterScore = 0
                         wicketsLost = 0
                         isInnings1 = false
                         roundResultText = "INNINGS 1 OVER! Target: $innings1Target Runs!"
                     } else {
-                        // Match Over
                         matchGameOver = true
                         winnerName = if (batterScore >= innings1Target) team2Name else team1Name
                     }
                 }
             } else {
-                // RUNS ADDED!
                 haptics.performPop()
                 batterScore += bat
                 roundResultText = "+$bat Runs! (Bat: $bat, Bowl: $bowl)"
@@ -107,13 +163,29 @@ fun HandCricketScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF0F141D))
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            .padding(16.dp)
+    fun handleGestureSelection(choice: Int, isBatter: Boolean) {
+        if (roomJoined) {
+            // Remote game gesture submission
+            val currentP1 = if (isBatter) choice else p1Choice
+            val currentP2 = if (!isBatter) choice else p2Choice
+            scope.launch {
+                RemoteRoomRepository.updateGameState(
+                    roomCode,
+                    mapOf("p1Choice" to currentP1, "p2Choice" to currentP2)
+                )
+            }
+        } else {
+            // Local game gesture submission
+            if (isBatter) p1Choice = choice else p2Choice = choice
+            evaluateLocalRound()
+        }
+    }
+
+    GameScaffold(
+        title = "HAND CRICKET 🏏",
+        titleColor = Color(0xFFFFD166),
+        gameId = "hand_cricket",
+        onExitGame = onExitGame
     ) {
         if (selectedGameMode == null) {
             // Mode Selector
@@ -122,24 +194,6 @@ fun HandCricketScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onExitGame) {
-                        Text("✕", color = TextSecondary, fontSize = 22.sp)
-                    }
-                    Text(
-                        text = "HAND CRICKET 🏏",
-                        color = Color(0xFFFFD166),
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 1.sp
-                    )
-                    Spacer(modifier = Modifier.width(48.dp))
-                }
-
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()
@@ -165,7 +219,7 @@ fun HandCricketScreen(
                                         haptics.performTick(composeHaptics)
                                         selectedGameMode = mode
                                         if (mode == HandCricketGameMode.TEAM_ROOM) {
-                                            roomCode = generateRoomCode()
+                                            showRemoteSheet = true
                                         }
                                     }
                                     .padding(20.dp)
@@ -191,114 +245,6 @@ fun HandCricketScreen(
                         }
                     }
                 }
-
-                TextButton(onClick = onExitGame) {
-                    Text("Back to Hub", color = TextMuted)
-                }
-            }
-        } else if (selectedGameMode == HandCricketGameMode.TEAM_ROOM && !roomJoined) {
-            // Online Multi-Device Room Setup View
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = { selectedGameMode = null }) {
-                        Text("←", color = TextSecondary, fontSize = 22.sp)
-                    }
-                    Text(
-                        text = "ONLINE TEAM ROOM 🌐",
-                        color = Color(0xFF00F2FE),
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Black
-                    )
-                    Spacer(modifier = Modifier.width(48.dp))
-                }
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(24.dp))
-                            .background(SurfaceGlassDark)
-                            .border(2.dp, Color(0xFF00F2FE), RoundedCornerShape(24.dp))
-                            .padding(24.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = "MATCH ROOM CODE", color = TextMuted, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = roomCode,
-                                color = Color(0xFF00F2FE),
-                                fontSize = 42.sp,
-                                fontWeight = FontWeight.Black,
-                                letterSpacing = 4.sp
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Share room code with teammates on other phones!",
-                                color = TextSecondary,
-                                fontSize = 12.sp,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Text(
-                        text = "TEAM ASSIGNMENTS",
-                        color = TextPrimary,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        OutlinedTextField(
-                            value = team1Name,
-                            onValueChange = { team1Name = it },
-                            label = { Text("Team 1 Name") },
-                            modifier = Modifier.weight(1f),
-                            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFF00F2FE), unfocusedBorderColor = BorderGlassDefault)
-                        )
-
-                        OutlinedTextField(
-                            value = team2Name,
-                            onValueChange = { team2Name = it },
-                            label = { Text("Team 2 Name") },
-                            modifier = Modifier.weight(1f),
-                            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFFFF007F), unfocusedBorderColor = BorderGlassDefault)
-                        )
-                    }
-                }
-
-                Button(
-                    onClick = {
-                        haptics.performPop()
-                        roomJoined = true
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00F2FE)),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                ) {
-                    Text("JOIN ROOM & START MATCH ▶", color = Color.Black, fontWeight = FontWeight.Black)
-                }
             }
         } else if (!matchGameOver) {
             // Live Hand Cricket Game Board
@@ -316,29 +262,33 @@ fun HandCricketScreen(
                         .border(1.dp, BorderGlassDefault, RoundedCornerShape(16.dp))
                         .padding(14.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column {
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
                             Text(
                                 text = if (isInnings1) "$team1Name (Batting)" else "$team2Name (Chasing Target $innings1Target)",
                                 color = Color(0xFFFFD166),
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold
                             )
-                            Text(
-                                text = "$batterScore Runs  •  $wicketsLost/$maxWickets Wickets",
-                                color = TextPrimary,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Black
-                            )
+                            if (roomJoined) {
+                                Text(
+                                    text = "🌐 ROOM: $roomCode",
+                                    color = Color(0xFF00F2FE),
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
-
-                        IconButton(onClick = onExitGame) {
-                            Text("✕", color = TextSecondary, fontSize = 20.sp)
-                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "$batterScore Runs  •  $wicketsLost/$maxWickets Wickets",
+                            color = TextPrimary,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Black
+                        )
                     }
                 }
 
@@ -352,7 +302,7 @@ fun HandCricketScreen(
                     )
                 }
 
-                // 180° Rotated Top Zone for Opposite Player in Split-Screen mode
+                // Bowler Zone
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -386,8 +336,7 @@ fun HandCricketScreen(
                                         .border(1.dp, Color(0xFFFF007F), CircleShape)
                                         .clickable {
                                             haptics.performTick(composeHaptics)
-                                            p2Choice = num
-                                            evaluateRound()
+                                            handleGestureSelection(num, isBatter = false)
                                         },
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -405,7 +354,7 @@ fun HandCricketScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Bottom Zone for Batter
+                // Batter Zone
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -436,8 +385,7 @@ fun HandCricketScreen(
                                         .border(1.dp, Color(0xFF00F2FE), CircleShape)
                                         .clickable {
                                             haptics.performTick(composeHaptics)
-                                            p1Choice = num
-                                            evaluateRound()
+                                            handleGestureSelection(num, isBatter = true)
                                         },
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -454,55 +402,39 @@ fun HandCricketScreen(
                 }
             }
         } else {
-            // Match Result & Victory Ceremony
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Text(
-                    text = "MATCH COMPLETED! 🏆",
-                    color = Color(0xFFFFD166),
-                    fontSize = 26.sp,
-                    fontWeight = FontWeight.Black
-                )
+            VictoryCeremonyOverlay(
+                winnerTitle = "WINNER: $winnerName 🎉",
+                subtitle = "Hand Cricket Champions!",
+                onPlayAgain = {
+                    matchGameOver = false
+                    isInnings1 = true
+                    batterScore = 0
+                    wicketsLost = 0
+                    p1Choice = null
+                    p2Choice = null
+                    roundResultText = null
+                },
+                onBackToHub = onExitGame
+            )
+        }
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "WINNER: $winnerName 🎉",
-                    color = Color(0xFF00E676),
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Button(
-                    onClick = {
-                        matchGameOver = false
-                        isInnings1 = true
-                        batterScore = 0
-                        wicketsLost = 0
-                        p1Choice = null
-                        p2Choice = null
-                        roundResultText = null
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD166)),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                ) {
-                    Text("PLAY REMATCH 🔄", color = Color.Black, fontWeight = FontWeight.Black)
+        // Remote Room Setup Sheet
+        if (showRemoteSheet) {
+            RemoteRoomSetupSheet(
+                gameId = "hand_cricket",
+                gameName = "Hand Cricket 🏏",
+                onDismiss = {
+                    showRemoteSheet = false
+                    if (!roomJoined) selectedGameMode = null
+                },
+                onRoomJoined = { code, hostFlag, pid ->
+                    roomCode = code
+                    isHost = hostFlag
+                    localPlayerId = pid
+                    roomJoined = true
+                    showRemoteSheet = false
                 }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                TextButton(onClick = onExitGame) {
-                    Text("Back to Hub", color = TextMuted)
-                }
-            }
+            )
         }
     }
 }

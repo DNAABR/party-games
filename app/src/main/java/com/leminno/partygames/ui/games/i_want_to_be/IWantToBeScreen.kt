@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.leminno.partygames.ui.components.GameScaffold
 import com.leminno.partygames.ui.theme.*
 import kotlinx.coroutines.delay
 
@@ -82,38 +83,17 @@ fun IWantToBeScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF0D1B2A))
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            .padding(20.dp)
+    GameScaffold(
+        title = "I Want To Be... 💼",
+        titleColor = Color(0xFF00F2FE),
+        gameId = "i_want_to_be",
+        onExitGame = onExitGame
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onExitGame) {
-                    Text("✕", color = TextSecondary, fontSize = 22.sp)
-                }
-                Text(
-                    text = "I WANT TO BE... 💼",
-                    color = Color(0xFF00F2FE),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.sp
-                )
-                Spacer(modifier = Modifier.width(48.dp))
-            }
-
             if (!isRevealed) {
                 // Anti-Cheat Hold-To-Reveal Card
                 Column(
@@ -404,10 +384,6 @@ fun IWantToBeScreen(
                         .height(52.dp)
                 ) {
                     Text("NEXT PLAYER TURN ▶", color = Color.Black, fontWeight = FontWeight.Black)
-                }
-            } else {
-                TextButton(onClick = onExitGame) {
-                    Text("Back to Hub", color = TextMuted)
                 }
             }
         }

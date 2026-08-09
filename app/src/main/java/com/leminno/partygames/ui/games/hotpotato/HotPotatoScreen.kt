@@ -20,6 +20,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlin.random.Random
@@ -86,86 +88,69 @@ fun HotPotatoScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(if (isExploded) AlertRed.copy(alpha = 0.9f) else BackgroundNavySlate)
-            .padding(24.dp)
+    GameScaffold(
+        title = "HOT POTATO 💥",
+        titleColor = Color(0xFFFFB300),
+        gameId = "hot_potato",
+        onExitGame = onExitGame
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            // Header Bar
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+        if (!isExploded) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = onExitGame) {
-                    Text("❌", fontSize = 20.sp)
-                }
-
-                Text(
-                    text = "HOT POTATO 💥",
-                    color = TextPrimary,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Black
-                )
-
+                // Header Pass Warning Badge
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color(0x33FFB300))
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .padding(horizontal = 16.dp, vertical = 6.dp)
                 ) {
-                    Text("PASS FAST! 🔄", color = Color(0xFFFFB300), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text("PASS FAST! 🔄", color = Color(0xFFFFB300), fontSize = 13.sp, fontWeight = FontWeight.Bold)
                 }
-            }
 
-            // Bomb Visualizer Pulse Node
-            Box(
-                modifier = Modifier
-                    .size(240.dp)
-                    .scale(pulseScale)
-                    .clip(CircleShape)
-                    .background(if (isExploded) AlertRed else Color(0x33FFB300))
-                    .border(2.dp, if (isExploded) WinGold else Color(0xFFFFB300), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = if (isExploded) "💥 BOOM!" else "💣 PASS!",
-                    fontSize = if (isExploded) 48.sp else 54.sp,
-                    fontWeight = FontWeight.Black
-                )
-            }
-
-            // Category Prompt Box
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(SurfaceGlassDark)
-                    .border(1.dp, BorderGlassDefault, RoundedCornerShape(20.dp))
-                    .padding(20.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("SHOUT ANSWER OUT LOUD:", color = TextMuted, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.height(8.dp))
+                // Bomb Visualizer Pulse Node
+                Box(
+                    modifier = Modifier
+                        .size(240.dp)
+                        .scale(pulseScale)
+                        .clip(CircleShape)
+                        .background(Color(0x33FFB300))
+                        .border(2.dp, Color(0xFFFFB300), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text(
-                        text = categories[currentCategoryIndex % categories.size],
-                        color = TextPrimary,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
+                        text = "💣 PASS!",
+                        fontSize = 54.sp,
+                        fontWeight = FontWeight.Black
                     )
                 }
-            }
 
-            // Controls
-            if (!isExploded) {
+                // Category Prompt Box
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(SurfaceGlassDark)
+                        .border(1.dp, BorderGlassDefault, RoundedCornerShape(20.dp))
+                        .padding(20.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("SHOUT ANSWER OUT LOUD:", color = TextMuted, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = categories[currentCategoryIndex % categories.size],
+                            color = TextPrimary,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+
+                // Next Prompt Button
                 Button(
                     onClick = {
                         currentCategoryIndex++
@@ -178,22 +163,19 @@ fun HotPotatoScreen(
                 ) {
                     Text("NEXT PROMPT ▶", color = BackgroundObsidian, fontSize = 16.sp, fontWeight = FontWeight.Black)
                 }
-            } else {
-                Button(
-                    onClick = {
-                        isExploded = false
-                        elapsedSec = 0
-                        randomDurationSec = Random.nextInt(15, 35)
-                        currentCategoryIndex++
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(54.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White)
-                ) {
-                    Text("PLAY AGAIN 💣", color = BackgroundObsidian, fontSize = 16.sp, fontWeight = FontWeight.Black)
-                }
             }
+        } else {
+            VictoryCeremonyOverlay(
+                winnerTitle = "💥 BOOM! BOMB EXPLODED!",
+                subtitle = "Whoever holds the phone is OUT!",
+                onPlayAgain = {
+                    isExploded = false
+                    elapsedSec = 0
+                    randomDurationSec = Random.nextInt(15, 35)
+                    currentCategoryIndex++
+                },
+                onBackToHub = onExitGame
+            )
         }
     }
 }

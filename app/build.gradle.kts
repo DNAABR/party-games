@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.google.services)
 }
 
 val envVersionCode = System.getenv("VERSION_CODE")?.toIntOrNull() ?: 1
@@ -78,6 +79,10 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.okhttp)
+
+    // Firebase Realtime Database
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.database.ktx)
 
     // Jetpack Compose BOM & Libraries
     implementation(platform(libs.androidx.compose.bom))

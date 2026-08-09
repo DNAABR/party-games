@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
 
 @Composable
@@ -73,6 +74,7 @@ fun WhoAmIScreen(
     GameScaffold(
         title = "Who Am I?",
         titleColor = Color(0xFF9D4EDD),
+        gameId = "who_am_i",
         onExitGame = onExitGame
     ) {
         if (!uiState.isGameOver) {
@@ -180,43 +182,12 @@ fun WhoAmIScreen(
                 }
             }
         } else {
-            // Victory / Game Summary View
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text("🎉 TIME'S UP!", color = WinGold, fontSize = 32.sp, fontWeight = FontWeight.Black)
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(SurfaceGlassDark)
-                        .border(1.dp, BorderGlassDefault, RoundedCornerShape(24.dp))
-                        .padding(24.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("FINAL SCORE", color = TextMuted, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                        Text("${uiState.score}", color = SuccessGreen, fontSize = 64.sp, fontWeight = FontWeight.Black)
-                        Text("Skips: ${uiState.skips}", color = TextSecondary, fontSize = 14.sp)
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Button(
-                    onClick = onExitGame,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(54.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF9D4EDD))
-                ) {
-                    Text("BACK TO ARCADE 🎮", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Black)
-                }
-            }
+            VictoryCeremonyOverlay(
+                winnerTitle = "Score: ${uiState.score} Points!",
+                subtitle = "Skips used: ${uiState.skips}",
+                onPlayAgain = { viewModel.initGame(timerSec) },
+                onBackToHub = onExitGame
+            )
         }
     }
 }

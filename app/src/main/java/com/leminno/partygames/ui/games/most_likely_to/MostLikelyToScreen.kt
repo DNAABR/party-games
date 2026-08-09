@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.leminno.partygames.ui.components.GameScaffold
 import com.leminno.partygames.ui.theme.*
 import kotlinx.coroutines.delay
 
@@ -48,7 +49,6 @@ fun MostLikelyToScreen(
     var votingPhase by remember { mutableStateOf(false) }
     var revealResults by remember { mutableStateOf(false) }
 
-    // Simulated players list based on playerCount
     val playerNames = remember(playerCount) {
         List(playerCount) { idx -> "Player ${idx + 1}" }
     }
@@ -69,38 +69,17 @@ fun MostLikelyToScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF180224))
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            .padding(20.dp)
+    GameScaffold(
+        title = "Most Likely To 🗳️",
+        titleColor = Color(0xFFE0AFA0),
+        gameId = "most_likely_to",
+        onExitGame = onExitGame
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onExitGame) {
-                    Text("✕", color = TextSecondary, fontSize = 22.sp)
-                }
-                Text(
-                    text = "MOST LIKELY TO 🗳️",
-                    color = Color(0xFFE0AFA0),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.sp
-                )
-                Spacer(modifier = Modifier.width(48.dp))
-            }
-
             // Prompt Card
             Box(
                 modifier = Modifier
@@ -137,7 +116,7 @@ fun MostLikelyToScreen(
                 // Animated 3-2-1 Countdown
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "${countdownValue}",
+                        text = "$countdownValue",
                         color = Color(0xFFFF007F),
                         fontSize = 72.sp,
                         fontWeight = FontWeight.Black
@@ -320,10 +299,6 @@ fun MostLikelyToScreen(
                 ) {
                     Text("NEXT QUESTION ▶", color = Color.White, fontWeight = FontWeight.Black)
                 }
-            }
-
-            TextButton(onClick = onExitGame) {
-                Text("Back to Hub", color = TextMuted)
             }
         }
     }

@@ -123,6 +123,7 @@ fun DecibelScreamScreen(
     GameScaffold(
         title = "DECIBEL SCREAM 🎙️",
         titleColor = Color(0xFF00E676),
+        gameId = "decibel_scream",
         onExitGame = onExitGame
     ) {
         Column(

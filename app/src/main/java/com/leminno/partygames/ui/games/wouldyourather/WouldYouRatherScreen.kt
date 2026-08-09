@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.leminno.partygames.ui.components.GameScaffold
 import com.leminno.partygames.ui.theme.*
 
 data class WouldYouRatherScenario(val optionA: String, val optionB: String, val percentA: Int)
@@ -48,43 +49,28 @@ fun WouldYouRatherScreen(
         label = "percentA"
     )
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(BackgroundNavySlate)
-            .padding(20.dp)
+    GameScaffold(
+        title = "Would You Rather ⚖️",
+        titleColor = Color(0xFF00F2FE),
+        gameId = "would_you_rather",
+        onExitGame = onExitGame
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Header Bar
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            // Header Dilemma Badge
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(SurfaceGlassDark)
+                    .padding(horizontal = 14.dp, vertical = 6.dp)
             ) {
-                IconButton(onClick = onExitGame) {
-                    Text("❌", fontSize = 20.sp)
-                }
-
-                Text(
-                    text = "WOULD YOU RATHER ⚖️",
-                    color = TextPrimary,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Black
-                )
-
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(SurfaceGlassDark)
-                        .padding(horizontal = 10.dp, vertical = 6.dp)
-                ) {
-                    Text("Card ${currentIndex + 1}", color = TextSecondary, fontSize = 12.sp)
-                }
+                Text("Dilemma #${currentIndex + 1}", color = TextSecondary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
             }
+
+            Spacer(modifier = Modifier.height(12.dp))
 
             // Option A Card
             Box(

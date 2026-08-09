@@ -30,6 +30,8 @@ import com.leminno.partygames.ui.theme.*
 @Composable
 fun GameCard(
     game: GameItem,
+    isFavorite: Boolean = false,
+    onToggleFavorite: (() -> Unit)? = null,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -37,7 +39,7 @@ fun GameCard(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
-    // Tactile physical scale-down (0.96x) on press with spring physics
+    // Tactile physical scale-down on press with spring physics
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.95f else 1.0f,
         animationSpec = spring(
@@ -78,7 +80,7 @@ fun GameCard(
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
-            // Top Row: Category Icon & Player Count Pill
+            // Top Row: Category Icon, Setup Type & Favorite Heart Button
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -100,19 +102,33 @@ fun GameCard(
                     )
                 }
 
-                // Setup Type Badge
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0x33FFFFFF))
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        text = "${game.setupType.badgeIcon} ${game.setupType.label}",
-                        color = TextSecondary,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Setup Type Badge
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color(0x33FFFFFF))
+                            .padding(horizontal = 6.dp, vertical = 3.dp)
+                    ) {
+                        Text(
+                            text = "${game.setupType.badgeIcon}",
+                            color = TextSecondary,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+
+                    if (onToggleFavorite != null) {
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = if (isFavorite) "❤️" else "🤍",
+                            fontSize = 14.sp,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable(onClick = onToggleFavorite)
+                                .padding(4.dp)
+                        )
+                    }
                 }
             }
 

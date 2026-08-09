@@ -40,6 +40,7 @@ fun MafiaWerewolfScreen(
     GameScaffold(
         title = "MAFIA / WEREWOLF 🌙",
         titleColor = Color(0xFF9D4EDD),
+        gameId = "mafia_werewolf",
         onExitGame = onExitGame
     ) {
         Column(

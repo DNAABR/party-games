@@ -17,6 +17,8 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
 
 enum class CellState(val symbol: String, val color: Color) {
@@ -83,7 +85,6 @@ fun PowerUpTTTScreen(
         if (selectedPowerUp != null) {
             when (selectedPowerUp) {
                 TttPowerUp.ERASE -> {
-                    // Cannot erase empty or shielded cell
                     if (cell.state != CellState.EMPTY && cell.state != currentTurnState && !cell.isShielded) {
                         haptics.performHeavyBurst()
                         val updated = board.toMutableList()
@@ -118,14 +119,12 @@ fun PowerUpTTTScreen(
                         } else {
                             if (isPlayerXTurn) playerXPowers = playerXPowers - TttPowerUp.EXTRA_TURN else playerOPowers = playerOPowers - TttPowerUp.EXTRA_TURN
                             selectedPowerUp = null
-                            // Keep turn for extra move!
                         }
                     }
                 }
                 null -> {}
             }
         } else {
-            // Normal placement
             if (cell.state == CellState.EMPTY && winner == null) {
                 haptics.performTick(composeHaptics)
                 val updated = board.toMutableList()
@@ -144,101 +143,80 @@ fun PowerUpTTTScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF0A0E1A))
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            .padding(20.dp)
+    GameScaffold(
+        title = "POWER-UP TIC-TAC-TOE ⚡",
+        titleColor = currentTurnState.color,
+        gameId = "ultimate_ttt",
+        onExitGame = onExitGame
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            // Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onExitGame) {
-                    Text("✕", color = TextSecondary, fontSize = 22.sp)
-                }
-                Text(
-                    text = "POWER-UP TIC-TAC-TOE ⚡",
-                    color = currentTurnState.color,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.sp
-                )
-                Spacer(modifier = Modifier.width(48.dp))
-            }
-
-            // Turn Status Badge
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(currentTurnState.color.copy(alpha = 0.2f))
-                    .border(1.5.dp, currentTurnState.color, RoundedCornerShape(16.dp))
-                    .padding(horizontal = 20.dp, vertical = 8.dp)
-            ) {
-                Text(
-                    text = if (winner != null) "WINNER: ${winner?.symbol} 🎉" else "TURN: ${currentTurnState.symbol} ${currentTurnState.name.replace("_", " ")}",
-                    color = currentTurnState.color,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Black
-                )
-            }
-
-            // 3x3 Grid Canvas Board
+        if (winner == null) {
             Column(
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                for (row in 0..2) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        for (col in 0..2) {
-                            val index = row * 3 + col
-                            val cell = board[index]
-                            val isHighlighted = winningLine?.contains(index) == true
+                // Turn Status Badge
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(currentTurnState.color.copy(alpha = 0.2f))
+                        .border(1.5.dp, currentTurnState.color, RoundedCornerShape(16.dp))
+                        .padding(horizontal = 20.dp, vertical = 8.dp)
+                ) {
+                    Text(
+                        text = "TURN: ${currentTurnState.symbol} ${currentTurnState.name.replace("_", " ")}",
+                        color = currentTurnState.color,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Black
+                    )
+                }
 
-                            Box(
-                                modifier = Modifier
-                                    .size(90.dp)
-                                    .clip(RoundedCornerShape(18.dp))
-                                    .background(if (isHighlighted) currentTurnState.color.copy(alpha = 0.4f) else SurfaceGlassDark)
-                                    .border(
-                                        width = if (isHighlighted) 3.dp else 1.5.dp,
-                                        color = if (isHighlighted) currentTurnState.color else BorderGlassDefault,
-                                        shape = RoundedCornerShape(18.dp)
+                // 3x3 Grid Canvas Board
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    for (row in 0..2) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            for (col in 0..2) {
+                                val index = row * 3 + col
+                                val cell = board[index]
+                                val isHighlighted = winningLine?.contains(index) == true
+
+                                Box(
+                                    modifier = Modifier
+                                        .size(90.dp)
+                                        .clip(RoundedCornerShape(18.dp))
+                                        .background(if (isHighlighted) currentTurnState.color.copy(alpha = 0.4f) else SurfaceGlassDark)
+                                        .border(
+                                            width = if (isHighlighted) 3.dp else 1.5.dp,
+                                            color = if (isHighlighted) currentTurnState.color else BorderGlassDefault,
+                                            shape = RoundedCornerShape(18.dp)
+                                        )
+                                        .clickable { handleCellClick(index) },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = cell.state.symbol,
+                                        fontSize = 38.sp
                                     )
-                                    .clickable { handleCellClick(index) },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = cell.state.symbol,
-                                    fontSize = 38.sp
-                                )
 
-                                if (cell.isShielded) {
-                                    Box(
-                                        modifier = Modifier
-                                            .align(Alignment.TopEnd)
-                                            .padding(6.dp)
-                                    ) {
-                                        Text("🛡️", fontSize = 12.sp)
+                                    if (cell.isShielded) {
+                                        Box(
+                                            modifier = Modifier
+                                                .align(Alignment.TopEnd)
+                                                .padding(6.dp)
+                                        ) {
+                                            Text("🛡️", fontSize = 12.sp)
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            // Power-Ups Inventory Bar
-            if (winner == null) {
+                // Power-Ups Inventory Bar
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()
@@ -290,30 +268,22 @@ fun PowerUpTTTScreen(
                         }
                     }
                 }
-            } else {
-                Button(
-                    onClick = {
-                        board = List(9) { BoardCell() }
-                        winner = null
-                        winningLine = null
-                        isPlayerXTurn = true
-                        selectedPowerUp = null
-                        playerXPowers = setOf(TttPowerUp.ERASE, TttPowerUp.SHIELD, TttPowerUp.EXTRA_TURN)
-                        playerOPowers = setOf(TttPowerUp.ERASE, TttPowerUp.SHIELD, TttPowerUp.EXTRA_TURN)
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00F2FE)),
-                    shape = RoundedCornerShape(14.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp)
-                ) {
-                    Text("RESTART MATCH 🔄", color = Color.Black, fontWeight = FontWeight.Black)
-                }
             }
-
-            TextButton(onClick = onExitGame) {
-                Text("Back to Hub", color = TextMuted)
-            }
+        } else {
+            VictoryCeremonyOverlay(
+                winnerTitle = "PLAYER ${winner?.symbol} WINS! 🎉",
+                subtitle = "Tic-Tac-Toe Mastermind!",
+                onPlayAgain = {
+                    board = List(9) { BoardCell() }
+                    winner = null
+                    winningLine = null
+                    isPlayerXTurn = true
+                    selectedPowerUp = null
+                    playerXPowers = setOf(TttPowerUp.ERASE, TttPowerUp.SHIELD, TttPowerUp.EXTRA_TURN)
+                    playerOPowers = setOf(TttPowerUp.ERASE, TttPowerUp.SHIELD, TttPowerUp.EXTRA_TURN)
+                },
+                onBackToHub = onExitGame
+            )
         }
     }
 }
