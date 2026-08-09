@@ -1,5 +1,6 @@
 package com.leminno.partygames.ui.games.decibel_scream
 
+import android.annotation.SuppressLint
 import android.Manifest
 import android.content.pm.PackageManager
 import android.media.AudioFormat
@@ -66,6 +67,7 @@ fun DecibelScreamScreen(
     }
 
     // Audio recording thread loop
+    @SuppressLint("MissingPermission")
     DisposableEffect(isListening) {
         if (!isListening) return@DisposableEffect onDispose {}
 
