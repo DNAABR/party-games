@@ -11,22 +11,33 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.leminno.partygames.ui.games.battleship.BattleshipScreen
 import com.leminno.partygames.ui.games.charades.CharadesScreen
 import com.leminno.partygames.ui.games.chiryauri.ChiryaUriScreen
+import com.leminno.partygames.ui.games.codenames.CodenamesScreen
 import com.leminno.partygames.ui.games.connectfour.ConnectFourScreen
 import com.leminno.partygames.ui.games.decibel_scream.DecibelScreamScreen
+import com.leminno.partygames.ui.games.fake_it.FakeItScreen
 import com.leminno.partygames.ui.games.hand_cricket.HandCricketScreen
+import com.leminno.partygames.ui.games.hangman.HangmanScreen
 import com.leminno.partygames.ui.games.hotpotato.HotPotatoScreen
 import com.leminno.partygames.ui.games.i_want_to_be.IWantToBeScreen
+import com.leminno.partygames.ui.games.mafia_werewolf.MafiaWerewolfScreen
 import com.leminno.partygames.ui.games.most_likely_to.MostLikelyToScreen
+import com.leminno.partygames.ui.games.name_place_animal.NamePlaceAnimalScreen
 import com.leminno.partygames.ui.games.neverhaveiever.NeverHaveIEverScreen
+import com.leminno.partygames.ui.games.scribble_and_pass.ScribbleAndPassScreen
+import com.leminno.partygames.ui.games.scrabble_league.ScrabbleLeagueScreen
 import com.leminno.partygames.ui.games.silent_library.SilentLibraryScreen
 import com.leminno.partygames.ui.games.truthordare.TruthOrDareScreen
+import com.leminno.partygames.ui.games.twit.TwitScreen
 import com.leminno.partygames.ui.games.two_truths_and_a_lie.TwoTruthsAndALieScreen
 import com.leminno.partygames.ui.games.ultimate_ttt.PowerUpTTTScreen
 import com.leminno.partygames.ui.games.undercover.UndercoverSpyScreen
+import com.leminno.partygames.ui.games.wavelength.WavelengthScreen
 import com.leminno.partygames.ui.games.whoami.WhoAmIScreen
 import com.leminno.partygames.ui.games.wouldyourather.WouldYouRatherScreen
+import com.leminno.partygames.ui.games.write_funny.WriteFunnyScreen
 import com.leminno.partygames.ui.hub.ArcadeHubScreen
 import com.leminno.partygames.ui.theme.PartyGamesTheme
 
@@ -180,6 +191,89 @@ fun PartyGamesAppNavHost() {
         // Phase 2 Game 8: Hand Cricket
         composable("game/hand_cricket/{playerCount}/{timerSec}") {
             HandCricketScreen(
+                onExitGame = { navController.popBackStack() }
+            )
+        }
+
+        // Phase 3 Game 1: Mafia / Werewolf
+        composable("game/mafia_werewolf/{playerCount}/{timerSec}") { backStackEntry ->
+            val playerCount = backStackEntry.arguments?.getString("playerCount")?.toIntOrNull() ?: 6
+            MafiaWerewolfScreen(
+                playerCount = playerCount,
+                onExitGame = { navController.popBackStack() }
+            )
+        }
+
+        // Phase 3 Game 2: Scribble & Pass
+        composable("game/scribble_and_pass/{playerCount}/{timerSec}") {
+            ScribbleAndPassScreen(
+                onExitGame = { navController.popBackStack() }
+            )
+        }
+
+        // Phase 3 Game 3: Wavelength
+        composable("game/wavelength/{playerCount}/{timerSec}") {
+            WavelengthScreen(
+                onExitGame = { navController.popBackStack() }
+            )
+        }
+
+        // Phase 3 Game 4: Codenames
+        composable("game/codenames/{playerCount}/{timerSec}") {
+            CodenamesScreen(
+                onExitGame = { navController.popBackStack() }
+            )
+        }
+
+        // Phase 3 Game 5: Twit (Wits & Wagers)
+        composable("game/twit/{playerCount}/{timerSec}") { backStackEntry ->
+            val playerCount = backStackEntry.arguments?.getString("playerCount")?.toIntOrNull() ?: 4
+            TwitScreen(
+                playerCount = playerCount,
+                onExitGame = { navController.popBackStack() }
+            )
+        }
+
+        // Phase 3 Game 6: Fake It
+        composable("game/fake_it/{playerCount}/{timerSec}") { backStackEntry ->
+            val playerCount = backStackEntry.arguments?.getString("playerCount")?.toIntOrNull() ?: 3
+            FakeItScreen(
+                playerCount = playerCount,
+                onExitGame = { navController.popBackStack() }
+            )
+        }
+
+        // Phase 3 Game 7: Write Funny (Quiplash)
+        composable("game/write_funny/{playerCount}/{timerSec}") {
+            WriteFunnyScreen(
+                onExitGame = { navController.popBackStack() }
+            )
+        }
+
+        // Phase 3 Game 8: Name Place Animal
+        composable("game/name_place_animal/{playerCount}/{timerSec}") {
+            NamePlaceAnimalScreen(
+                onExitGame = { navController.popBackStack() }
+            )
+        }
+
+        // Phase 3 Game 9: Battleship
+        composable("game/battleship/{playerCount}/{timerSec}") {
+            BattleshipScreen(
+                onExitGame = { navController.popBackStack() }
+            )
+        }
+
+        // Phase 3 Game 10: Hangman
+        composable("game/hangman/{playerCount}/{timerSec}") {
+            HangmanScreen(
+                onExitGame = { navController.popBackStack() }
+            )
+        }
+
+        // Phase 3 Game 11: Letter League
+        composable("game/scrabble_league/{playerCount}/{timerSec}") {
+            ScrabbleLeagueScreen(
                 onExitGame = { navController.popBackStack() }
             )
         }
