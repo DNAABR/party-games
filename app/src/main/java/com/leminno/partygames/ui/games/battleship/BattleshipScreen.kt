@@ -154,7 +154,7 @@ fun BattleshipScreen(
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(20.dp))
                             .background(SurfaceGlassDark)
-                            .border(1.5.dp, AccentPurple, RoundedCornerShape(20.dp))
+                            .border(1.5.dp, Color(0xFF9D4EDD), RoundedCornerShape(20.dp))
                             .clickable {
                                 isRemoteMode = true
                                 showRemoteSheet = true
@@ -165,7 +165,7 @@ fun BattleshipScreen(
                             Text("🌐", fontSize = 36.sp)
                             Spacer(modifier = Modifier.width(16.dp))
                             Column {
-                                Text("Remote Play (2 Devices)", color = AccentPurple, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                                Text("Remote Play (2 Devices)", color = Color(0xFF9D4EDD), fontSize = 17.sp, fontWeight = FontWeight.Bold)
                                 Text("Play on your own screens via Room Code & Link", color = TextMuted, fontSize = 12.sp)
                             }
                         }

@@ -18,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -29,6 +30,10 @@ import com.leminno.partygames.data.remote.RemoteRoom
 import com.leminno.partygames.data.remote.RemoteRoomRepository
 import com.leminno.partygames.ui.theme.*
 import kotlinx.coroutines.launch
+
+val AccentCyanColor = Color(0xFF00F2FE)
+val AccentPurpleColor = Color(0xFF9D4EDD)
+val GradientPurpleCyanBrush = Brush.horizontalGradient(listOf(AccentPurpleColor, AccentCyanColor))
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,7 +72,7 @@ fun RemoteRoomSetupSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = SurfaceDark,
+        containerColor = BackgroundObsidian,
         scrimColor = Color.Black.copy(alpha = 0.75f),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
@@ -81,7 +86,7 @@ fun RemoteRoomSetupSheet(
             // Header
             Text(
                 text = "🌐 REMOTE MULTIPLAYER",
-                color = Color(0xFF00F2FE),
+                color = AccentCyanColor,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 2.sp
@@ -103,8 +108,8 @@ fun RemoteRoomSetupSheet(
                 label = { Text("Your Display Name", color = TextMuted) },
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = AccentCyan,
-                    unfocusedBorderColor = BorderGlass,
+                    focusedBorderColor = AccentCyanColor,
+                    unfocusedBorderColor = BorderGlassDefault,
                     focusedTextColor = TextPrimary,
                     unfocusedTextColor = TextPrimary
                 ),
@@ -126,7 +131,7 @@ fun RemoteRoomSetupSheet(
                     modifier = Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(if (selectedTab == 0) GradientPurpleCyan else Color.Transparent)
+                        .background(if (selectedTab == 0) GradientPurpleCyanBrush else Brush.linearGradient(listOf(Color.Transparent, Color.Transparent)))
                         .clickable { selectedTab = 0 }
                         .padding(vertical = 10.dp),
                     contentAlignment = Alignment.Center
@@ -143,7 +148,7 @@ fun RemoteRoomSetupSheet(
                     modifier = Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(if (selectedTab == 1) GradientPurpleCyan else Color.Transparent)
+                        .background(if (selectedTab == 1) GradientPurpleCyanBrush else Brush.linearGradient(listOf(Color.Transparent, Color.Transparent)))
                         .clickable { selectedTab = 1 }
                         .padding(vertical = 10.dp),
                     contentAlignment = Alignment.Center
@@ -181,7 +186,7 @@ fun RemoteRoomSetupSheet(
                             }
                         },
                         enabled = !isCreatingRoom,
-                        colors = ButtonDefaults.buttonColors(containerColor = AccentCyan),
+                        colors = ButtonDefaults.buttonColors(containerColor = AccentCyanColor),
                         shape = RoundedCornerShape(16.dp),
                         modifier = Modifier
                             .fillMaxWidth()
@@ -200,7 +205,7 @@ fun RemoteRoomSetupSheet(
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(20.dp))
                             .background(SurfaceGlassDark)
-                            .border(2.dp, Color(0xFF00F2FE), RoundedCornerShape(20.dp))
+                            .border(2.dp, AccentCyanColor, RoundedCornerShape(20.dp))
                             .padding(20.dp),
                         contentAlignment = Alignment.Center
                     ) {
@@ -209,7 +214,7 @@ fun RemoteRoomSetupSheet(
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = createdRoomCode,
-                                color = Color(0xFF00F2FE),
+                                color = AccentCyanColor,
                                 fontSize = 38.sp,
                                 fontWeight = FontWeight.Black,
                                 letterSpacing = 4.sp
@@ -233,7 +238,7 @@ fun RemoteRoomSetupSheet(
                                     onClick = {
                                         RemoteRoomRepository.shareRoomInvite(context, gameName, createdRoomCode)
                                     },
-                                    colors = ButtonDefaults.buttonColors(containerColor = AccentPurple),
+                                    colors = ButtonDefaults.buttonColors(containerColor = AccentPurpleColor),
                                     shape = RoundedCornerShape(12.dp)
                                 ) {
                                     Text("🔗 Share Link", color = Color.White, fontWeight = FontWeight.Bold)
@@ -293,7 +298,7 @@ fun RemoteRoomSetupSheet(
                         onClick = {
                             onRoomJoined(createdRoomCode, true, localPlayerId)
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = AccentCyan),
+                        colors = ButtonDefaults.buttonColors(containerColor = AccentCyanColor),
                         shape = RoundedCornerShape(16.dp),
                         modifier = Modifier
                             .fillMaxWidth()
@@ -310,8 +315,8 @@ fun RemoteRoomSetupSheet(
                     label = { Text("Enter 6-Character Code", color = TextMuted) },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = AccentCyan,
-                        unfocusedBorderColor = BorderGlass,
+                        focusedBorderColor = AccentCyanColor,
+                        unfocusedBorderColor = BorderGlassDefault,
                         focusedTextColor = TextPrimary,
                         unfocusedTextColor = TextPrimary
                     ),
@@ -344,7 +349,7 @@ fun RemoteRoomSetupSheet(
                         }
                     },
                     enabled = inputCode.isNotBlank() && !isJoiningRoom,
-                    colors = ButtonDefaults.buttonColors(containerColor = AccentCyan),
+                    colors = ButtonDefaults.buttonColors(containerColor = AccentCyanColor),
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier
                         .fillMaxWidth()
