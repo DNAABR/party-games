@@ -41,6 +41,7 @@ fun TruthOrDareScreen(
     GameScaffold(
         title = "TRUTH OR DARE 🔮",
         titleColor = Color(0xFF9D4EDD),
+        gameId = "truth_or_dare",
         onExitGame = onExitGame
     ) {
         Column(

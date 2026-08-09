@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
 
 @Composable
@@ -47,103 +48,115 @@ fun ConnectFourScreen(
     GameScaffold(
         title = "CONNECT FOUR 🔴🟡",
         titleColor = Color(0xFFFF6B6B),
+        gameId = "connect_four",
         onExitGame = onExitGame
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            // Turn Status Header
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(SurfaceGlassDark)
-                    .border(1.dp, turnColor, RoundedCornerShape(14.dp))
-                    .padding(horizontal = 18.dp, vertical = 8.dp)
+        if (uiState.winnerPlayer == null && !uiState.isDraw) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = when {
-                        uiState.winnerPlayer != null -> "PLAYER ${uiState.winnerPlayer} WINS! 🏆"
-                        uiState.isDraw -> "IT'S A DRAW! 🤝"
-                        uiState.isRedTurn -> "RED TURN 🔴"
-                        else -> "YELLOW TURN 🟡"
-                    },
-                    color = turnColor,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // 6x7 Grid Board
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(7f / 6f)
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(Color(0xFF1E293B))
-                    .border(3.dp, Color(0xFF334155), RoundedCornerShape(20.dp))
-                    .padding(12.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                // Turn Status Header
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(SurfaceGlassDark)
+                        .border(1.dp, turnColor, RoundedCornerShape(14.dp))
+                        .padding(horizontal = 18.dp, vertical = 8.dp)
                 ) {
-                    for (col in 0..6) {
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight()
-                                .clickable {
-                                    haptics.performTick(composeHaptics)
-                                    viewModel.dropDisc(
-                                        col = col,
-                                        onWin = { haptics.performHeavyBurst() },
-                                        onDraw = { haptics.performWarningThud() }
-                                    )
-                                },
-                            verticalArrangement = Arrangement.SpaceBetween,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            for (row in 0..5) {
-                                val cellVal = uiState.grid[row][col]
-                                val cellColor = when (cellVal) {
-                                    1 -> Color(0xFFFF0055) // Red
-                                    2 -> Color(0xFFFFD166) // Yellow
-                                    else -> Color(0xFF0F172A) // Empty Slot
-                                }
+                    Text(
+                        text = when {
+                            uiState.isRedTurn -> "RED TURN 🔴"
+                            else -> "YELLOW TURN 🟡"
+                        },
+                        color = turnColor,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
 
-                                Box(
-                                    modifier = Modifier
-                                        .size(36.dp)
-                                        .clip(CircleShape)
-                                        .background(cellColor)
-                                        .border(1.dp, Color(0x33FFFFFF), CircleShape)
-                                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // 6x7 Grid Board
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(7f / 6f)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(Color(0xFF1E293B))
+                        .border(3.dp, Color(0xFF334155), RoundedCornerShape(20.dp))
+                        .padding(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        for (col in 0..6) {
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight()
+                                    .clickable {
+                                        haptics.performTick(composeHaptics)
+                                        viewModel.dropDisc(
+                                            col = col,
+                                            onWin = { haptics.performHeavyBurst() },
+                                            onDraw = { haptics.performWarningThud() }
+                                        )
+                                    },
+                                verticalArrangement = Arrangement.SpaceBetween,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                for (row in 0..5) {
+                                    val cellVal = uiState.grid[row][col]
+                                    val cellColor = when (cellVal) {
+                                        1 -> Color(0xFFFF0055) // Red
+                                        2 -> Color(0xFFFFD166) // Yellow
+                                        else -> Color(0xFF0F172A) // Empty Slot
+                                    }
+
+                                    Box(
+                                        modifier = Modifier
+                                            .size(36.dp)
+                                            .clip(CircleShape)
+                                            .background(cellColor)
+                                            .border(1.dp, Color(0x33FFFFFF), CircleShape)
+                                    )
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            // Bottom Reset Button
-            Button(
-                onClick = {
-                    haptics.performPop()
-                    viewModel.resetGame()
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6B6B)),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
-            ) {
-                Text("RESTART MATCH 🔄", color = Color.White, fontWeight = FontWeight.Black)
+                // Bottom Reset Button
+                Button(
+                    onClick = {
+                        haptics.performPop()
+                        viewModel.resetGame()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6B6B)),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp)
+                ) {
+                    Text("RESTART MATCH 🔄", color = Color.White, fontWeight = FontWeight.Black)
+                }
             }
+        } else {
+            val winnerTitle = when {
+                uiState.winnerPlayer != null -> "PLAYER ${uiState.winnerPlayer} WINS!"
+                else -> "IT'S A DRAW!"
+            }
+            VictoryCeremonyOverlay(
+                winnerTitle = winnerTitle,
+                subtitle = "Connect Four Champions",
+                onPlayAgain = { viewModel.resetGame() },
+                onBackToHub = onExitGame
+            )
         }
     }
 }

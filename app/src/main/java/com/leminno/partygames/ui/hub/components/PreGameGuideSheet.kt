@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.leminno.partygames.ui.components.AiPromptGeneratorSheet
 import com.leminno.partygames.ui.model.GameItem
 import com.leminno.partygames.ui.theme.*
 
@@ -35,6 +36,8 @@ fun PreGameGuideSheet(
     var selectedPlayerCount by remember { mutableIntStateOf(game.minPlayers.coerceAtLeast(2)) }
     var selectedTimerSec by remember { mutableIntStateOf(60) }
     var selectedIntensity by remember { mutableStateOf("Party") }
+    var showAiGenerator by remember { mutableStateOf(false) }
+    var customPromptsCount by remember { mutableIntStateOf(0) }
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -191,18 +194,33 @@ fun PreGameGuideSheet(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             // Player Setup Controls
-            Text(
-                text = "GAME SETUP",
-                color = TextMuted,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "GAME SETUP",
+                    color = TextMuted,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
 
-            Spacer(modifier = Modifier.height(8.dp))
+                TextButton(onClick = { showAiGenerator = true }) {
+                    Text(
+                        text = if (customPromptsCount > 0) "✨ Custom Pack ($customPromptsCount prompts)" else "✨ AI Custom Pack",
+                        color = Color(0xFF00F2FE),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
 
             // Player Count Selector
             Row(
@@ -235,7 +253,7 @@ fun PreGameGuideSheet(
             }
 
             // Timer Duration Selector
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -264,7 +282,7 @@ fun PreGameGuideSheet(
             }
 
             // Deck Intensity Selector
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -323,6 +341,16 @@ fun PreGameGuideSheet(
             }
 
             Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        if (showAiGenerator) {
+            AiPromptGeneratorSheet(
+                gameTitle = game.title,
+                onPromptsGenerated = { prompts ->
+                    customPromptsCount = prompts.size
+                },
+                onDismissRequest = { showAiGenerator = false }
+            )
         }
     }
 }

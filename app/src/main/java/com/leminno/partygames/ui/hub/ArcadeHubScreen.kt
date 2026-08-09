@@ -5,9 +5,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,8 +24,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.leminno.partygames.data.GameCatalogRepository
+import com.leminno.partygames.data.repository.UserPreferencesRepository
 import com.leminno.partygames.ui.hub.components.GameCard
+import com.leminno.partygames.ui.hub.components.PartyCompanionSheet
 import com.leminno.partygames.ui.hub.components.PreGameGuideSheet
+import com.leminno.partygames.ui.hub.components.QuickSettingsSheet
 import com.leminno.partygames.ui.model.GameItem
 import com.leminno.partygames.data.model.GameCategory
 import com.leminno.partygames.ui.theme.*
@@ -36,16 +41,31 @@ fun ArcadeHubScreen(
     val composeHaptics = LocalHapticFeedback.current
     val haptics = remember { HapticFeedbackManager(context) }
 
+    LaunchedEffect(Unit) {
+        UserPreferencesRepository.init(context)
+    }
+
+    val favoriteGameIds by UserPreferencesRepository.favoriteGameIds.collectAsState()
+    val recentGameIds by UserPreferencesRepository.recentGameIds.collectAsState()
+
     var selectedCategory by remember { mutableStateOf<GameCategory?>(null) }
+    var showOnlyFavorites by remember { mutableStateOf(false) }
     var selectedPlayerFilter by remember { mutableStateOf<String>("ALL") } // ALL, 2P, 3-6P, 8P+
     var searchQuery by remember { mutableStateOf("") }
 
     var selectedGameForSheet by remember { mutableStateOf<GameItem?>(null) }
+    var showQuickSettings by remember { mutableStateOf(false) }
+    var showPartyCompanion by remember { mutableStateOf(false) }
+
+    val recentGames = remember(recentGameIds) {
+        recentGameIds.mapNotNull { id -> GameCatalogRepository.allGames.find { it.id == id } }
+    }
 
     // Filter games list
-    val filteredGames = remember(selectedCategory, selectedPlayerFilter, searchQuery) {
+    val filteredGames = remember(selectedCategory, showOnlyFavorites, favoriteGameIds, selectedPlayerFilter, searchQuery) {
         GameCatalogRepository.allGames.filter { game ->
             val matchesCategory = selectedCategory == null || game.category == selectedCategory
+            val matchesFavorites = !showOnlyFavorites || favoriteGameIds.contains(game.id)
             val matchesSearch = searchQuery.isEmpty() ||
                     game.title.contains(searchQuery, ignoreCase = true) ||
                     game.description.contains(searchQuery, ignoreCase = true)
@@ -55,7 +75,7 @@ fun ArcadeHubScreen(
                 "8P+" -> game.maxPlayers >= 8
                 else -> true
             }
-            matchesCategory && matchesSearch && matchesPlayers
+            matchesCategory && matchesFavorites && matchesSearch && matchesPlayers
         }
     }
 
@@ -70,7 +90,7 @@ fun ArcadeHubScreen(
         ) {
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Console Title Header & Arcade Emblem
+            // Console Title Header & Arcade Emblem + QoL Action Icons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -93,20 +113,22 @@ fun ArcadeHubScreen(
                     )
                 }
 
-                // Quick Info Badge
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(SurfaceGlassDark)
-                        .border(1.dp, BorderGlassDefault, RoundedCornerShape(14.dp))
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = "🎉 ${GameCatalogRepository.allGames.size} Games",
-                        color = TextSecondary,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Party Scorekeeper Button
+                    IconButton(onClick = {
+                        haptics.performTick(composeHaptics)
+                        showPartyCompanion = true
+                    }) {
+                        Text("🏆", fontSize = 20.sp)
+                    }
+
+                    // Settings Button
+                    IconButton(onClick = {
+                        haptics.performTick(composeHaptics)
+                        showQuickSettings = true
+                    }) {
+                        Text("⚙️", fontSize = 20.sp)
+                    }
                 }
             }
 
@@ -116,7 +138,7 @@ fun ArcadeHubScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(64.dp)
+                    .height(60.dp)
                     .clip(RoundedCornerShape(20.dp))
                     .background(
                         brush = Brush.horizontalGradient(
@@ -141,18 +163,18 @@ fun ArcadeHubScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = "⚡", fontSize = 26.sp)
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(text = "⚡", fontSize = 24.sp)
+                        Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Text(
                                 text = "QUICK PLAY",
                                 color = Color.White,
-                                fontSize = 16.sp,
+                                fontSize = 15.sp,
                                 fontWeight = FontWeight.Black,
                                 letterSpacing = 1.sp
                             )
                             Text(
-                                text = "Random 5-Min Chaos Challenge",
+                                text = "Random 5-Min Challenge",
                                 color = Color.White.copy(alpha = 0.85f),
                                 fontSize = 11.sp
                             )
@@ -168,7 +190,49 @@ fun ArcadeHubScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            // Recently Played Carousel (if available)
+            if (recentGames.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(14.dp))
+                Text(
+                    text = "🕒 RECENTLY PLAYED",
+                    color = TextSecondary,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    items(recentGames, key = { "recent_${it.id}" }) { game ->
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(SurfaceGlassDark)
+                                .border(1.dp, Color(0xFF00F2FE).copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+                                .clickable {
+                                    haptics.performTick(composeHaptics)
+                                    selectedGameForSheet = game
+                                }
+                                .padding(horizontal = 12.dp, vertical = 8.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(text = game.category.iconSymbol, fontSize = 13.sp)
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = game.title,
+                                    color = TextPrimary,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
 
             // Search Bar
             OutlinedTextField(
@@ -188,22 +252,36 @@ fun ArcadeHubScreen(
                 singleLine = true
             )
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            // Category Filter Badges Row (Color + Geometry non-color cues)
+            // Category & Favorites Filter Badges Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 // ALL Chip
                 CategoryChip(
                     label = "All",
                     icon = "🌟",
-                    isSelected = selectedCategory == null,
+                    isSelected = selectedCategory == null && !showOnlyFavorites,
                     accentColor = Color(0xFF00F2FE),
                     onClick = {
                         haptics.performTick(composeHaptics)
                         selectedCategory = null
+                        showOnlyFavorites = false
+                    }
+                )
+
+                // Favorites Chip
+                CategoryChip(
+                    label = "Favs",
+                    icon = "❤️",
+                    isSelected = showOnlyFavorites,
+                    accentColor = Color(0xFFFF0055),
+                    onClick = {
+                        haptics.performTick(composeHaptics)
+                        showOnlyFavorites = !showOnlyFavorites
+                        if (showOnlyFavorites) selectedCategory = null
                     }
                 )
 
@@ -212,17 +290,18 @@ fun ArcadeHubScreen(
                     CategoryChip(
                         label = category.title.split(" ").first(),
                         icon = category.iconSymbol,
-                        isSelected = selectedCategory == category,
+                        isSelected = selectedCategory == category && !showOnlyFavorites,
                         accentColor = token.primaryAccent,
                         onClick = {
                             haptics.performTick(composeHaptics)
+                            showOnlyFavorites = false
                             selectedCategory = if (selectedCategory == category) null else category
                         }
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // Player Count Pill Selector
             Row(
@@ -252,7 +331,7 @@ fun ArcadeHubScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             // Games Grid
             LazyVerticalGrid(
@@ -263,8 +342,14 @@ fun ArcadeHubScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(filteredGames, key = { it.id }) { game ->
+                    val isFav = favoriteGameIds.contains(game.id)
                     GameCard(
                         game = game,
+                        isFavorite = isFav,
+                        onToggleFavorite = {
+                            haptics.performTick(composeHaptics)
+                            UserPreferencesRepository.toggleFavorite(game.id)
+                        },
                         onClick = {
                             haptics.performTick(composeHaptics)
                             selectedGameForSheet = game
@@ -282,8 +367,23 @@ fun ArcadeHubScreen(
                 onStartGame = { playerCount, roundTimerSec, _ ->
                     val gameToLaunch = game.id
                     selectedGameForSheet = null
+                    UserPreferencesRepository.addRecentlyPlayed(gameToLaunch)
                     onLaunchGame(gameToLaunch, playerCount, roundTimerSec)
                 }
+            )
+        }
+
+        // Quick Settings Modal
+        if (showQuickSettings) {
+            QuickSettingsSheet(
+                onDismissRequest = { showQuickSettings = false }
+            )
+        }
+
+        // Party Companion Modal
+        if (showPartyCompanion) {
+            PartyCompanionSheet(
+                onDismissRequest = { showPartyCompanion = false }
             )
         }
     }
@@ -303,15 +403,15 @@ private fun CategoryChip(
             .background(if (isSelected) accentColor.copy(alpha = 0.25f) else SurfaceGlassDark)
             .border(1.dp, if (isSelected) accentColor else BorderGlassDefault, RoundedCornerShape(12.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 10.dp, vertical = 8.dp)
+            .padding(horizontal = 8.dp, vertical = 6.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = icon, fontSize = 14.sp)
+            Text(text = icon, fontSize = 13.sp)
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = label,
                 color = if (isSelected) accentColor else TextSecondary,
-                fontSize = 12.sp,
+                fontSize = 11.sp,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
             )
         }
