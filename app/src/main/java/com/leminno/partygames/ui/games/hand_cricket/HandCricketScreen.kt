@@ -20,6 +20,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlin.random.Random
@@ -107,13 +109,11 @@ fun HandCricketScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF0F141D))
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            .padding(16.dp)
+    GameScaffold(
+        title = "HAND CRICKET 🏏",
+        titleColor = Color(0xFFFFD166),
+        gameId = "hand_cricket",
+        onExitGame = onExitGame
     ) {
         if (selectedGameMode == null) {
             // Mode Selector
@@ -122,24 +122,6 @@ fun HandCricketScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onExitGame) {
-                        Text("✕", color = TextSecondary, fontSize = 22.sp)
-                    }
-                    Text(
-                        text = "HAND CRICKET 🏏",
-                        color = Color(0xFFFFD166),
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 1.sp
-                    )
-                    Spacer(modifier = Modifier.width(48.dp))
-                }
-
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()
@@ -191,10 +173,6 @@ fun HandCricketScreen(
                         }
                     }
                 }
-
-                TextButton(onClick = onExitGame) {
-                    Text("Back to Hub", color = TextMuted)
-                }
             }
         } else if (selectedGameMode == HandCricketGameMode.TEAM_ROOM && !roomJoined) {
             // Online Multi-Device Room Setup View
@@ -203,23 +181,6 @@ fun HandCricketScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = { selectedGameMode = null }) {
-                        Text("←", color = TextSecondary, fontSize = 22.sp)
-                    }
-                    Text(
-                        text = "ONLINE TEAM ROOM 🌐",
-                        color = Color(0xFF00F2FE),
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Black
-                    )
-                    Spacer(modifier = Modifier.width(48.dp))
-                }
-
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()
@@ -316,29 +277,19 @@ fun HandCricketScreen(
                         .border(1.dp, BorderGlassDefault, RoundedCornerShape(16.dp))
                         .padding(14.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column {
-                            Text(
-                                text = if (isInnings1) "$team1Name (Batting)" else "$team2Name (Chasing Target $innings1Target)",
-                                color = Color(0xFFFFD166),
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = "$batterScore Runs  •  $wicketsLost/$maxWickets Wickets",
-                                color = TextPrimary,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Black
-                            )
-                        }
-
-                        IconButton(onClick = onExitGame) {
-                            Text("✕", color = TextSecondary, fontSize = 20.sp)
-                        }
+                    Column {
+                        Text(
+                            text = if (isInnings1) "$team1Name (Batting)" else "$team2Name (Chasing Target $innings1Target)",
+                            color = Color(0xFFFFD166),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "$batterScore Runs  •  $wicketsLost/$maxWickets Wickets",
+                            color = TextPrimary,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Black
+                        )
                     }
                 }
 
@@ -454,55 +405,20 @@ fun HandCricketScreen(
                 }
             }
         } else {
-            // Match Result & Victory Ceremony
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Text(
-                    text = "MATCH COMPLETED! 🏆",
-                    color = Color(0xFFFFD166),
-                    fontSize = 26.sp,
-                    fontWeight = FontWeight.Black
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "WINNER: $winnerName 🎉",
-                    color = Color(0xFF00E676),
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Button(
-                    onClick = {
-                        matchGameOver = false
-                        isInnings1 = true
-                        batterScore = 0
-                        wicketsLost = 0
-                        p1Choice = null
-                        p2Choice = null
-                        roundResultText = null
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD166)),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                ) {
-                    Text("PLAY REMATCH 🔄", color = Color.Black, fontWeight = FontWeight.Black)
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                TextButton(onClick = onExitGame) {
-                    Text("Back to Hub", color = TextMuted)
-                }
-            }
+            VictoryCeremonyOverlay(
+                winnerTitle = "WINNER: $winnerName 🎉",
+                subtitle = "Hand Cricket Champions!",
+                onPlayAgain = {
+                    matchGameOver = false
+                    isInnings1 = true
+                    batterScore = 0
+                    wicketsLost = 0
+                    p1Choice = null
+                    p2Choice = null
+                    roundResultText = null
+                },
+                onBackToHub = onExitGame
+            )
         }
     }
 }

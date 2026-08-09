@@ -18,6 +18,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
 
 @Composable
@@ -32,160 +34,146 @@ fun UndercoverSpyScreen(
         listOf("Submarine", "Airplane", "Space Station", "Movie Studio", "Hospital", "Casino", "Supermarket", "Circus", "Polar Station")
     }
 
-    val secretLocation = remember { locations.random() }
-    val spyIndex = remember { (0 until playerCount).random() }
+    var secretLocation by remember { mutableStateOf(locations.random()) }
+    var spyIndex by remember { mutableIntStateOf((0 until playerCount).random()) }
 
     var currentPlayerTurn by remember { mutableIntStateOf(0) }
     var isRevealingRole by remember { mutableStateOf(false) }
     var isSetupPhase by remember { mutableStateOf(true) }
+    var isFinished by remember { mutableStateOf(false) }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(BackgroundNavySlate)
-            .padding(24.dp)
+    GameScaffold(
+        title = "Undercover Spy 🕵️",
+        titleColor = Color(0xFF00E676),
+        gameId = "undercover_spy",
+        onExitGame = onExitGame
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            // Header Bar
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+        if (!isFinished) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = onExitGame) {
-                    Text("❌", fontSize = 20.sp)
-                }
-
-                Text(
-                    text = "UNDERCOVER SPY 🕵️",
-                    color = TextPrimary,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Black
-                )
-
+                // Player Indicator Badge
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color(0x3300E676))
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .padding(horizontal = 16.dp, vertical = 6.dp)
                 ) {
-                    Text("Player ${currentPlayerTurn + 1} / $playerCount", color = Color(0xFF00E676), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text("Player ${currentPlayerTurn + 1} / $playerCount", color = Color(0xFF00E676), fontSize = 13.sp, fontWeight = FontWeight.Bold)
                 }
-            }
 
-            if (isSetupPhase) {
-                // Secret Role Reveal Card with Hold-to-Reveal Fingerprint Scanner
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(340.dp)
-                        .clip(RoundedCornerShape(28.dp))
-                        .background(SurfaceGlassDark)
-                        .border(2.dp, if (isRevealingRole) Color(0xFF00E676) else BorderGlassDefault, RoundedCornerShape(28.dp))
-                        .pointerInput(Unit) {
-                            detectTapGestures(
-                                onPress = {
-                                    isRevealingRole = true
-                                    haptics.performPop()
-                                    tryAwaitRelease()
-                                    isRevealingRole = false
-                                }
-                            )
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (isRevealingRole) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            val isSpy = currentPlayerTurn == spyIndex
-                            Text(
-                                text = if (isSpy) "YOU ARE THE SPY! 🕵️" else "LOCATION: $secretLocation",
-                                color = if (isSpy) Color(0xFFFF007F) else Color(0xFF00E676),
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Black,
-                                textAlign = TextAlign.Center
-                            )
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Text(
-                                text = if (isSpy) "Try to blend in and guess the location!" else "Ask subtle questions to spot the imposter!",
-                                color = TextSecondary,
-                                fontSize = 13.sp,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    } else {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Box(
-                                modifier = Modifier
-                                    .size(72.dp)
-                                    .clip(CircleShape)
-                                    .background(Color(0x2200E676))
-                                    .border(1.dp, Color(0xFF00E676), CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text("🔒", fontSize = 32.sp)
+                if (isSetupPhase) {
+                    // Secret Role Reveal Card with Hold-to-Reveal Fingerprint Scanner
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(340.dp)
+                            .clip(RoundedCornerShape(28.dp))
+                            .background(SurfaceGlassDark)
+                            .border(2.dp, if (isRevealingRole) Color(0xFF00E676) else BorderGlassDefault, RoundedCornerShape(28.dp))
+                            .pointerInput(Unit) {
+                                detectTapGestures(
+                                    onPress = {
+                                        isRevealingRole = true
+                                        haptics.performPop()
+                                        tryAwaitRelease()
+                                        isRevealingRole = false
+                                    }
+                                )
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isRevealingRole) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                val isSpy = currentPlayerTurn == spyIndex
+                                Text(
+                                    text = if (isSpy) "YOU ARE THE SPY! 🕵️" else "LOCATION: $secretLocation",
+                                    color = if (isSpy) Color(0xFFFF007F) else Color(0xFF00E676),
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.Black,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Text(
+                                    text = if (isSpy) "Try to blend in and guess the location!" else "Ask subtle questions to spot the imposter!",
+                                    color = TextSecondary,
+                                    fontSize = 13.sp,
+                                    textAlign = TextAlign.Center
+                                )
                             }
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = "HOLD FINGERPRINT TO REVEAL",
-                                color = TextPrimary,
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = "Ensure other players cannot see screen!",
-                                color = TextMuted,
-                                fontSize = 11.sp
-                            )
+                        } else {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(72.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0x2200E676))
+                                        .border(1.dp, Color(0xFF00E676), CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text("🔒", fontSize = 32.sp)
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "HOLD FINGERPRINT TO REVEAL",
+                                    color = TextPrimary,
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = "Ensure other players cannot see screen!",
+                                    color = TextMuted,
+                                    fontSize = 11.sp
+                                )
+                            }
                         }
                     }
-                }
 
-                // Next Player / Start Discussion Button
-                Button(
-                    onClick = {
-                        if (currentPlayerTurn + 1 < playerCount) {
-                            currentPlayerTurn++
-                            haptics.performPop()
-                        } else {
-                            isSetupPhase = false
-                            haptics.performHeavyBurst()
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(54.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E676))
-                ) {
-                    Text(
-                        text = if (currentPlayerTurn + 1 < playerCount) "PASS TO PLAYER ${currentPlayerTurn + 2} 🔄" else "START DISCUSSION 💬",
-                        color = BackgroundObsidian,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Black
-                    )
-                }
-            } else {
-                // Game Phase Discussion View
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text("💬 DISCUSSION PHASE!", color = Color(0xFF00E676), fontSize = 28.sp, fontWeight = FontWeight.Black)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "Take turns asking each other questions! The spy must guess the location without being identified.",
-                        color = TextSecondary,
-                        fontSize = 14.sp,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(32.dp))
+                    // Next Player / Start Discussion Button
                     Button(
-                        onClick = onExitGame,
+                        onClick = {
+                            if (currentPlayerTurn + 1 < playerCount) {
+                                currentPlayerTurn++
+                                haptics.performPop()
+                            } else {
+                                isSetupPhase = false
+                                haptics.performHeavyBurst()
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(54.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E676))
+                    ) {
+                        Text(
+                            text = if (currentPlayerTurn + 1 < playerCount) "PASS TO PLAYER ${currentPlayerTurn + 2} 🔄" else "START DISCUSSION 💬",
+                            color = BackgroundObsidian,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                    }
+                } else {
+                    // Game Phase Discussion View
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.padding(20.dp)
+                    ) {
+                        Text("💬 DISCUSSION PHASE!", color = Color(0xFF00E676), fontSize = 28.sp, fontWeight = FontWeight.Black)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Take turns asking each other questions! The spy must guess the location without being identified.",
+                            color = TextSecondary,
+                            fontSize = 14.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+
+                    Button(
+                        onClick = { isFinished = true },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(54.dp),
@@ -195,6 +183,19 @@ fun UndercoverSpyScreen(
                     }
                 }
             }
+        } else {
+            VictoryCeremonyOverlay(
+                winnerTitle = "Player ${spyIndex + 1} Was The Spy! 🕵️",
+                subtitle = "Secret Location: $secretLocation",
+                onPlayAgain = {
+                    secretLocation = locations.random()
+                    spyIndex = (0 until playerCount).random()
+                    currentPlayerTurn = 0
+                    isSetupPhase = true
+                    isFinished = false
+                },
+                onBackToHub = onExitGame
+            )
         }
     }
 }

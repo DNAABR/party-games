@@ -25,6 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
 import kotlinx.coroutines.delay
 
@@ -65,7 +67,6 @@ fun CharadesScreen(
         val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
         if (accelerometer == null) {
-            // Accelerometer unavailable on this device/emulator; manual buttons will be used
             return@DisposableEffect onDispose {}
         }
 
@@ -143,13 +144,11 @@ fun CharadesScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(flashState ?: Color(0xFF0B0E14))
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            .padding(20.dp)
+    GameScaffold(
+        title = "CHARADES 🎭",
+        titleColor = Color(0xFFFFD166),
+        gameId = "charades",
+        onExitGame = onExitGame
     ) {
         if (!gameStarted) {
             // Category Selection Pre-Game View
@@ -158,24 +157,6 @@ fun CharadesScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onExitGame) {
-                        Text("✕", color = TextSecondary, fontSize = 22.sp)
-                    }
-                    Text(
-                        text = "CHARADES 🎭",
-                        color = Color(0xFFFFD166),
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 1.5.sp
-                    )
-                    Spacer(modifier = Modifier.width(48.dp))
-                }
-
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = "CHOOSE YOUR DECK",
@@ -285,7 +266,7 @@ fun CharadesScreen(
                     }
                 }
 
-                // Main Secret Word Prompt (Large for Friends to Read)
+                // Main Secret Word Prompt
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
@@ -352,83 +333,15 @@ fun CharadesScreen(
                 }
             }
         } else {
-            // Round Summary View
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "TIME'S UP! 🎭",
-                    color = Color(0xFFFFD166),
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Black,
-                    modifier = Modifier.padding(top = 16.dp)
-                )
-
-                Text(
-                    text = "Total Guessed Correctly: ${scoredWords.count { it.isCorrect }} / ${scoredWords.size}",
-                    color = TextSecondary,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(top = 6.dp)
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                LazyColumn(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(scoredWords) { item ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(SurfaceGlassDark)
-                                .padding(14.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = item.word,
-                                color = TextPrimary,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = if (item.isCorrect) "✓ +1" else "✗ Skip",
-                                color = if (item.isCorrect) Color(0xFF00E676) else Color(0xFFFFB300),
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Black
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Button(
-                    onClick = {
-                        gameStarted = false
-                        gameOver = false
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD166)),
-                    shape = RoundedCornerShape(14.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp)
-                ) {
-                    Text("PLAY AGAIN ▶", color = Color.Black, fontWeight = FontWeight.Black)
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                TextButton(onClick = onExitGame) {
-                    Text("Back to Hub", color = TextMuted)
-                }
-            }
+            VictoryCeremonyOverlay(
+                winnerTitle = "SCORE: ${scoredWords.count { it.isCorrect }} / ${scoredWords.size}",
+                subtitle = "Great Charades Acting!",
+                onPlayAgain = {
+                    gameStarted = false
+                    gameOver = false
+                },
+                onBackToHub = onExitGame
+            )
         }
     }
 }

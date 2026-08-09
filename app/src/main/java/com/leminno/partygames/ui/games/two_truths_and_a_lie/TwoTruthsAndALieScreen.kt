@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.leminno.partygames.ui.components.GameScaffold
 import com.leminno.partygames.ui.theme.*
 
 data class StatementItem(
@@ -57,38 +58,17 @@ fun TwoTruthsAndALieScreen(
         lieInput = preset.third
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF0F172A))
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            .padding(20.dp)
+    GameScaffold(
+        title = "Two Truths & A Lie 🎭",
+        titleColor = Color(0xFFFF007F),
+        gameId = "two_truths_and_a_lie",
+        onExitGame = onExitGame
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onExitGame) {
-                    Text("✕", color = TextSecondary, fontSize = 22.sp)
-                }
-                Text(
-                    text = "TWO TRUTHS & A LIE 🎭",
-                    color = Color(0xFFFF007F),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.sp
-                )
-                Spacer(modifier = Modifier.width(48.dp))
-            }
-
             if (gamePhase == "INPUT") {
                 // Input Form Phase
                 Column(

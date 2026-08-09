@@ -17,6 +17,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
 
 val funnyPrompts = listOf(
@@ -40,228 +42,178 @@ fun WriteFunnyScreen(
     var answer2 by remember { mutableStateOf("") }
     var selectedWinner by remember { mutableIntStateOf(0) }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF11081C))
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            .padding(16.dp)
+    GameScaffold(
+        title = "WRITE FUNNY (QUIPLASH) ⚡",
+        titleColor = Color(0xFFFFD166),
+        gameId = "write_funny",
+        onExitGame = onExitGame
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            // Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+        if (gamePhase != "REVEAL") {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = onExitGame) {
-                    Text("✕", color = TextSecondary, fontSize = 22.sp)
-                }
-                Text(
-                    text = "WRITE FUNNY (QUIPLASH) ⚡",
-                    color = Color(0xFFFFD166),
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.sp
-                )
-                Spacer(modifier = Modifier.width(48.dp))
-            }
-
-            // Prompt Box
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(SurfaceGlassDark)
-                    .border(1.5.dp, Color(0xFFFFD166), RoundedCornerShape(20.dp))
-                    .padding(20.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("ABSURD PROMPT", color = Color(0xFFFFD166), fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = currentPrompt,
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Black,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-
-            if (gamePhase == "PLAYER1_INPUT" || gamePhase == "PLAYER2_INPUT") {
-                val isPlayer1 = gamePhase == "PLAYER1_INPUT"
-                val activeTitle = if (isPlayer1) "PLAYER 1 RESPONSE" else "PLAYER 2 RESPONSE"
-                val activeValue = if (isPlayer1) answer1 else answer2
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = activeTitle,
-                        color = Color(0xFF00F2FE),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    OutlinedTextField(
-                        value = activeValue,
-                        onValueChange = { if (isPlayer1) answer1 = it else answer2 = it },
-                        label = { Text("Write your funny punchline") },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFF00F2FE), unfocusedBorderColor = BorderGlassDefault)
-                    )
-                }
-
-                Button(
-                    onClick = {
-                        haptics.performPop()
-                        if (isPlayer1) {
-                            gamePhase = "PLAYER2_INPUT"
-                        } else {
-                            gamePhase = "GROUP_VOTE"
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00F2FE)),
-                    shape = RoundedCornerShape(16.dp),
+                // Prompt Box
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp),
-                    enabled = activeValue.isNotBlank()
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(SurfaceGlassDark)
+                        .border(1.5.dp, Color(0xFFFFD166), RoundedCornerShape(20.dp))
+                        .padding(20.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = if (isPlayer1) "SUBMIT & PASS TO PLAYER 2 ▶" else "LOCK ANSWERS & START VOTE 🗳️",
-                        color = Color.Black,
-                        fontWeight = FontWeight.Black
-                    )
-                }
-            } else if (gamePhase == "GROUP_VOTE") {
-                // Anonymous Side-by-Side Voting Cards
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "WHICH PUNCHLINE IS FUNNIER?",
-                        color = Color(0xFFFFD166),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Black
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Answer Option 1
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(if (selectedWinner == 1) Color(0x3300F2FE) else SurfaceGlassDark)
-                            .border(1.5.dp, if (selectedWinner == 1) Color(0xFF00F2FE) else BorderGlassDefault, RoundedCornerShape(16.dp))
-                            .clickable {
-                                haptics.performPop()
-                                selectedWinner = 1
-                            }
-                            .padding(20.dp)
-                    ) {
-                        Text(answer1, color = TextPrimary, fontSize = 16.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Text("⚔️ VS ⚔️", color = TextMuted, fontSize = 13.sp, fontWeight = FontWeight.Black)
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    // Answer Option 2
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(if (selectedWinner == 2) Color(0x33FF007F) else SurfaceGlassDark)
-                            .border(1.5.dp, if (selectedWinner == 2) Color(0xFFFF007F) else BorderGlassDefault, RoundedCornerShape(16.dp))
-                            .clickable {
-                                haptics.performPop()
-                                selectedWinner = 2
-                            }
-                            .padding(20.dp)
-                    ) {
-                        Text(answer2, color = TextPrimary, fontSize = 16.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("ABSURD PROMPT", color = Color(0xFFFFD166), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = currentPrompt,
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Black,
+                            textAlign = TextAlign.Center
+                        )
                     }
                 }
 
-                Button(
-                    onClick = {
-                        if (selectedWinner != 0) {
-                            haptics.performHeavyBurst()
-                            gamePhase = "REVEAL"
+                if (gamePhase == "PLAYER1_INPUT" || gamePhase == "PLAYER2_INPUT") {
+                    val isPlayer1 = gamePhase == "PLAYER1_INPUT"
+                    val activeTitle = if (isPlayer1) "PLAYER 1 RESPONSE" else "PLAYER 2 RESPONSE"
+                    val activeValue = if (isPlayer1) answer1 else answer2
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = activeTitle,
+                            color = Color(0xFF00F2FE),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        OutlinedTextField(
+                            value = activeValue,
+                            onValueChange = { if (isPlayer1) answer1 = it else answer2 = it },
+                            label = { Text("Write your funny punchline") },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFF00F2FE), unfocusedBorderColor = BorderGlassDefault)
+                        )
+                    }
+
+                    Button(
+                        onClick = {
+                            haptics.performPop()
+                            if (isPlayer1) {
+                                gamePhase = "PLAYER2_INPUT"
+                            } else {
+                                gamePhase = "GROUP_VOTE"
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00F2FE)),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        enabled = activeValue.isNotBlank()
+                    ) {
+                        Text(
+                            text = if (isPlayer1) "SUBMIT & PASS TO PLAYER 2 ▶" else "LOCK ANSWERS & START VOTE 🗳️",
+                            color = Color.Black,
+                            fontWeight = FontWeight.Black
+                        )
+                    }
+                } else if (gamePhase == "GROUP_VOTE") {
+                    // Anonymous Side-by-Side Voting Cards
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "WHICH PUNCHLINE IS FUNNIER?",
+                            color = Color(0xFFFFD166),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Black
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Answer Option 1
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(if (selectedWinner == 1) Color(0x3300F2FE) else SurfaceGlassDark)
+                                .border(1.5.dp, if (selectedWinner == 1) Color(0xFF00F2FE) else BorderGlassDefault, RoundedCornerShape(16.dp))
+                                .clickable {
+                                    haptics.performPop()
+                                    selectedWinner = 1
+                                }
+                                .padding(20.dp)
+                        ) {
+                            Text(answer1, color = TextPrimary, fontSize = 16.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                         }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD166)),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    enabled = selectedWinner != 0
-                ) {
-                    Text("CROWN WINNER 👑", color = Color.Black, fontWeight = FontWeight.Black)
-                }
-            } else {
-                // Winner Crown Phase
-                val winningAnswer = if (selectedWinner == 1) answer1 else answer2
-                val winnerName = if (selectedWinner == 1) "PLAYER 1" else "PLAYER 2"
 
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "VICTORY TO $winnerName! 👑",
-                        color = Color(0xFFFFD166),
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Black
-                    )
+                        Spacer(modifier = Modifier.height(12.dp))
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                        Text("⚔️ VS ⚔️", color = TextMuted, fontSize = 13.sp, fontWeight = FontWeight.Black)
 
-                    Text(
-                        text = "\"$winningAnswer\"",
-                        color = Color.White,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
-                    )
-                }
+                        Spacer(modifier = Modifier.height(12.dp))
 
-                Button(
-                    onClick = {
-                        currentPrompt = funnyPrompts.random()
-                        answer1 = ""
-                        answer2 = ""
-                        selectedWinner = 0
-                        gamePhase = "PLAYER1_INPUT"
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD166)),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                ) {
-                    Text("NEXT PROMPT DUEL ▶", color = Color.Black, fontWeight = FontWeight.Black)
+                        // Answer Option 2
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(if (selectedWinner == 2) Color(0x33FF007F) else SurfaceGlassDark)
+                                .border(1.5.dp, if (selectedWinner == 2) Color(0xFFFF007F) else BorderGlassDefault, RoundedCornerShape(16.dp))
+                                .clickable {
+                                    haptics.performPop()
+                                    selectedWinner = 2
+                                }
+                                .padding(20.dp)
+                        ) {
+                            Text(answer2, color = TextPrimary, fontSize = 16.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                        }
+                    }
+
+                    Button(
+                        onClick = {
+                            if (selectedWinner != 0) {
+                                haptics.performHeavyBurst()
+                                gamePhase = "REVEAL"
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD166)),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        enabled = selectedWinner != 0
+                    ) {
+                        Text("CROWN WINNER 👑", color = Color.Black, fontWeight = FontWeight.Black)
+                    }
                 }
             }
+        } else {
+            val winningAnswer = if (selectedWinner == 1) answer1 else answer2
+            val winnerName = if (selectedWinner == 1) "PLAYER 1" else "PLAYER 2"
 
-            TextButton(onClick = onExitGame) {
-                Text("Back to Hub", color = TextMuted)
-            }
+            VictoryCeremonyOverlay(
+                winnerTitle = "VICTORY TO $winnerName! 👑",
+                subtitle = "\"$winningAnswer\"",
+                onPlayAgain = {
+                    currentPrompt = funnyPrompts.random()
+                    answer1 = ""
+                    answer2 = ""
+                    selectedWinner = 0
+                    gamePhase = "PLAYER1_INPUT"
+                },
+                onBackToHub = onExitGame
+            )
         }
     }
 }

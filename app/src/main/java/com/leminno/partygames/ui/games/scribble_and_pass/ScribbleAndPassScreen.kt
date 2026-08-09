@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.leminno.partygames.ui.components.GameScaffold
 import com.leminno.partygames.ui.theme.*
 
 data class DrawPathState(
@@ -61,38 +62,17 @@ fun ScribbleAndPassScreen(
         Color(0xFF00E676), Color(0xFF9D4EDD), Color.White
     )
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF0B0F19))
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            .padding(16.dp)
+    GameScaffold(
+        title = "SCRIBBLE & PASS 🎨",
+        titleColor = Color(0xFF00F2FE),
+        gameId = "scribble_and_pass",
+        onExitGame = onExitGame
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onExitGame) {
-                    Text("✕", color = TextSecondary, fontSize = 22.sp)
-                }
-                Text(
-                    text = "SCRIBBLE & PASS 🎨",
-                    color = Color(0xFF00F2FE),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.sp
-                )
-                Spacer(modifier = Modifier.width(48.dp))
-            }
-
             if (gamePhase == "PROMPT_ENTRY") {
                 // Secret Prompt Entry
                 Column(
@@ -380,10 +360,6 @@ fun ScribbleAndPassScreen(
                 ) {
                     Text("START NEW DRAWING CHAIN ▶", color = Color.Black, fontWeight = FontWeight.Black)
                 }
-            }
-
-            TextButton(onClick = onExitGame) {
-                Text("Back to Hub", color = TextMuted)
             }
         }
     }

@@ -21,6 +21,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.leminno.partygames.ui.components.GameScaffold
 import com.leminno.partygames.ui.theme.*
 
 data class NumericQuestion(
@@ -56,38 +57,17 @@ fun TwitScreen(
     var guessesList by remember { mutableStateOf<List<PlayerGuess>>(emptyList()) }
     var selectedBetGuess by remember { mutableStateOf<PlayerGuess?>(null) }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF0C101A))
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            .padding(16.dp)
+    GameScaffold(
+        title = "TWIT (NUMERIC BETTING) 🎰",
+        titleColor = Color(0xFFFFD166),
+        gameId = "twit",
+        onExitGame = onExitGame
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onExitGame) {
-                    Text("✕", color = TextSecondary, fontSize = 22.sp)
-                }
-                Text(
-                    text = "TWIT (NUMERIC BETTING) 🎰",
-                    color = Color(0xFFFFD166),
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.sp
-                )
-                Spacer(modifier = Modifier.width(48.dp))
-            }
-
             // Question Prompt Card
             Box(
                 modifier = Modifier
@@ -276,10 +256,6 @@ fun TwitScreen(
                 ) {
                     Text("NEXT QUESTION ▶", color = Color.Black, fontWeight = FontWeight.Black)
                 }
-            }
-
-            TextButton(onClick = onExitGame) {
-                Text("Back to Hub", color = TextMuted)
             }
         }
     }

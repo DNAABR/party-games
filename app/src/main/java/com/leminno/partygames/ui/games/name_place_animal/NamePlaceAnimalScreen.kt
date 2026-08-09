@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.leminno.partygames.ui.components.GameScaffold
 import com.leminno.partygames.ui.theme.*
 import kotlinx.coroutines.delay
 
@@ -51,7 +52,6 @@ fun NamePlaceAnimalScreen(
                 isRoundComplete = true
                 haptics.performHeavyBurst()
 
-                // Calculate score
                 var pts = 0
                 if (nameInput.trim().startsWith(currentLetter, ignoreCase = true)) pts += 10
                 if (placeInput.trim().startsWith(currentLetter, ignoreCase = true)) pts += 10
@@ -62,38 +62,17 @@ fun NamePlaceAnimalScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF07111E))
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            .padding(16.dp)
+    GameScaffold(
+        title = "NAME PLACE ANIMAL 🔤",
+        titleColor = Color(0xFF00E676),
+        gameId = "name_place_animal",
+        onExitGame = onExitGame
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onExitGame) {
-                    Text("✕", color = TextSecondary, fontSize = 22.sp)
-                }
-                Text(
-                    text = "NAME PLACE ANIMAL 🔤",
-                    color = Color(0xFF00E676),
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.sp
-                )
-                Spacer(modifier = Modifier.width(48.dp))
-            }
-
             // Target Letter Badge & Timer
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -250,10 +229,6 @@ fun NamePlaceAnimalScreen(
                 ) {
                     Text("NEXT LETTER RACE ▶", color = Color.Black, fontWeight = FontWeight.Black)
                 }
-            }
-
-            TextButton(onClick = onExitGame) {
-                Text("Back to Hub", color = TextMuted)
             }
         }
     }

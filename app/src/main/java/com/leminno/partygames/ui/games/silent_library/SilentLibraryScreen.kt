@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.leminno.partygames.ui.components.GameScaffold
 import com.leminno.partygames.ui.theme.*
 import kotlinx.coroutines.delay
 
@@ -82,38 +83,17 @@ fun SilentLibraryScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF0F0F1A))
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            .padding(20.dp)
+    GameScaffold(
+        title = "Silent Library 🤫",
+        titleColor = Color(0xFFFFD166),
+        gameId = "silent_library",
+        onExitGame = onExitGame
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onExitGame) {
-                    Text("✕", color = TextSecondary, fontSize = 22.sp)
-                }
-                Text(
-                    text = "SILENT LIBRARY 🤫",
-                    color = Color(0xFFFFD166),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.sp
-                )
-                Spacer(modifier = Modifier.width(48.dp))
-            }
-
             // Task Card
             Box(
                 modifier = Modifier
@@ -324,10 +304,6 @@ fun SilentLibraryScreen(
                 ) {
                     Text("DRAW NEXT CARD ▶", color = Color.Black, fontWeight = FontWeight.Black)
                 }
-            }
-
-            TextButton(onClick = onExitGame) {
-                Text("Back to Hub", color = TextMuted)
             }
         }
     }

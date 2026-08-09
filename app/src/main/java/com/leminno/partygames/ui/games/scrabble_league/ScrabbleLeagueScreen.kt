@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.leminno.partygames.ui.components.GameScaffold
 import com.leminno.partygames.ui.theme.*
 
 data class TileCell(
@@ -47,38 +48,17 @@ fun ScrabbleLeagueScreen(
     var player2Rack by remember { mutableStateOf((1..7).map { tileLettersBag.random() }) }
     var selectedRackTileIndex by remember { mutableStateOf<Int?>(null) }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF0A121A))
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            .padding(16.dp)
+    GameScaffold(
+        title = "LETTER LEAGUE 🔠",
+        titleColor = Color(0xFFFFD166),
+        gameId = "scrabble_league",
+        onExitGame = onExitGame
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onExitGame) {
-                    Text("✕", color = TextSecondary, fontSize = 22.sp)
-                }
-                Text(
-                    text = "LETTER LEAGUE 🔠",
-                    color = Color(0xFFFFD166),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.sp
-                )
-                Spacer(modifier = Modifier.width(48.dp))
-            }
-
             // Scoreboard
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -254,10 +234,6 @@ fun ScrabbleLeagueScreen(
                 ) {
                     Text("PASS TURN ⏭️", color = Color.White, fontWeight = FontWeight.Black, fontSize = 12.sp)
                 }
-            }
-
-            TextButton(onClick = onExitGame) {
-                Text("Back to Hub", color = TextMuted)
             }
         }
     }
