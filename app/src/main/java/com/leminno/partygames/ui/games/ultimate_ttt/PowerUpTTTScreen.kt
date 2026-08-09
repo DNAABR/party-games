@@ -49,8 +49,8 @@ fun PowerUpTTTScreen(
     var selectedPowerUp by remember { mutableStateOf<TttPowerUp?>(null) }
 
     // Inventory of power ups per player (1 each per game)
-    var playerXPowers by remember { mutableStateOf(mutableSetOf(TttPowerUp.ERASE, TttPowerUp.SHIELD, TttPowerUp.EXTRA_TURN)) }
-    var playerOPowers by remember { mutableStateOf(mutableSetOf(TttPowerUp.ERASE, TttPowerUp.SHIELD, TttPowerUp.EXTRA_TURN)) }
+    var playerXPowers by remember { mutableStateOf(setOf(TttPowerUp.ERASE, TttPowerUp.SHIELD, TttPowerUp.EXTRA_TURN)) }
+    var playerOPowers by remember { mutableStateOf(setOf(TttPowerUp.ERASE, TttPowerUp.SHIELD, TttPowerUp.EXTRA_TURN)) }
 
     var winner by remember { mutableStateOf<CellState?>(null) }
     var winningLine by remember { mutableStateOf<List<Int>?>(null) }
@@ -89,7 +89,7 @@ fun PowerUpTTTScreen(
                         val updated = board.toMutableList()
                         updated[index] = BoardCell(CellState.EMPTY, false)
                         board = updated
-                        if (isPlayerXTurn) playerXPowers.remove(TttPowerUp.ERASE) else playerOPowers.remove(TttPowerUp.ERASE)
+                        if (isPlayerXTurn) playerXPowers = playerXPowers - TttPowerUp.ERASE else playerOPowers = playerOPowers - TttPowerUp.ERASE
                         selectedPowerUp = null
                         isPlayerXTurn = !isPlayerXTurn
                     }
@@ -100,7 +100,7 @@ fun PowerUpTTTScreen(
                         val updated = board.toMutableList()
                         updated[index] = cell.copy(isShielded = true)
                         board = updated
-                        if (isPlayerXTurn) playerXPowers.remove(TttPowerUp.SHIELD) else playerOPowers.remove(TttPowerUp.SHIELD)
+                        if (isPlayerXTurn) playerXPowers = playerXPowers - TttPowerUp.SHIELD else playerOPowers = playerOPowers - TttPowerUp.SHIELD
                         selectedPowerUp = null
                         isPlayerXTurn = !isPlayerXTurn
                     }
@@ -116,7 +116,7 @@ fun PowerUpTTTScreen(
                             winner = win
                             winningLine = line
                         } else {
-                            if (isPlayerXTurn) playerXPowers.remove(TttPowerUp.EXTRA_TURN) else playerOPowers.remove(TttPowerUp.EXTRA_TURN)
+                            if (isPlayerXTurn) playerXPowers = playerXPowers - TttPowerUp.EXTRA_TURN else playerOPowers = playerOPowers - TttPowerUp.EXTRA_TURN
                             selectedPowerUp = null
                             // Keep turn for extra move!
                         }
@@ -298,8 +298,8 @@ fun PowerUpTTTScreen(
                         winningLine = null
                         isPlayerXTurn = true
                         selectedPowerUp = null
-                        playerXPowers = mutableSetOf(TttPowerUp.ERASE, TttPowerUp.SHIELD, TttPowerUp.EXTRA_TURN)
-                        playerOPowers = mutableSetOf(TttPowerUp.ERASE, TttPowerUp.SHIELD, TttPowerUp.EXTRA_TURN)
+                        playerXPowers = setOf(TttPowerUp.ERASE, TttPowerUp.SHIELD, TttPowerUp.EXTRA_TURN)
+                        playerOPowers = setOf(TttPowerUp.ERASE, TttPowerUp.SHIELD, TttPowerUp.EXTRA_TURN)
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00F2FE)),
                     shape = RoundedCornerShape(14.dp),

@@ -191,7 +191,7 @@ object GameCatalogRepository {
             maxPlayers = 10,
             estTimeMinutes = 5,
             isMvp = true,
-            antiCheatNotice = "Use the 2-second hold-to-reveal card so nearby players can't peak!",
+            antiCheatNotice = "Use the 2-second hold-to-reveal card so nearby players can't peek!",
             rules = listOf(
                 GameRuleStep(1, "Secret Role Reveal", "Hold screen for 2 seconds to view secret profession safely.", "🔒"),
                 GameRuleStep(2, "Give 3 Clues", "Give subtle clues without naming the profession.", "💡"),
@@ -209,7 +209,7 @@ object GameCatalogRepository {
             maxPlayers = 10,
             estTimeMinutes = 8,
             isMvp = true,
-            antiCheatNotice = "Input statements privately using masked input mode.",
+            antiCheatNotice = "Enter statements privately before passing the phone.",
             rules = listOf(
                 GameRuleStep(1, "Create Statements", "Type 2 true facts and 1 convincing lie.", "✍️"),
                 GameRuleStep(2, "Group Vote", "Pass phone and let players select the statement they think is a lie.", "🗳️"),
@@ -263,7 +263,7 @@ object GameCatalogRepository {
             maxPlayers = 10,
             estTimeMinutes = 5,
             isMvp = true,
-            antiCheatNotice = "No smiling or laughing! Front camera tracks player expression.",
+            antiCheatNotice = "No smiling or laughing — let the group decide if the player cracked!",
             rules = listOf(
                 GameRuleStep(1, "Draw Task", "Active player receives a funny task card.", "🃏"),
                 GameRuleStep(2, "Hold Straight Face", "Perform task for 30 seconds with straight face.", "😐"),

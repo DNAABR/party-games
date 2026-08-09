@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -78,7 +79,7 @@ fun DecibelScreamScreen(
         )
 
         try {
-            if (hasMicPermission) {
+            if (hasMicPermission && bufferSize > 0) {
                 audioRecord = AudioRecord(
                     MediaRecorder.AudioSource.MIC,
                     44100,
@@ -93,7 +94,8 @@ fun DecibelScreamScreen(
         }
 
         val thread = Thread {
-            val buffer = ShortArray(bufferSize)
+            val safeBufferSize = if (bufferSize > 0) bufferSize else 1024
+            val buffer = ShortArray(safeBufferSize)
             while (isThreadRunning) {
                 if (audioRecord != null && audioRecord.recordingState == AudioRecord.RECORDSTATE_RECORDING) {
                     val readSize = audioRecord.read(buffer, 0, buffer.size)
@@ -104,14 +106,19 @@ fun DecibelScreamScreen(
                         }
                         val amplitude = Math.sqrt(sum / readSize)
                         val db = if (amplitude > 0) (20 * log10(amplitude)).toFloat() else 0f
-                        currentDb = db.coerceIn(0f, 120f)
-                        if (currentDb > peakDb) peakDb = currentDb
+                        val calculatedDb = db.coerceIn(0f, 120f)
+                        Snapshot.withMutableSnapshot {
+                            currentDb = calculatedDb
+                            if (calculatedDb > peakDb) peakDb = calculatedDb
+                        }
                     }
                 } else {
-                    // Fallback simulated wave generator when mic permission is withheld
+                    // Fallback simulated wave generator when mic permission is withheld or bufferSize invalid
                     val simDb = (30f..95f).random()
-                    currentDb = simDb
-                    if (simDb > peakDb) peakDb = simDb
+                    Snapshot.withMutableSnapshot {
+                        currentDb = simDb
+                        if (simDb > peakDb) peakDb = simDb
+                    }
                     Thread.sleep(150)
                 }
             }

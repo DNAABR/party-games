@@ -64,6 +64,11 @@ fun CharadesScreen(
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
+        if (accelerometer == null) {
+            // Accelerometer unavailable on this device/emulator; manual buttons will be used
+            return@DisposableEffect onDispose {}
+        }
+
         var lastTriggerTime = System.currentTimeMillis()
 
         val listener = object : SensorEventListener {

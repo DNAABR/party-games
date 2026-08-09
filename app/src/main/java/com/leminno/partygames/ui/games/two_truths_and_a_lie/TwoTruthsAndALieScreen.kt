@@ -49,7 +49,6 @@ fun TwoTruthsAndALieScreen(
     var gamePhase by remember { mutableStateOf("INPUT") } // INPUT, VOTING, REVEAL
     var shuffledStatements by remember { mutableStateOf<List<StatementItem>>(emptyList()) }
     var selectedVoteIndex by remember { mutableStateOf<Int?>(null) }
-    var votesMap by remember { mutableStateOf<Map<Int, Int>>(emptyMap()) } // statement index -> vote count
 
     fun loadPreset() {
         val preset = presetDecks.random()
