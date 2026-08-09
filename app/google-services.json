@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "174166816548",
+    "project_id": "party-games-dd1eb",
+    "storage_bucket": "party-games-dd1eb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:174166816548:android:771914580df8beaa2125b1",
+        "android_client_info": {
+          "package_name": "com.leminno.partygames"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8HnG9WR2xY1Zq8r2QQ4pMk3kUbfk80sU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
