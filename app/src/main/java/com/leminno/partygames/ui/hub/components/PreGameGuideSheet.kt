@@ -232,6 +232,8 @@ fun PreGameGuideSheet(
                         Text("+", color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                     }
                 }
+            }
+
             // Timer Duration Selector
             Spacer(modifier = Modifier.height(12.dp))
             Row(

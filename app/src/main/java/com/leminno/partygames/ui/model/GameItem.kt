@@ -1,6 +1,6 @@
 package com.leminno.partygames.ui.model
 
-import com.leminno.partygames.ui.theme.GameCategory
+import com.leminno.partygames.data.model.GameCategory
 
 enum class SetupType(val label: String, val badgeIcon: String) {
     FOREHEAD_SENSOR("Forehead Sensor", "📱"),
