@@ -232,6 +232,62 @@ fun PreGameGuideSheet(
                         Text("+", color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                     }
                 }
+            // Timer Duration Selector
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Timer:", color = TextSecondary, fontSize = 13.sp)
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    listOf(30, 60, 90).forEach { timerSec ->
+                        val isSel = selectedTimerSec == timerSec
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(if (isSel) categoryToken.primaryAccent else SurfaceGlassDark)
+                                .clickable { selectedTimerSec = timerSec }
+                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
+                            Text(
+                                text = "${timerSec}s",
+                                color = if (isSel) Color.White else TextMuted,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Deck Intensity Selector
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Deck:", color = TextSecondary, fontSize = 13.sp)
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    listOf("Clean", "Party", "Extreme").forEach { intensity ->
+                        val isSel = selectedIntensity == intensity
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(if (isSel) categoryToken.primaryAccent else SurfaceGlassDark)
+                                .clickable { selectedIntensity = intensity }
+                                .padding(horizontal = 10.dp, vertical = 6.dp)
+                        ) {
+                            Text(
+                                text = intensity,
+                                color = if (isSel) Color.White else TextMuted,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
