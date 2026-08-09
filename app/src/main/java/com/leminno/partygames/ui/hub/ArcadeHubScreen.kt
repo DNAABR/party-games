@@ -35,6 +35,7 @@ import com.leminno.partygames.ui.theme.*
 
 @Composable
 fun ArcadeHubScreen(
+    initialRoomCode: String? = null,
     onLaunchGame: (gameId: String, playerCount: Int, timerSec: Int) -> Unit
 ) {
     val context = LocalContext.current
@@ -56,6 +57,7 @@ fun ArcadeHubScreen(
     var selectedGameForSheet by remember { mutableStateOf<GameItem?>(null) }
     var showQuickSettings by remember { mutableStateOf(false) }
     var showPartyCompanion by remember { mutableStateOf(false) }
+    var showRemoteRoomSheet by remember { mutableStateOf(initialRoomCode != null) }
 
     val recentGames = remember(recentGameIds) {
         recentGameIds.mapNotNull { id -> GameCatalogRepository.allGames.find { it.id == id } }
@@ -114,6 +116,14 @@ fun ArcadeHubScreen(
                 }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Remote Room Code Button
+                    IconButton(onClick = {
+                        haptics.performTick(composeHaptics)
+                        showRemoteRoomSheet = true
+                    }) {
+                        Text("🌐", fontSize = 20.sp)
+                    }
+
                     // Party Scorekeeper Button
                     IconButton(onClick = {
                         haptics.performTick(composeHaptics)
@@ -384,6 +394,20 @@ fun ArcadeHubScreen(
         if (showPartyCompanion) {
             PartyCompanionSheet(
                 onDismissRequest = { showPartyCompanion = false }
+            )
+        }
+
+        // Remote Room Join Sheet
+        if (showRemoteRoomSheet) {
+            com.leminno.partygames.ui.components.RemoteRoomSetupSheet(
+                gameId = "hand_cricket",
+                gameName = "Remote Multiplayer Room 🌐",
+                initialRoomCode = initialRoomCode,
+                onDismiss = { showRemoteRoomSheet = false },
+                onRoomJoined = { roomCode, isHost, _ ->
+                    showRemoteRoomSheet = false
+                    onLaunchGame("hand_cricket", 2, 60)
+                }
             )
         }
     }

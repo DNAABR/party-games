@@ -44,12 +44,14 @@ private val gameRouteArgs = listOf(
 
 @Composable
 fun PartyGamesAppNavHost(
+    initialRoomCode: String? = null,
     navController: NavHostController = rememberNavController()
 ) {
     NavHost(navController = navController, startDestination = "hub") {
         // Arcade Hub Screen
         composable("hub") {
             ArcadeHubScreen(
+                initialRoomCode = initialRoomCode,
                 onLaunchGame = { gameId, playerCount, timerSec ->
                     navController.navigate("game/$gameId/$playerCount/$timerSec")
                 }

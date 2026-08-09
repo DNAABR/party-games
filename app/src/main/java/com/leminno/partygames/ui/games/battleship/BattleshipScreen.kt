@@ -17,9 +17,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.leminno.partygames.data.remote.RemoteRoomRepository
 import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.RemoteRoomSetupSheet
 import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
+import kotlinx.coroutines.launch
 
 enum class BattleCellState {
     EMPTY, SHIP, HIT, MISS
@@ -30,15 +33,62 @@ fun BattleshipScreen(
     onExitGame: () -> Unit
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val haptics = remember { HapticFeedbackManager(context) }
 
     val gridSize = 6 // 6x6 grid for fast mobile party play
     var player1Board by remember { mutableStateOf(List(gridSize * gridSize) { BattleCellState.EMPTY }) }
     var player2Board by remember { mutableStateOf(List(gridSize * gridSize) { BattleCellState.EMPTY }) }
 
-    var gamePhase by remember { mutableStateOf("P1_PLACEMENT") } // P1_PLACEMENT, PASS_PRIVACY, P2_PLACEMENT, BATTLE_P1, P2_BATTLE, GAME_OVER
+    var gamePhase by remember { mutableStateOf("MODE_SELECT") } // MODE_SELECT, P1_PLACEMENT, PASS_PRIVACY, P2_PLACEMENT, BATTLE_P1, P2_BATTLE, GAME_OVER
+    var isRemoteMode by remember { mutableStateOf(false) }
+    var showRemoteSheet by remember { mutableStateOf(false) }
+
+    var roomCode by remember { mutableStateOf("") }
+    var isHost by remember { mutableStateOf(true) }
+    var localPlayerId by remember { mutableStateOf("") }
+
     var winnerText by remember { mutableStateOf<String?>(null) }
     var actionLog by remember { mutableStateOf("Place 4 ships on your grid!") }
+
+    // Observe Remote Room State
+    LaunchedEffect(roomCode, isRemoteMode) {
+        if (isRemoteMode && roomCode.isNotBlank()) {
+            RemoteRoomRepository.observeRoom(roomCode).collect { room ->
+                if (room != null && room.gameState.isNotEmpty()) {
+                    val p1List = (room.gameState["p1Board"] as? List<*>)?.mapNotNull { (it as? Number)?.toInt() }
+                    val p2List = (room.gameState["p2Board"] as? List<*>)?.mapNotNull { (it as? Number)?.toInt() }
+
+                    if (p1List != null && p1List.size == 36) {
+                        player1Board = p1List.map { BattleCellState.entries[it] }
+                    }
+                    if (p2List != null && p2List.size == 36) {
+                        player2Board = p2List.map { BattleCellState.entries[it] }
+                    }
+
+                    val remotePhase = room.gameState["phase"] as? String
+                    if (remotePhase != null && remotePhase != gamePhase) {
+                        gamePhase = remotePhase
+                    }
+                }
+            }
+        }
+    }
+
+    fun syncRemoteState(newP1: List<BattleCellState>, newP2: List<BattleCellState>, newPhase: String) {
+        if (isRemoteMode && roomCode.isNotBlank()) {
+            scope.launch {
+                RemoteRoomRepository.updateGameState(
+                    roomCode,
+                    mapOf(
+                        "p1Board" to newP1.map { it.ordinal },
+                        "p2Board" to newP2.map { it.ordinal },
+                        "phase" to newPhase
+                    )
+                )
+            }
+        }
+    }
 
     fun placeShip(board: List<BattleCellState>, index: Int): List<BattleCellState> {
         val currentShipCount = board.count { it == BattleCellState.SHIP }
@@ -65,14 +115,70 @@ fun BattleshipScreen(
         gameId = "battleship",
         onExitGame = onExitGame
     ) {
-        if (gamePhase != "GAME_OVER") {
+        if (gamePhase == "MODE_SELECT") {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                if (gamePhase == "PASS_PRIVACY") {
-                    // Full Screen Privacy Cover
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("SELECT PLAY MODE", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Black)
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(SurfaceGlassDark)
+                            .border(1.5.dp, Color(0xFF00F2FE), RoundedCornerShape(20.dp))
+                            .clickable {
+                                isRemoteMode = false
+                                gamePhase = "P1_PLACEMENT"
+                            }
+                            .padding(20.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("📱", fontSize = 36.sp)
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text("Pass & Play (Same Phone)", color = Color(0xFF00F2FE), fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                                Text("Shared screen with privacy pass covers", color = TextMuted, fontSize = 12.sp)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(SurfaceGlassDark)
+                            .border(1.5.dp, AccentPurple, RoundedCornerShape(20.dp))
+                            .clickable {
+                                isRemoteMode = true
+                                showRemoteSheet = true
+                            }
+                            .padding(20.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("🌐", fontSize = 36.sp)
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text("Remote Play (2 Devices)", color = AccentPurple, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                                Text("Play on your own screens via Room Code & Link", color = TextMuted, fontSize = 12.sp)
+                            }
+                        }
+                    }
+                }
+            }
+        } else if (gamePhase != "GAME_OVER") {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                if (gamePhase == "PASS_PRIVACY" && !isRemoteMode) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
@@ -97,7 +203,7 @@ fun BattleshipScreen(
                         Text("READY! UNLOCK SCREEN ▶", color = Color.Black, fontWeight = FontWeight.Black)
                     }
                 } else if (gamePhase == "P1_PLACEMENT" || gamePhase == "P2_PLACEMENT") {
-                    val isP1 = gamePhase == "P1_PLACEMENT"
+                    val isP1 = if (isRemoteMode) isHost else gamePhase == "P1_PLACEMENT"
                     val activeBoard = if (isP1) player1Board else player2Board
                     val shipCount = activeBoard.count { it == BattleCellState.SHIP }
 
@@ -112,7 +218,6 @@ fun BattleshipScreen(
                         Text("Tap grid cells to place 4 ships ($shipCount/4 placed)", color = TextMuted, fontSize = 12.sp)
                     }
 
-                    // 6x6 Placement Grid
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         for (row in 0 until gridSize) {
                             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -129,10 +234,13 @@ fun BattleshipScreen(
                                             .border(1.dp, BorderGlassDefault, RoundedCornerShape(8.dp))
                                             .clickable {
                                                 haptics.performTick()
+                                                val updatedBoard = placeShip(activeBoard, idx)
                                                 if (isP1) {
-                                                    player1Board = placeShip(player1Board, idx)
+                                                    player1Board = updatedBoard
+                                                    syncRemoteState(updatedBoard, player2Board, gamePhase)
                                                 } else {
-                                                    player2Board = placeShip(player2Board, idx)
+                                                    player2Board = updatedBoard
+                                                    syncRemoteState(player1Board, updatedBoard, gamePhase)
                                                 }
                                             },
                                         contentAlignment = Alignment.Center
@@ -149,7 +257,13 @@ fun BattleshipScreen(
                     Button(
                         onClick = {
                             haptics.performPop()
-                            gamePhase = "PASS_PRIVACY"
+                            if (isRemoteMode) {
+                                val nextPhase = if (isHost) "P2_PLACEMENT" else "BATTLE_P1"
+                                gamePhase = nextPhase
+                                syncRemoteState(player1Board, player2Board, nextPhase)
+                            } else {
+                                gamePhase = "PASS_PRIVACY"
+                            }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00F2FE)),
                         shape = RoundedCornerShape(16.dp),
@@ -158,7 +272,7 @@ fun BattleshipScreen(
                             .height(56.dp),
                         enabled = shipCount == 4
                     ) {
-                        Text("LOCK FLEET & PASS DEVICE ▶", color = Color.Black, fontWeight = FontWeight.Black)
+                        Text(if (isRemoteMode) "CONFIRM FLEET 🚀" else "LOCK FLEET & PASS DEVICE ▶", color = Color.Black, fontWeight = FontWeight.Black)
                     }
                 } else if (gamePhase == "BATTLE_P1" || gamePhase == "P2_BATTLE") {
                     val isP1Turn = gamePhase == "BATTLE_P1"
@@ -175,7 +289,6 @@ fun BattleshipScreen(
                         Text(actionLog, color = TextPrimary, fontSize = 13.sp)
                     }
 
-                    // 6x6 Strike Grid
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         for (row in 0 until gridSize) {
                             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -199,7 +312,16 @@ fun BattleshipScreen(
                                             .clickable {
                                                 if (cell == BattleCellState.EMPTY || cell == BattleCellState.SHIP) {
                                                     val (updated, isHit) = fireSalvo(targetBoard, idx)
-                                                    if (isP1Turn) player2Board = updated else player1Board = updated
+                                                    var newP1 = player1Board
+                                                    var newP2 = player2Board
+
+                                                    if (isP1Turn) {
+                                                        player2Board = updated
+                                                        newP2 = updated
+                                                    } else {
+                                                        player1Board = updated
+                                                        newP1 = updated
+                                                    }
 
                                                     if (isHit) {
                                                         haptics.performHeavyBurst()
@@ -210,10 +332,13 @@ fun BattleshipScreen(
                                                     }
 
                                                     val remainingHitsNeeded = updated.count { it == BattleCellState.SHIP }
+                                                    var targetPhase = gamePhase
                                                     if (remainingHitsNeeded == 0) {
                                                         winnerText = if (isP1Turn) "PLAYER 1 SUNK THE FLEET! VICTORY! 🏆" else "PLAYER 2 SUNK THE FLEET! VICTORY! 🏆"
+                                                        targetPhase = "GAME_OVER"
                                                         gamePhase = "GAME_OVER"
                                                     }
+                                                    syncRemoteState(newP1, newP2, targetPhase)
                                                 }
                                             },
                                         contentAlignment = Alignment.Center
@@ -228,7 +353,9 @@ fun BattleshipScreen(
                     Button(
                         onClick = {
                             haptics.performPop()
-                            gamePhase = if (isP1Turn) "P2_BATTLE" else "BATTLE_P1"
+                            val nextPhase = if (isP1Turn) "P2_BATTLE" else "BATTLE_P1"
+                            gamePhase = nextPhase
+                            syncRemoteState(player1Board, player2Board, nextPhase)
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF0055)),
                         shape = RoundedCornerShape(16.dp),
@@ -236,7 +363,7 @@ fun BattleshipScreen(
                             .fillMaxWidth()
                             .height(56.dp)
                     ) {
-                        Text("END TURN & PASS PHONE 🔒", color = Color.White, fontWeight = FontWeight.Black)
+                        Text(if (isRemoteMode) "PASS TURN TO OPPONENT 🔒" else "END TURN & PASS PHONE 🔒", color = Color.White, fontWeight = FontWeight.Black)
                     }
                 }
             }
@@ -247,11 +374,30 @@ fun BattleshipScreen(
                 onPlayAgain = {
                     player1Board = List(gridSize * gridSize) { BattleCellState.EMPTY }
                     player2Board = List(gridSize * gridSize) { BattleCellState.EMPTY }
-                    gamePhase = "P1_PLACEMENT"
+                    gamePhase = "MODE_SELECT"
                     winnerText = null
                     actionLog = "Place 4 ships on your grid!"
                 },
                 onBackToHub = onExitGame
+            )
+        }
+
+        if (showRemoteSheet) {
+            RemoteRoomSetupSheet(
+                gameId = "battleship",
+                gameName = "Battleship ⚓",
+                onDismiss = {
+                    showRemoteSheet = false
+                    if (roomCode.isBlank()) gamePhase = "MODE_SELECT"
+                },
+                onRoomJoined = { code, hostFlag, pid ->
+                    roomCode = code
+                    isHost = hostFlag
+                    localPlayerId = pid
+                    isRemoteMode = true
+                    gamePhase = if (hostFlag) "P1_PLACEMENT" else "P2_PLACEMENT"
+                    showRemoteSheet = false
+                }
             )
         }
     }

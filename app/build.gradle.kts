@@ -79,6 +79,10 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.okhttp)
 
+    // Firebase Realtime Database
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.database.ktx)
+
     // Jetpack Compose BOM & Libraries
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
