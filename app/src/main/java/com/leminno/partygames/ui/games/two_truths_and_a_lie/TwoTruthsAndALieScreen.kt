@@ -172,7 +172,7 @@ fun TwoTruthsAndALieScreen(
                 Button(
                     onClick = {
                         if (truth1.isNotBlank() && truth2.isNotBlank() && lieInput.isNotBlank()) {
-                            haptics.performSuccess()
+                            haptics.performPop()
                             val items = listOf(
                                 StatementItem(truth1, false, 0),
                                 StatementItem(truth2, false, 1),
@@ -251,7 +251,7 @@ fun TwoTruthsAndALieScreen(
                 Button(
                     onClick = {
                         if (selectedVoteIndex != null) {
-                            haptics.performHeavyClick(composeHaptics)
+                            haptics.performHeavyBurst()
                             gamePhase = "REVEAL"
                         }
                     },

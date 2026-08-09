@@ -81,7 +81,7 @@ fun CharadesScreen(
                 // Tilt down (screen facing ground) = Correct
                 if (z < -6.5f || y > 7.5f) {
                     lastTriggerTime = System.currentTimeMillis()
-                    haptics.performSuccess()
+                    haptics.performPop()
                     flashState = Color(0xFF00E676)
                     val word = wordList.getOrNull(currentWordIndex) ?: ""
                     if (word.isNotEmpty()) {
@@ -137,7 +137,7 @@ fun CharadesScreen(
                 remainingSeconds--
             }
             if (remainingSeconds <= 0) {
-                haptics.performHeavyClick(composeHaptics)
+                haptics.performHeavyBurst()
                 gameOver = true
             }
         }
@@ -232,7 +232,7 @@ fun CharadesScreen(
 
                 Button(
                     onClick = {
-                        haptics.performHeavyClick(composeHaptics)
+                        haptics.performHeavyBurst()
                         wordList = selectedCategory.words.shuffled()
                         currentWordIndex = 0
                         scoredWords = emptyList()
@@ -335,7 +335,7 @@ fun CharadesScreen(
 
                     Button(
                         onClick = {
-                            haptics.performSuccess()
+                            haptics.performPop()
                             flashState = Color(0xFF00E676)
                             val word = wordList.getOrNull(currentWordIndex) ?: ""
                             if (word.isNotEmpty()) scoredWords = scoredWords + ScoredWord(word, true)

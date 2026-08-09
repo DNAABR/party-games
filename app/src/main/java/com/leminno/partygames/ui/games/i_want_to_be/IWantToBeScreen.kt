@@ -62,7 +62,7 @@ fun IWantToBeScreen(
             delay(50)
             holdProgress += 0.05f
             if (holdProgress >= 1f) {
-                haptics.performSuccess()
+                haptics.performPop()
                 isRevealed = true
             }
         }
@@ -77,7 +77,7 @@ fun IWantToBeScreen(
             }
             if (timerSeconds <= 0) {
                 timerRunning = false
-                haptics.performHeavyClick(composeHaptics)
+                haptics.performHeavyBurst()
             }
         }
     }
@@ -349,7 +349,7 @@ fun IWantToBeScreen(
                     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         Button(
                             onClick = {
-                                haptics.performSuccess()
+                                haptics.performPop()
                                 groupGuessedRight = true
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E676)),
@@ -361,7 +361,7 @@ fun IWantToBeScreen(
 
                         Button(
                             onClick = {
-                                haptics.performHeavyClick(composeHaptics)
+                                haptics.performHeavyBurst()
                                 groupGuessedRight = false
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF0055)),

@@ -85,7 +85,7 @@ fun PowerUpTTTScreen(
                 TttPowerUp.ERASE -> {
                     // Cannot erase empty or shielded cell
                     if (cell.state != CellState.EMPTY && cell.state != currentTurnState && !cell.isShielded) {
-                        haptics.performHeavyClick(composeHaptics)
+                        haptics.performHeavyBurst()
                         val updated = board.toMutableList()
                         updated[index] = BoardCell(CellState.EMPTY, false)
                         board = updated
@@ -96,7 +96,7 @@ fun PowerUpTTTScreen(
                 }
                 TttPowerUp.SHIELD -> {
                     if (cell.state == currentTurnState && !cell.isShielded) {
-                        haptics.performSuccess()
+                        haptics.performPop()
                         val updated = board.toMutableList()
                         updated[index] = cell.copy(isShielded = true)
                         board = updated
@@ -134,7 +134,7 @@ fun PowerUpTTTScreen(
 
                 val (win, line) = checkWinCondition(updated)
                 if (win != null) {
-                    haptics.performSuccess()
+                    haptics.performPop()
                     winner = win
                     winningLine = line
                 } else {

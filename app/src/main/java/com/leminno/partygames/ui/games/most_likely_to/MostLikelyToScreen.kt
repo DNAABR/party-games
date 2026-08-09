@@ -62,7 +62,7 @@ fun MostLikelyToScreen(
             delay(1000)
             countdownValue = countdownValue!! - 1
             if (countdownValue == 0) {
-                haptics.performSuccess()
+                haptics.performPop()
                 countdownValue = null
                 votingPhase = true
             }
@@ -241,7 +241,7 @@ fun MostLikelyToScreen(
 
                 Button(
                     onClick = {
-                        haptics.performSuccess()
+                        haptics.performPop()
                         revealResults = true
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE0AFA0)),

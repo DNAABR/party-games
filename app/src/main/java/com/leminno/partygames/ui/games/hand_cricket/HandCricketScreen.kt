@@ -72,7 +72,7 @@ fun HandCricketScreen(
 
             if (bat == bowl) {
                 // OUT!
-                haptics.performHeavyClick(composeHaptics)
+                haptics.performHeavyBurst()
                 wicketsLost++
                 roundResultText = "WICKET! OUT! 💥 Both picked $bat!"
 
@@ -92,7 +92,7 @@ fun HandCricketScreen(
                 }
             } else {
                 // RUNS ADDED!
-                haptics.performSuccess()
+                haptics.performPop()
                 batterScore += bat
                 roundResultText = "+$bat Runs! (Bat: $bat, Bowl: $bowl)"
 
@@ -288,7 +288,7 @@ fun HandCricketScreen(
 
                 Button(
                     onClick = {
-                        haptics.performSuccess()
+                        haptics.performPop()
                         roomJoined = true
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00F2FE)),

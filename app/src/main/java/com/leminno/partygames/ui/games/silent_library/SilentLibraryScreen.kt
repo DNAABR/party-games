@@ -77,7 +77,7 @@ fun SilentLibraryScreen(
             if (timerSeconds <= 0) {
                 isTimerRunning = false
                 challengeCompleted = true
-                haptics.performSuccess()
+                haptics.performPop()
             }
         }
     }
@@ -274,7 +274,7 @@ fun SilentLibraryScreen(
                     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         Button(
                             onClick = {
-                                haptics.performSuccess()
+                                haptics.performPop()
                                 playerLaughed = false
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E676)),
@@ -286,7 +286,7 @@ fun SilentLibraryScreen(
 
                         Button(
                             onClick = {
-                                haptics.performHeavyClick(composeHaptics)
+                                haptics.performHeavyBurst()
                                 playerLaughed = true
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF0055)),

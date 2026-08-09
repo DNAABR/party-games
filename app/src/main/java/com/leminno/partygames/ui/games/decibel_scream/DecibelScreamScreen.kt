@@ -114,7 +114,7 @@ fun DecibelScreamScreen(
                     }
                 } else {
                     // Fallback simulated wave generator when mic permission is withheld or bufferSize invalid
-                    val simDb = (30f..95f).random()
+                    val simDb = (30..95).random().toFloat()
                     Snapshot.withMutableSnapshot {
                         currentDb = simDb
                         if (simDb > peakDb) peakDb = simDb
@@ -147,7 +147,7 @@ fun DecibelScreamScreen(
             if (timerRemaining <= 0) {
                 isListening = false
                 challengeComplete = true
-                haptics.performSuccess()
+                haptics.performPop()
             }
         }
     }
@@ -252,7 +252,7 @@ fun DecibelScreamScreen(
                         if (!hasMicPermission) {
                             permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                         }
-                        haptics.performHeavyClick(composeHaptics)
+                        haptics.performHeavyBurst()
                         peakDb = 0f
                         currentDb = 0f
                         isListening = true
