@@ -17,9 +17,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.leminno.partygames.data.remote.RemoteRoomRepository
 import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.RemoteRoomSetupSheet
 import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
+import kotlinx.coroutines.launch
 
 val funnyPrompts = listOf(
     "The worst thing to say right after a job interview handshake",
@@ -34,13 +37,59 @@ fun WriteFunnyScreen(
     onExitGame: () -> Unit
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val haptics = remember { HapticFeedbackManager(context) }
 
+    var gamePhase by remember { mutableStateOf("MODE_SELECT") } // MODE_SELECT, PLAYER1_INPUT, PLAYER2_INPUT, GROUP_VOTE, REVEAL
+    var isRemoteMode by remember { mutableStateOf(false) }
+    var showRemoteSheet by remember { mutableStateOf(false) }
+    var roomCode by remember { mutableStateOf("") }
+    var isHost by remember { mutableStateOf(true) }
+
     var currentPrompt by remember { mutableStateOf(funnyPrompts.random()) }
-    var gamePhase by remember { mutableStateOf("PLAYER1_INPUT") } // PLAYER1_INPUT, PLAYER2_INPUT, GROUP_VOTE, REVEAL
     var answer1 by remember { mutableStateOf("") }
     var answer2 by remember { mutableStateOf("") }
     var selectedWinner by remember { mutableIntStateOf(0) }
+
+    // Observe Remote Quiplash State
+    LaunchedEffect(roomCode, isRemoteMode) {
+        if (isRemoteMode && roomCode.isNotBlank()) {
+            RemoteRoomRepository.observeRoom(roomCode).collect { room ->
+                if (room != null && room.gameState.isNotEmpty()) {
+                    val remotePrompt = room.gameState["prompt"] as? String
+                    val remoteAns1 = room.gameState["ans1"] as? String
+                    val remoteAns2 = room.gameState["ans2"] as? String
+                    val remotePhase = room.gameState["phase"] as? String
+                    val remoteWinner = (room.gameState["winner"] as? Number)?.toInt()
+
+                    if (!remotePrompt.isNullOrBlank()) currentPrompt = remotePrompt
+                    if (!remoteAns1.isNullOrBlank()) answer1 = remoteAns1
+                    if (!remoteAns2.isNullOrBlank()) answer2 = remoteAns2
+                    if (remoteWinner != null && remoteWinner != 0) selectedWinner = remoteWinner
+                    if (remotePhase != null && remotePhase != gamePhase) {
+                        gamePhase = remotePhase
+                    }
+                }
+            }
+        }
+    }
+
+    fun syncRemote(prompt: String, a1: String, a2: String, phase: String, winner: Int = 0) {
+        if (isRemoteMode && roomCode.isNotBlank()) {
+            scope.launch {
+                RemoteRoomRepository.updateGameState(
+                    roomCode,
+                    mapOf(
+                        "prompt" to prompt,
+                        "ans1" to a1,
+                        "ans2" to a2,
+                        "phase" to phase,
+                        "winner" to winner
+                    )
+                )
+            }
+        }
+    }
 
     GameScaffold(
         title = "WRITE FUNNY (QUIPLASH) ⚡",
@@ -48,7 +97,64 @@ fun WriteFunnyScreen(
         gameId = "write_funny",
         onExitGame = onExitGame
     ) {
-        if (gamePhase != "REVEAL") {
+        if (gamePhase == "MODE_SELECT") {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("SELECT PLAY MODE", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Black)
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(SurfaceGlassDark)
+                            .border(1.5.dp, Color(0xFFFFD166), RoundedCornerShape(20.dp))
+                            .clickable {
+                                isRemoteMode = false
+                                gamePhase = "PLAYER1_INPUT"
+                            }
+                            .padding(20.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("📱", fontSize = 36.sp)
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text("Pass & Play (Same Phone)", color = Color(0xFFFFD166), fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                                Text("Type response secretly & pass device", color = TextMuted, fontSize = 12.sp)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(SurfaceGlassDark)
+                            .border(1.5.dp, Color(0xFF00F2FE), RoundedCornerShape(20.dp))
+                            .clickable {
+                                isRemoteMode = true
+                                showRemoteSheet = true
+                            }
+                            .padding(20.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("🌐", fontSize = 36.sp)
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text("Remote Play (Multi-Device)", color = Color(0xFF00F2FE), fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                                Text("Jackbox style! Answer on your phone, group votes remotely", color = TextMuted, fontSize = 12.sp)
+                            }
+                        }
+                    }
+                }
+            }
+        } else if (gamePhase != "REVEAL") {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -98,121 +204,117 @@ fun WriteFunnyScreen(
                         OutlinedTextField(
                             value = activeValue,
                             onValueChange = { if (isPlayer1) answer1 = it else answer2 = it },
-                            label = { Text("Write your funny punchline") },
+                            label = { Text("Write your funny answer...") },
                             modifier = Modifier.fillMaxWidth(),
-                            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFF00F2FE), unfocusedBorderColor = BorderGlassDefault)
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color(0xFF00F2FE),
+                                unfocusedBorderColor = BorderGlassDefault,
+                                focusedTextColor = TextPrimary,
+                                unfocusedTextColor = TextPrimary
+                            )
                         )
                     }
 
                     Button(
                         onClick = {
-                            haptics.performPop()
-                            if (isPlayer1) {
-                                gamePhase = "PLAYER2_INPUT"
-                            } else {
-                                gamePhase = "GROUP_VOTE"
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00F2FE)),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        enabled = activeValue.isNotBlank()
-                    ) {
-                        Text(
-                            text = if (isPlayer1) "SUBMIT & PASS TO PLAYER 2 ▶" else "LOCK ANSWERS & START VOTE 🗳️",
-                            color = Color.Black,
-                            fontWeight = FontWeight.Black
-                        )
-                    }
-                } else if (gamePhase == "GROUP_VOTE") {
-                    // Anonymous Side-by-Side Voting Cards
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "WHICH PUNCHLINE IS FUNNIER?",
-                            color = Color(0xFFFFD166),
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Black
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Answer Option 1
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(if (selectedWinner == 1) Color(0x3300F2FE) else SurfaceGlassDark)
-                                .border(1.5.dp, if (selectedWinner == 1) Color(0xFF00F2FE) else BorderGlassDefault, RoundedCornerShape(16.dp))
-                                .clickable {
-                                    haptics.performPop()
-                                    selectedWinner = 1
+                            if (activeValue.isNotBlank()) {
+                                haptics.performPop()
+                                if (isPlayer1) {
+                                    gamePhase = "PLAYER2_INPUT"
+                                    syncRemote(currentPrompt, answer1, answer2, "PLAYER2_INPUT")
+                                } else {
+                                    gamePhase = "GROUP_VOTE"
+                                    syncRemote(currentPrompt, answer1, answer2, "GROUP_VOTE")
                                 }
-                                .padding(20.dp)
-                        ) {
-                            Text(answer1, color = TextPrimary, fontSize = 16.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-                        }
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        Text("⚔️ VS ⚔️", color = TextMuted, fontSize = 13.sp, fontWeight = FontWeight.Black)
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        // Answer Option 2
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(if (selectedWinner == 2) Color(0x33FF007F) else SurfaceGlassDark)
-                                .border(1.5.dp, if (selectedWinner == 2) Color(0xFFFF007F) else BorderGlassDefault, RoundedCornerShape(16.dp))
-                                .clickable {
-                                    haptics.performPop()
-                                    selectedWinner = 2
-                                }
-                                .padding(20.dp)
-                        ) {
-                            Text(answer2, color = TextPrimary, fontSize = 16.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-                        }
-                    }
-
-                    Button(
-                        onClick = {
-                            if (selectedWinner != 0) {
-                                haptics.performHeavyBurst()
-                                gamePhase = "REVEAL"
                             }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD166)),
                         shape = RoundedCornerShape(16.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(56.dp),
-                        enabled = selectedWinner != 0
+                            .height(56.dp)
                     ) {
-                        Text("CROWN WINNER 👑", color = Color.Black, fontWeight = FontWeight.Black)
+                        Text(if (isPlayer1) "LOCK ANSWER 1 ▶" else "SUBMIT & VOTE ▶", color = Color.Black, fontWeight = FontWeight.Black)
+                    }
+                } else if (gamePhase == "GROUP_VOTE") {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("VOTE FOR THE FUNNIEST ANSWER!", color = Color(0xFFFF007F), fontSize = 18.sp, fontWeight = FontWeight.Black)
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(SurfaceGlassDark)
+                                .border(2.dp, Color(0xFF00F2FE), RoundedCornerShape(20.dp))
+                                .clickable {
+                                    haptics.performHeavyBurst()
+                                    selectedWinner = 1
+                                    gamePhase = "REVEAL"
+                                    syncRemote(currentPrompt, answer1, answer2, "REVEAL", 1)
+                                }
+                                .padding(20.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("Option A: \"$answer1\"", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(SurfaceGlassDark)
+                                .border(2.dp, Color(0xFFFF007F), RoundedCornerShape(20.dp))
+                                .clickable {
+                                    haptics.performHeavyBurst()
+                                    selectedWinner = 2
+                                    gamePhase = "REVEAL"
+                                    syncRemote(currentPrompt, answer1, answer2, "REVEAL", 2)
+                                }
+                                .padding(20.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("Option B: \"$answer2\"", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                        }
                     }
                 }
             }
         } else {
-            val winningAnswer = if (selectedWinner == 1) answer1 else answer2
-            val winnerName = if (selectedWinner == 1) "PLAYER 1" else "PLAYER 2"
-
+            val winText = if (selectedWinner == 1) "Option A: \"$answer1\" WINS!" else "Option B: \"$answer2\" WINS!"
             VictoryCeremonyOverlay(
-                winnerTitle = "VICTORY TO $winnerName! 👑",
-                subtitle = "\"$winningAnswer\"",
+                winnerTitle = "QUIPLASH CHAMPION! 🏆",
+                subtitle = winText,
                 onPlayAgain = {
-                    currentPrompt = funnyPrompts.random()
                     answer1 = ""
                     answer2 = ""
+                    currentPrompt = funnyPrompts.random()
                     selectedWinner = 0
-                    gamePhase = "PLAYER1_INPUT"
+                    gamePhase = "MODE_SELECT"
                 },
                 onBackToHub = onExitGame
+            )
+        }
+
+        if (showRemoteSheet) {
+            RemoteRoomSetupSheet(
+                gameId = "write_funny",
+                gameName = "Write Funny (Quiplash) ⚡",
+                onDismiss = {
+                    showRemoteSheet = false
+                    if (roomCode.isBlank()) gamePhase = "MODE_SELECT"
+                },
+                onRoomJoined = { code, hostFlag, _ ->
+                    roomCode = code
+                    isHost = hostFlag
+                    isRemoteMode = true
+                    gamePhase = "PLAYER1_INPUT"
+                    showRemoteSheet = false
+                }
             )
         }
     }

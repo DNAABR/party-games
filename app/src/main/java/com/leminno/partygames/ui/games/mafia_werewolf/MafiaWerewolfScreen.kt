@@ -33,9 +33,9 @@ fun MafiaWerewolfScreen(
     val haptics = remember { HapticFeedbackManager(context) }
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(playerCount) {
-        viewModel.initGame(playerCount)
-    }
+    var selectedMode by remember { mutableStateOf<String?>(null) } // null, LOCAL, REMOTE
+    var showRemoteSheet by remember { mutableStateOf(false) }
+    var roomCode by remember { mutableStateOf("") }
 
     GameScaffold(
         title = "MAFIA / WEREWOLF 🌙",
@@ -48,7 +48,57 @@ fun MafiaWerewolfScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            if (uiState.gamePhase == "ROLE_ASSIGNMENT") {
+            if (selectedMode == null) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("SELECT PLAY MODE", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Black)
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(SurfaceGlassDark)
+                            .border(1.5.dp, Color(0xFF9D4EDD), RoundedCornerShape(20.dp))
+                            .clickable {
+                                selectedMode = "LOCAL"
+                            }
+                            .padding(20.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("📱", fontSize = 36.sp)
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text("Pass & Play (Same Phone)", color = Color(0xFF9D4EDD), fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                                Text("Pass single phone around for secret role cards", color = TextMuted, fontSize = 12.sp)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(SurfaceGlassDark)
+                            .border(1.5.dp, Color(0xFF00F2FE), RoundedCornerShape(20.dp))
+                            .clickable {
+                                selectedMode = "REMOTE"
+                                showRemoteSheet = true
+                            }
+                            .padding(20.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("🌐", fontSize = 36.sp)
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text("Remote Play (Multi-Device)", color = Color(0xFF00F2FE), fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                                Text("Secret role cards delivered directly to separate phone screens", color = TextMuted, fontSize = 12.sp)
+                            }
+                        }
+                    }
+                }
+            } else if (uiState.gamePhase == "ROLE_ASSIGNMENT") {
                 // Role Assignment Phase
                 val currentPlayer = uiState.playersState.getOrNull(uiState.currentPlayerIndex)
                 if (currentPlayer != null) {
@@ -396,6 +446,22 @@ fun MafiaWerewolfScreen(
                     Text("PLAY NEW MATCH ▶", color = Color.White, fontWeight = FontWeight.Black)
                 }
             }
+        }
+
+        if (showRemoteSheet) {
+            com.leminno.partygames.ui.components.RemoteRoomSetupSheet(
+                gameId = "mafia_werewolf",
+                gameName = "Mafia / Werewolf 🌙",
+                onDismiss = {
+                    showRemoteSheet = false
+                    if (roomCode.isBlank()) selectedMode = null
+                },
+                onRoomJoined = { code, _, _ ->
+                    roomCode = code
+                    selectedMode = "REMOTE"
+                    showRemoteSheet = false
+                }
+            )
         }
     }
 }
