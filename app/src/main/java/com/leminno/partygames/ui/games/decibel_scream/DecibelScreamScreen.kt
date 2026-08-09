@@ -1,7 +1,7 @@
 package com.leminno.partygames.ui.games.decibel_scream
 
-import android.annotation.SuppressLint
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,34 +24,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.leminno.partygames.ui.components.GameScaffold
 import com.leminno.partygames.ui.theme.*
-import kotlinx.coroutines.delay
 import kotlin.math.log10
-
-enum class DecibelChallengeMode(val title: String, val desc: String, val targetGoal: String) {
-    WHISPER("Quiet Whisper", "Stay under 20dB while whispering your secret!", "< 20 dB"),
-    MAX_SCREAM("Max Volume Spike", "Scream as loud as possible in 3 seconds!", "Peak dB"),
-    STEADY_HUM("Steady Hum", "Hold a consistent hum tone for 5 seconds!", "Consistent dB")
-}
 
 @Composable
 fun DecibelScreamScreen(
+    viewModel: DecibelScreamViewModel = viewModel(),
     onExitGame: () -> Unit
 ) {
     val context = LocalContext.current
     val haptics = remember { HapticFeedbackManager(context) }
     val composeHaptics = LocalHapticFeedback.current
 
-    var selectedMode by remember { mutableStateOf(DecibelChallengeMode.MAX_SCREAM) }
-    var isListening by remember { mutableStateOf(false) }
-    var currentDb by remember { mutableFloatStateOf(0f) }
-    var peakDb by remember { mutableFloatStateOf(0f) }
-    var timerRemaining by remember { mutableIntStateOf(5) }
-    var challengeComplete by remember { mutableStateOf(false) }
+    val uiState by viewModel.uiState.collectAsState()
 
     var hasMicPermission by remember {
         mutableStateOf(
@@ -68,8 +57,8 @@ fun DecibelScreamScreen(
 
     // Audio recording thread loop
     @SuppressLint("MissingPermission")
-    DisposableEffect(isListening) {
-        if (!isListening) return@DisposableEffect onDispose {}
+    DisposableEffect(uiState.isListening) {
+        if (!uiState.isListening) return@DisposableEffect onDispose {}
 
         var audioRecord: AudioRecord? = null
         var isThreadRunning = true
@@ -108,19 +97,12 @@ fun DecibelScreamScreen(
                         }
                         val amplitude = Math.sqrt(sum / readSize)
                         val db = if (amplitude > 0) (20 * log10(amplitude)).toFloat() else 0f
-                        val calculatedDb = db.coerceIn(0f, 120f)
-                        Snapshot.withMutableSnapshot {
-                            currentDb = calculatedDb
-                            if (calculatedDb > peakDb) peakDb = calculatedDb
-                        }
+                        viewModel.updateDbLevel(db)
                     }
                 } else {
                     // Fallback simulated wave generator when mic permission is withheld or bufferSize invalid
                     val simDb = (30..95).random().toFloat()
-                    Snapshot.withMutableSnapshot {
-                        currentDb = simDb
-                        if (simDb > peakDb) peakDb = simDb
-                    }
+                    viewModel.updateDbLevel(simDb)
                     Thread.sleep(150)
                 }
             }
@@ -138,55 +120,17 @@ fun DecibelScreamScreen(
         }
     }
 
-    // Challenge Timer Loop
-    LaunchedEffect(isListening) {
-        if (isListening) {
-            timerRemaining = 5
-            while (timerRemaining > 0 && isListening) {
-                delay(1000)
-                timerRemaining--
-            }
-            if (timerRemaining <= 0) {
-                isListening = false
-                challengeComplete = true
-                haptics.performPop()
-            }
-        }
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF07101E))
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            .padding(20.dp)
+    GameScaffold(
+        title = "DECIBEL SCREAM 🎙️",
+        titleColor = Color(0xFF00E676),
+        onExitGame = onExitGame
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onExitGame) {
-                    Text("✕", color = TextSecondary, fontSize = 22.sp)
-                }
-                Text(
-                    text = "DECIBEL SCREAM 🎙️",
-                    color = Color(0xFF00E676),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.sp
-                )
-                Spacer(modifier = Modifier.width(48.dp))
-            }
-
-            if (!isListening && !challengeComplete) {
+            if (!uiState.isListening && !uiState.challengeComplete) {
                 // Mode Selector Screen
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -203,7 +147,7 @@ fun DecibelScreamScreen(
 
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         DecibelChallengeMode.entries.forEach { mode ->
-                            val isSel = selectedMode == mode
+                            val isSel = uiState.selectedMode == mode
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -212,7 +156,7 @@ fun DecibelScreamScreen(
                                     .border(1.5.dp, if (isSel) Color(0xFF00E676) else BorderGlassDefault, RoundedCornerShape(16.dp))
                                     .clickable {
                                         haptics.performTick(composeHaptics)
-                                        selectedMode = mode
+                                        viewModel.selectMode(mode)
                                     }
                                     .padding(16.dp)
                             ) {
@@ -255,9 +199,9 @@ fun DecibelScreamScreen(
                             permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                         }
                         haptics.performHeavyBurst()
-                        peakDb = 0f
-                        currentDb = 0f
-                        isListening = true
+                        viewModel.startChallenge(
+                            onChallengeComplete = { haptics.performPop() }
+                        )
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E676)),
                     shape = RoundedCornerShape(16.dp),
@@ -267,7 +211,7 @@ fun DecibelScreamScreen(
                 ) {
                     Text("START 5-SEC CHALLENGE 🎙️", color = Color.Black, fontWeight = FontWeight.Black)
                 }
-            } else if (isListening) {
+            } else if (uiState.isListening) {
                 // Live Sound Meter & Gauge
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -275,7 +219,7 @@ fun DecibelScreamScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "TIMING: ${timerRemaining}s",
+                        text = "TIMING: ${uiState.timerRemaining}s",
                         color = Color(0xFFFF0055),
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Black
@@ -294,7 +238,7 @@ fun DecibelScreamScreen(
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = "${currentDb.toInt()}",
+                                text = "${uiState.currentDb.toInt()}",
                                 color = Color.White,
                                 fontSize = 64.sp,
                                 fontWeight = FontWeight.Black
@@ -307,7 +251,7 @@ fun DecibelScreamScreen(
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "PEAK: ${peakDb.toInt()} dB",
+                                text = "PEAK: ${uiState.peakDb.toInt()} dB",
                                 color = TextMuted,
                                 fontSize = 13.sp
                             )
@@ -348,7 +292,7 @@ fun DecibelScreamScreen(
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = selectedMode.title,
+                                text = uiState.selectedMode.title,
                                 color = TextMuted,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold
@@ -357,7 +301,7 @@ fun DecibelScreamScreen(
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Text(
-                                text = "${peakDb.toInt()} dB",
+                                text = "${uiState.peakDb.toInt()} dB",
                                 color = Color(0xFF00E676),
                                 fontSize = 54.sp,
                                 fontWeight = FontWeight.Black
@@ -374,8 +318,7 @@ fun DecibelScreamScreen(
 
                 Button(
                     onClick = {
-                        challengeComplete = false
-                        isListening = false
+                        viewModel.resetChallenge()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E676)),
                     shape = RoundedCornerShape(16.dp),
@@ -385,10 +328,6 @@ fun DecibelScreamScreen(
                 ) {
                     Text("TRY AGAIN OR NEXT PLAYER ▶", color = Color.Black, fontWeight = FontWeight.Black)
                 }
-            }
-
-            TextButton(onClick = onExitGame) {
-                Text("Back to Hub", color = TextMuted)
             }
         }
     }

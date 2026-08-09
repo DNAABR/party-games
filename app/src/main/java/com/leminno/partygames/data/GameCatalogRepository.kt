@@ -3,7 +3,7 @@ package com.leminno.partygames.data
 import com.leminno.partygames.ui.model.GameItem
 import com.leminno.partygames.ui.model.GameRuleStep
 import com.leminno.partygames.ui.model.SetupType
-import com.leminno.partygames.ui.theme.GameCategory
+import com.leminno.partygames.data.model.GameCategory
 
 object GameCatalogRepository {
 

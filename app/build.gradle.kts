@@ -13,6 +13,11 @@ android {
     namespace = "com.leminno.partygames"
     compileSdk = 35
 
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
+
     defaultConfig {
         applicationId = "com.leminno.partygames"
         minSdk = 26
@@ -21,34 +26,38 @@ android {
         versionName = envVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
 
-    buildFeatures {
-        compose = true
+        val aiKey = System.getenv("AI_GATEWAY_KEY") ?: "leminno_apps_Key"
+        buildConfigField("String", "AI_GATEWAY_KEY", "\"$aiKey\"")
     }
 
     signingConfigs {
         create("release") {
             val keystorePath = System.getenv("PARTYGAMES_KEYSTORE_PATH") ?: "release.jks"
             val storeFileFile = File(keystorePath).let { if (it.isAbsolute) it else file(it) }
-            if (storeFileFile.exists()) {
+            val envStorePassword = System.getenv("PARTYGAMES_KEYSTORE_PASSWORD")
+            val envKeyAlias = System.getenv("PARTYGAMES_KEY_ALIAS")
+            val envKeyPassword = System.getenv("PARTYGAMES_KEY_PASSWORD")
+
+            if (storeFileFile.exists() && !envStorePassword.isNullOrEmpty() && !envKeyAlias.isNullOrEmpty() && !envKeyPassword.isNullOrEmpty()) {
                 storeFile = storeFileFile
-                storePassword = System.getenv("PARTYGAMES_KEYSTORE_PASSWORD") ?: "PartyGamesRelease2026!"
-                keyAlias = System.getenv("PARTYGAMES_KEY_ALIAS") ?: "partygames-key"
-                keyPassword = System.getenv("PARTYGAMES_KEY_PASSWORD") ?: "PartyGamesRelease2026!"
+                storePassword = envStorePassword
+                keyAlias = envKeyAlias
+                keyPassword = envKeyPassword
             }
         }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
             val releaseConfig = signingConfigs.findByName("release")
-            if (releaseConfig?.storeFile?.exists() == true) {
+            if (releaseConfig?.storeFile?.exists() == true && !releaseConfig.storePassword.isNullOrEmpty()) {
                 signingConfig = releaseConfig
             }
         }

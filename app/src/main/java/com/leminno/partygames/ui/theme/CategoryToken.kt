@@ -4,16 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-enum class GameCategory(
-    val title: String,
-    val description: String,
-    val iconSymbol: String
-) {
-    TRIVIA("Trivia & Word", "Cerebral, fast-paced prompts", "🎭"),
-    ACTION("Action & Physical", "Fast, high-velocity motion & quick reactions", "⚡"),
-    MYSTERY("Mystery & Deduction", "Secret roles, quiet reveals & psychological bluffs", "🕵️"),
-    BOARD("Board & Strategy", "Tactical grid choices & physical turn placement", "🎲")
-}
+import com.leminno.partygames.data.model.GameCategory
 
 enum class MotionPersonality {
     SPRING_BOUNCY,     // Trivia: playful curved curves & bouncy springs
