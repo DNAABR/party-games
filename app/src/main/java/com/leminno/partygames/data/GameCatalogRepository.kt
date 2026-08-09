@@ -172,7 +172,7 @@ object GameCatalogRepository {
             minPlayers = 2,
             maxPlayers = 12,
             estTimeMinutes = 5,
-            isMvp = true,
+            isMvp = false,
             antiCheatNotice = "Keep screen facing away from the actor's eyes!",
             rules = listOf(
                 GameRuleStep(1, "Forehead Position", "Place phone on forehead facing your teammates.", "📱"),
@@ -190,7 +190,7 @@ object GameCatalogRepository {
             minPlayers = 3,
             maxPlayers = 10,
             estTimeMinutes = 5,
-            isMvp = true,
+            isMvp = false,
             antiCheatNotice = "Use the 2-second hold-to-reveal card so nearby players can't peek!",
             rules = listOf(
                 GameRuleStep(1, "Secret Role Reveal", "Hold screen for 2 seconds to view secret profession safely.", "🔒"),
@@ -208,7 +208,7 @@ object GameCatalogRepository {
             minPlayers = 3,
             maxPlayers = 10,
             estTimeMinutes = 8,
-            isMvp = true,
+            isMvp = false,
             antiCheatNotice = "Enter statements privately before passing the phone.",
             rules = listOf(
                 GameRuleStep(1, "Create Statements", "Type 2 true facts and 1 convincing lie.", "✍️"),
@@ -226,7 +226,7 @@ object GameCatalogRepository {
             minPlayers = 3,
             maxPlayers = 12,
             estTimeMinutes = 5,
-            isMvp = true,
+            isMvp = false,
             antiCheatNotice = "Cast secret votes on phone before group discussion!",
             rules = listOf(
                 GameRuleStep(1, "Read Scenario", "App shows: 'Who is most likely to...'", "📜"),
@@ -244,7 +244,7 @@ object GameCatalogRepository {
             minPlayers = 2,
             maxPlayers = 10,
             estTimeMinutes = 5,
-            isMvp = true,
+            isMvp = false,
             antiCheatNotice = "Hold mic 6 inches from mouth during sound challenges!",
             rules = listOf(
                 GameRuleStep(1, "Choose Mode", "Select Whisper (<15dB), Max Scream, or Steady Hum.", "🎙️"),
@@ -262,7 +262,7 @@ object GameCatalogRepository {
             minPlayers = 2,
             maxPlayers = 10,
             estTimeMinutes = 5,
-            isMvp = true,
+            isMvp = false,
             antiCheatNotice = "No smiling or laughing — let the group decide if the player cracked!",
             rules = listOf(
                 GameRuleStep(1, "Draw Task", "Active player receives a funny task card.", "🃏"),
@@ -280,7 +280,7 @@ object GameCatalogRepository {
             minPlayers = 2,
             maxPlayers = 2,
             estTimeMinutes = 5,
-            isMvp = true,
+            isMvp = false,
             antiCheatNotice = "Power-ups are limited to 1 per game round per player!",
             rules = listOf(
                 GameRuleStep(1, "Place or Power-Up", "Tap cell to place mark OR deploy a Power-Up card.", "⚡"),
@@ -298,7 +298,7 @@ object GameCatalogRepository {
             minPlayers = 2,
             maxPlayers = 12,
             estTimeMinutes = 8,
-            isMvp = true,
+            isMvp = false,
             antiCheatNotice = "In split-screen, tap your choice at the same time!",
             rules = listOf(
                 GameRuleStep(1, "Select Mode", "Choose 1v1 Split-Screen or Team Match (Multi-Device / Online Room).", "📲"),
@@ -318,7 +318,7 @@ object GameCatalogRepository {
             minPlayers = 5,
             maxPlayers = 16,
             estTimeMinutes = 20,
-            isMvp = true,
+            isMvp = false,
             antiCheatNotice = "Background audio masking plays during night phase to cover phone tap sounds!",
             rules = listOf(
                 GameRuleStep(1, "Assign Roles", "Pass phone so every player views their secret role.", "🕵️"),
@@ -336,7 +336,7 @@ object GameCatalogRepository {
             minPlayers = 3,
             maxPlayers = 10,
             estTimeMinutes = 15,
-            isMvp = true,
+            isMvp = false,
             antiCheatNotice = "Pass device between turns without showing the previous prompt!",
             rules = listOf(
                 GameRuleStep(1, "Write Prompt", "Player 1 writes a hilarious secret prompt.", "✍️"),
@@ -354,7 +354,7 @@ object GameCatalogRepository {
             minPlayers = 2,
             maxPlayers = 10,
             estTimeMinutes = 10,
-            isMvp = true,
+            isMvp = false,
             antiCheatNotice = "Psychic views hidden target slice before closing target cover!",
             rules = listOf(
                 GameRuleStep(1, "Psychic Clue", "Psychic sees target position and gives a spectrum clue.", "🔮"),
@@ -372,7 +372,7 @@ object GameCatalogRepository {
             minPlayers = 4,
             maxPlayers = 10,
             estTimeMinutes = 15,
-            isMvp = true,
+            isMvp = false,
             antiCheatNotice = "Spymaster view is guarded by a 2-second hold-to-confirm screen dimming state.",
             rules = listOf(
                 GameRuleStep(1, "Spymaster Key", "Spymaster views secret color key for 25 grid words.", "🔑"),
@@ -390,7 +390,7 @@ object GameCatalogRepository {
             minPlayers = 3,
             maxPlayers = 8,
             estTimeMinutes = 10,
-            isMvp = true,
+            isMvp = false,
             antiCheatNotice = "Guesses are laid out on a spectrum without showing player names until bets are placed!",
             rules = listOf(
                 GameRuleStep(1, "Submit Guess", "Write a secret numerical estimate to the trivia prompt.", "🔢"),
@@ -408,7 +408,7 @@ object GameCatalogRepository {
             minPlayers = 3,
             maxPlayers = 10,
             estTimeMinutes = 12,
-            isMvp = true,
+            isMvp = false,
             antiCheatNotice = "Type fake answers privately on screen.",
             rules = listOf(
                 GameRuleStep(1, "Write Bluff", "Type a convincing fake answer to the obscure question.", "🤥"),
@@ -426,7 +426,7 @@ object GameCatalogRepository {
             minPlayers = 3,
             maxPlayers = 10,
             estTimeMinutes = 12,
-            isMvp = true,
+            isMvp = false,
             antiCheatNotice = "Responses are voted on anonymously without showing author names!",
             rules = listOf(
                 GameRuleStep(1, "Write Answer", "Two players write hilarious answers to absurd question.", "⚡"),
@@ -444,7 +444,7 @@ object GameCatalogRepository {
             minPlayers = 2,
             maxPlayers = 8,
             estTimeMinutes = 8,
-            isMvp = true,
+            isMvp = false,
             antiCheatNotice = "30-second timer auto-locks fields when countdown ends!",
             rules = listOf(
                 GameRuleStep(1, "Random Letter", "App generates random letter (e.g., 'S').", "🔤"),
@@ -462,7 +462,7 @@ object GameCatalogRepository {
             minPlayers = 2,
             maxPlayers = 2,
             estTimeMinutes = 10,
-            isMvp = true,
+            isMvp = false,
             antiCheatNotice = "Full black screen appears between turns to protect grid privacy.",
             rules = listOf(
                 GameRuleStep(1, "Deploy Ships", "Place Aircraft Carrier, Battleship, Submarine, Patrol Boat.", "⚓"),
@@ -480,7 +480,7 @@ object GameCatalogRepository {
             minPlayers = 2,
             maxPlayers = 6,
             estTimeMinutes = 5,
-            isMvp = true,
+            isMvp = false,
             antiCheatNotice = "Custom word entry is masked before turn passes.",
             rules = listOf(
                 GameRuleStep(1, "Set Secret Word", "Type custom hidden word or generate random prompt.", "🔑"),
@@ -498,7 +498,7 @@ object GameCatalogRepository {
             minPlayers = 2,
             maxPlayers = 4,
             estTimeMinutes = 15,
-            isMvp = true,
+            isMvp = false,
             antiCheatNotice = "Tile racks are hidden behind 'View My Tiles' pop-up overlay that auto-hides.",
             rules = listOf(
                 GameRuleStep(1, "View Tile Rack", "Tap 'View My Tiles' overlay to check your 7 letter tiles.", "🔠"),

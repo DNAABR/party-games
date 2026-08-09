@@ -28,7 +28,7 @@ data class GameItem(
     val minPlayers: Int,
     val maxPlayers: Int,
     val estTimeMinutes: Int,
-    val isMvp: Boolean = true,
+    val isMvp: Boolean = false,
     val antiCheatNotice: String? = null,
     val rules: List<GameRuleStep>
 )

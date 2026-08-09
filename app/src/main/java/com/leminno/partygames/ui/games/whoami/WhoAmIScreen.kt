@@ -37,7 +37,15 @@ fun WhoAmIScreen(
             "Harry Potter", "Spider-Man", "Albert Einstein", "Taylor Swift",
             "Mickey Mouse", "Batman", "Sherlock Holmes", "Barack Obama",
             "SpongeBob", "Elon Musk", "Cristiano Ronaldo", "Pikachu",
-            "Leonardo DiCaprio", "Serena Williams", "Katy Perry", "Mario"
+            "Leonardo DiCaprio", "Serena Williams", "Katy Perry", "Mario",
+            "Beyoncé", "Darth Vader", "Dwayne Johnson", "Wonder Woman",
+            "Michael Jordan", "Elsa", "Tom Cruise", "Oprah Winfrey",
+            "Iron Man", "Lionel Messi", "Lady Gaga", "Shrek",
+            "Drake", "Hermione Granger", "Will Smith", "Cleopatra",
+            "Homer Simpson", "Naruto", "Rihanna", "Indiana Jones",
+            "Gordon Ramsay", "Bugs Bunny", "Adele", "James Bond",
+            "Goku", "Ed Sheeran", "Cinderella", "The Rock",
+            "Ariana Grande", "Scooby-Doo", "Freddie Mercury", "Groot"
         ).shuffled()
     }
 
@@ -103,7 +111,9 @@ fun WhoAmIScreen(
         if (!isGameOver) {
             while (timeRemaining > 0) {
                 delay(1000L)
-                timeRemaining--
+                if (!isWaitingForUpright) {
+                    timeRemaining--
+                }
             }
             isGameOver = true
             haptics.performHeavyBurst()

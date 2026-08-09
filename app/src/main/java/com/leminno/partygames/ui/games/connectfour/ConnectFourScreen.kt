@@ -30,9 +30,10 @@ fun ConnectFourScreen(
     val grid = remember { mutableStateListOf(*Array(6) { IntArray(7) }) }
     var isRedTurn by remember { mutableStateOf(true) }
     var winnerPlayer by remember { mutableStateOf<Int?>(null) } // 1, 2, or null
+    var isDraw by remember { mutableStateOf(false) }
 
     fun dropDisc(col: Int) {
-        if (winnerPlayer != null) return
+        if (winnerPlayer != null || isDraw) return
         for (row in 5 downTo 0) {
             if (grid[row][col] == 0) {
                 grid[row][col] = if (isRedTurn) 1 else 2
@@ -43,6 +44,9 @@ fun ConnectFourScreen(
                 if (checkWin(grid, row, col, targetPlayer)) {
                     winnerPlayer = targetPlayer
                     haptics.performHeavyBurst()
+                } else if (grid.all { r -> r.all { it != 0 } }) {
+                    isDraw = true
+                    haptics.performWarningThud()
                 } else {
                     isRedTurn = !isRedTurn
                 }
@@ -88,7 +92,7 @@ fun ConnectFourScreen(
                         .padding(horizontal = 10.dp, vertical = 6.dp)
                 ) {
                     Text(
-                        text = if (winnerPlayer != null) "PLAYER $winnerPlayer WINS! 🏆" else if (isRedTurn) "RED TURN 🔴" else "YELLOW TURN 🟡",
+                        text = if (winnerPlayer != null) "PLAYER $winnerPlayer WINS! 🏆" else if (isDraw) "IT'S A DRAW! 🤝" else if (isRedTurn) "RED TURN 🔴" else "YELLOW TURN 🟡",
                         color = turnColor,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold
@@ -153,6 +157,7 @@ fun ConnectFourScreen(
                         }
                     }
                     winnerPlayer = null
+                    isDraw = false
                     isRedTurn = true
                     haptics.performPop()
                 },

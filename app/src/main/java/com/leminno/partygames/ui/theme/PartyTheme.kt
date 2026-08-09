@@ -12,6 +12,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -71,8 +72,10 @@ fun Modifier.glassCard(
 /**
  * No-ripple clickable helper for clean custom touch interactions.
  */
-fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier = this.clickable(
-    interactionSource = MutableInteractionSource(),
-    indication = null,
-    onClick = onClick
-)
+fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier = composed {
+    clickable(
+        interactionSource = remember { MutableInteractionSource() },
+        indication = null,
+        onClick = onClick
+    )
+}
