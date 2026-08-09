@@ -1,0 +1,119 @@
+﻿name: Android build
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GRADLE_VERSION: "8.13"
+  PARTYGAMES_KEYSTORE_PATH: "release.jks"
+  PARTYGAMES_KEYSTORE_PASSWORD: ${{ secrets.PARTYGAMES_KEYSTORE_PASSWORD || 'PartyGamesRelease2026!' }}
+  PARTYGAMES_KEY_ALIAS: ${{ secrets.PARTYGAMES_KEY_ALIAS || 'partygames-key' }}
+  PARTYGAMES_KEY_PASSWORD: ${{ secrets.PARTYGAMES_KEY_PASSWORD || 'PartyGamesRelease2026!' }}
+  VERSION_CODE: ${{ github.run_number }}
+  VERSION_NAME: "0.1.${{ github.run_number }}"
+
+jobs:
+  build:
+    name: Assemble, test and lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: "platforms;android-36 build-tools;36.0.0"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: ${{ env.GRADLE_VERSION }}
+
+      - name: Materialise Gradle wrapper
+        run: |
+          if [ ! -f gradlew ]; then
+            echo "No wrapper found. Generating one with Gradle ${GRADLE_VERSION}."
+            gradle wrapper --gradle-version "${GRADLE_VERSION}" --no-daemon
+            chmod +x gradlew
+          else
+            echo "Wrapper already committed."
+            chmod +x gradlew
+          fi
+
+      - name: Upload Gradle wrapper for committing
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-wrapper
+          path: |
+            gradlew
+            gradlew.bat
+            gradle/wrapper/
+          if-no-files-found: warn
+
+      - name: Assemble debug
+        run: ./gradlew :app:assembleDebug --stacktrace
+
+      - name: Unit tests
+        run: ./gradlew :app:testDebugUnitTest --stacktrace
+
+      - name: Lint
+        run: ./gradlew :app:lintDebug --stacktrace
+
+      - name: Assemble release APK
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+        run: ./gradlew :app:assembleRelease --stacktrace
+
+      - name: Bundle release AAB
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+        run: ./gradlew :app:bundleRelease --stacktrace
+
+      - name: Upload debug APK
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: party-games-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: ignore
+
+      - name: Upload release APK
+        if: (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: party-games-release-apk-v0.1.${{ github.run_number }}
+          path: app/build/outputs/apk/release/*.apk
+          if-no-files-found: ignore
+
+      - name: Upload release AAB
+        if: (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: party-games-release-aab-v0.1.${{ github.run_number }}
+          path: app/build/outputs/bundle/release/*.aab
+          if-no-files-found: ignore
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: party-games-reports
+          path: |
+            app/build/reports/
+            app/build/outputs/logs/
+          if-no-files-found: ignore
