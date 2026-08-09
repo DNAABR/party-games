@@ -203,7 +203,7 @@ fun TwitScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text(item.playerName, color = TextPrimary, fontWeight = FontWeight.Bold)
+                                    Text("Guess #${guessesList.indexOf(item) + 1}", color = TextPrimary, fontWeight = FontWeight.Bold)
                                     Text(
                                         text = "${item.guessValue}",
                                         color = Color(0xFFFFD166),

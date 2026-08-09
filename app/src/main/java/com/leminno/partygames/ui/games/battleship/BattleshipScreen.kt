@@ -34,7 +34,7 @@ fun BattleshipScreen(
     var player1Board by remember { mutableStateOf(List(gridSize * gridSize) { BattleCellState.EMPTY }) }
     var player2Board by remember { mutableStateOf(List(gridSize * gridSize) { BattleCellState.EMPTY }) }
 
-    var gamePhase by remember { mutableStateOf("P1_PLACEMENT") } // P1_PLACEMENT, PASS_PRIVACY, P2_PLACEMENT, BATTLE_P1, BATTLE_P2, GAME_OVER
+    var gamePhase by remember { mutableStateOf("P1_PLACEMENT") } // P1_PLACEMENT, PASS_PRIVACY, P2_PLACEMENT, BATTLE_P1, P2_BATTLE, GAME_OVER
     var winnerText by remember { mutableStateOf<String?>(null) }
     var actionLog by remember { mutableStateOf("Place 4 ships on your grid!") }
 

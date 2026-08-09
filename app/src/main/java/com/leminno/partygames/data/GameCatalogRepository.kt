@@ -312,14 +312,14 @@ object GameCatalogRepository {
             id = "mafia_werewolf",
             title = "Mafia / Werewolf",
             tagLine = "Narrator mystery night",
-            description = "The app acts as Narrator guiding night cycles (Mafia kill, Doctor save, Detective inspect) with background audio masking!",
+            description = "The app acts as Narrator guiding night cycles (Mafia kill, Doctor save, Detective inspect) step-by-step.",
             category = GameCategory.MYSTERY,
             setupType = SetupType.PASS_AND_PLAY,
             minPlayers = 5,
             maxPlayers = 16,
             estTimeMinutes = 20,
             isMvp = false,
-            antiCheatNotice = "Background audio masking plays during night phase to cover phone tap sounds!",
+            antiCheatNotice = "Keep screen faced down and eyes closed during night phase instructions!",
             rules = listOf(
                 GameRuleStep(1, "Assign Roles", "Pass phone so every player views their secret role.", "🕵️"),
                 GameRuleStep(2, "Night Phase", "Narrator guides Mafia, Doctor, and Detective actions step-by-step.", "🌙"),
@@ -373,7 +373,7 @@ object GameCatalogRepository {
             maxPlayers = 10,
             estTimeMinutes = 15,
             isMvp = false,
-            antiCheatNotice = "Spymaster view is guarded by a 2-second hold-to-confirm screen dimming state.",
+            antiCheatNotice = "Spymaster view is guarded by pass-and-play confirmation overlay before revealing key.",
             rules = listOf(
                 GameRuleStep(1, "Spymaster Key", "Spymaster views secret color key for 25 grid words.", "🔑"),
                 GameRuleStep(2, "Give One Word Clue", "Give a single word clue and number of matching cards.", "🗣️"),
@@ -449,14 +449,14 @@ object GameCatalogRepository {
             rules = listOf(
                 GameRuleStep(1, "Random Letter", "App generates random letter (e.g., 'S').", "🔤"),
                 GameRuleStep(2, "Speed Fill", "Type Name, Place, Animal, Thing starting with letter.", "✍️"),
-                GameRuleStep(3, "Auto Score & Vote", "App scores answers with dispute appeal button!", "⭐")
+                GameRuleStep(3, "Auto Score", "App scores unique answers automatically when countdown ends!", "⭐")
             )
         ),
         GameItem(
             id = "battleship",
             title = "Battleship",
             tagLine = "Naval fleet strategy",
-            description = "Secretly place your fleet on a 10x10 grid, then take turns calling out coordinates to sink opponent's fleet!",
+            description = "Secretly place your fleet on a 6x6 grid, then take turns calling out coordinates to sink opponent's fleet!",
             category = GameCategory.BOARD,
             setupType = SetupType.PASS_AND_PLAY,
             minPlayers = 2,
@@ -492,14 +492,14 @@ object GameCatalogRepository {
             id = "scrabble_league",
             title = "Letter League",
             tagLine = "Tile word board",
-            description = "Classic word building on a tile board with pop-up tile rack overlay and auto-dictionary validation!",
+            description = "Classic word building on a tactical grid board with pop-up tile rack overlay and turn scoring!",
             category = GameCategory.BOARD,
             setupType = SetupType.PASS_AND_PLAY,
             minPlayers = 2,
             maxPlayers = 4,
             estTimeMinutes = 15,
             isMvp = false,
-            antiCheatNotice = "Tile racks are hidden behind 'View My Tiles' pop-up overlay that auto-hides.",
+            antiCheatNotice = "Tile racks are hidden behind 'View My Tiles' pop-up overlay for turn privacy.",
             rules = listOf(
                 GameRuleStep(1, "View Tile Rack", "Tap 'View My Tiles' overlay to check your 7 letter tiles.", "🔠"),
                 GameRuleStep(2, "Place Word", "Drag or tap tiles onto board grid.", "🧩"),

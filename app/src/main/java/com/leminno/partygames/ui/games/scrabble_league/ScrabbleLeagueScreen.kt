@@ -45,7 +45,7 @@ fun ScrabbleLeagueScreen(
     var isRackOverlayVisible by remember { mutableStateOf(false) }
     var player1Rack by remember { mutableStateOf((1..7).map { tileLettersBag.random() }) }
     var player2Rack by remember { mutableStateOf((1..7).map { tileLettersBag.random() }) }
-    var selectedRackTile by remember { mutableStateOf<Char?>(null) }
+    var selectedRackTileIndex by remember { mutableStateOf<Int?>(null) }
 
     Box(
         modifier = Modifier
@@ -129,28 +129,36 @@ fun ScrabbleLeagueScreen(
                                     .background(if (cell.letter != null) Color(0xFFFFD166) else SurfaceGlassDark)
                                     .border(1.dp, BorderGlassDefault, RoundedCornerShape(10.dp))
                                     .clickable {
-                                        if (selectedRackTile != null && cell.letter == null) {
+                                        val currentRack = if (isPlayer1Turn) player1Rack else player2Rack
+                                        val tileChar = selectedRackTileIndex?.let { idx -> currentRack.getOrNull(idx) }
+
+                                        if (selectedRackTileIndex != null && tileChar != null && cell.letter == null) {
                                             haptics.performPop()
                                             val updated = boardGrid.toMutableList()
-                                            updated[idx] = TileCell(selectedRackTile, 2)
+                                            updated[idx] = TileCell(tileChar, 2)
                                             boardGrid = updated
 
-                                            // Remove from current active rack
+                                            // Remove from current active rack at exact index
+                                            val targetIndex = selectedRackTileIndex!!
                                             if (isPlayer1Turn) {
                                                 val rackMut = player1Rack.toMutableList()
-                                                rackMut.remove(selectedRackTile)
-                                                rackMut.add(tileLettersBag.random())
+                                                if (targetIndex in rackMut.indices) {
+                                                    rackMut.removeAt(targetIndex)
+                                                    rackMut.add(tileLettersBag.random())
+                                                }
                                                 player1Rack = rackMut
                                                 player1Score += 2
                                             } else {
                                                 val rackMut = player2Rack.toMutableList()
-                                                rackMut.remove(selectedRackTile)
-                                                rackMut.add(tileLettersBag.random())
+                                                if (targetIndex in rackMut.indices) {
+                                                    rackMut.removeAt(targetIndex)
+                                                    rackMut.add(tileLettersBag.random())
+                                                }
                                                 player2Rack = rackMut
                                                 player2Score += 2
                                             }
 
-                                            selectedRackTile = null
+                                            selectedRackTileIndex = null
                                         }
                                     },
                                 contentAlignment = Alignment.Center
@@ -187,8 +195,8 @@ fun ScrabbleLeagueScreen(
                         Spacer(modifier = Modifier.height(10.dp))
 
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            currentRack.forEach { char ->
-                                val isSelected = selectedRackTile == char
+                            currentRack.forEachIndexed { tileIdx, char ->
+                                val isSelected = selectedRackTileIndex == tileIdx
                                 Box(
                                     modifier = Modifier
                                         .size(38.dp)
@@ -196,7 +204,7 @@ fun ScrabbleLeagueScreen(
                                         .background(if (isSelected) Color(0xFF00E676) else Color(0xFFFFD166))
                                         .clickable {
                                             haptics.performTick()
-                                            selectedRackTile = char
+                                            selectedRackTileIndex = tileIdx
                                         },
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -236,7 +244,7 @@ fun ScrabbleLeagueScreen(
                         haptics.performPop()
                         isPlayer1Turn = !isPlayer1Turn
                         isRackOverlayVisible = false
-                        selectedRackTile = null
+                        selectedRackTileIndex = null
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF9D4EDD)),
                     shape = RoundedCornerShape(14.dp),
