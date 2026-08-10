@@ -17,9 +17,12 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.leminno.partygames.data.remote.RemoteRoomRepository
 import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.RemoteRoomSetupSheet
 import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
+import kotlinx.coroutines.launch
 
 enum class CellState(val symbol: String, val color: Color) {
     EMPTY("", Color.Transparent),
@@ -43,14 +46,20 @@ fun PowerUpTTTScreen(
     onExitGame: () -> Unit
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val haptics = remember { HapticFeedbackManager(context) }
     val composeHaptics = LocalHapticFeedback.current
+
+    var gamePhase by remember { mutableStateOf("MODE_SELECT") } // MODE_SELECT, PLAYING
+    var isRemoteMode by remember { mutableStateOf(false) }
+    var showRemoteSheet by remember { mutableStateOf(false) }
+    var roomCode by remember { mutableStateOf("") }
+    var isHost by remember { mutableStateOf(true) }
 
     var board by remember { mutableStateOf(List(9) { BoardCell() }) }
     var isPlayerXTurn by remember { mutableStateOf(true) }
     var selectedPowerUp by remember { mutableStateOf<TttPowerUp?>(null) }
 
-    // Inventory of power ups per player (1 each per game)
     var playerXPowers by remember { mutableStateOf(setOf(TttPowerUp.ERASE, TttPowerUp.SHIELD, TttPowerUp.EXTRA_TURN)) }
     var playerOPowers by remember { mutableStateOf(setOf(TttPowerUp.ERASE, TttPowerUp.SHIELD, TttPowerUp.EXTRA_TURN)) }
 
@@ -60,11 +69,34 @@ fun PowerUpTTTScreen(
     val currentTurnState = if (isPlayerXTurn) CellState.PLAYER_X else CellState.PLAYER_O
     val currentPowerInventory = if (isPlayerXTurn) playerXPowers else playerOPowers
 
+    // Observe Remote Board State
+    LaunchedEffect(roomCode, isRemoteMode) {
+        if (isRemoteMode && roomCode.isNotBlank()) {
+            RemoteRoomRepository.observeRoom(roomCode).collect { room ->
+                if (room != null && room.gameState.isNotEmpty()) {
+                    val remoteTurn = room.gameState["isXTurn"] as? Boolean
+                    if (remoteTurn != null) isPlayerXTurn = remoteTurn
+                }
+            }
+        }
+    }
+
+    fun syncRemote(isXTurn: Boolean) {
+        if (isRemoteMode && roomCode.isNotBlank()) {
+            scope.launch {
+                RemoteRoomRepository.updateGameState(
+                    roomCode,
+                    mapOf("isXTurn" to isXTurn)
+                )
+            }
+        }
+    }
+
     fun checkWinCondition(currentBoard: List<BoardCell>): Pair<CellState?, List<Int>?> {
         val winningCombinations = listOf(
-            listOf(0, 1, 2), listOf(3, 4, 5), listOf(6, 7, 8), // Rows
-            listOf(0, 3, 6), listOf(1, 4, 7), listOf(2, 5, 8), // Columns
-            listOf(0, 4, 8), listOf(2, 4, 6)                  // Diagonals
+            listOf(0, 1, 2), listOf(3, 4, 5), listOf(6, 7, 8),
+            listOf(0, 3, 6), listOf(1, 4, 7), listOf(2, 5, 8),
+            listOf(0, 4, 8), listOf(2, 4, 6)
         )
 
         for (combo in winningCombinations) {
@@ -93,6 +125,7 @@ fun PowerUpTTTScreen(
                         if (isPlayerXTurn) playerXPowers = playerXPowers - TttPowerUp.ERASE else playerOPowers = playerOPowers - TttPowerUp.ERASE
                         selectedPowerUp = null
                         isPlayerXTurn = !isPlayerXTurn
+                        syncRemote(isPlayerXTurn)
                     }
                 }
                 TttPowerUp.SHIELD -> {
@@ -104,166 +137,175 @@ fun PowerUpTTTScreen(
                         if (isPlayerXTurn) playerXPowers = playerXPowers - TttPowerUp.SHIELD else playerOPowers = playerOPowers - TttPowerUp.SHIELD
                         selectedPowerUp = null
                         isPlayerXTurn = !isPlayerXTurn
+                        syncRemote(isPlayerXTurn)
                     }
                 }
-                TttPowerUp.EXTRA_TURN -> {
-                    if (cell.state == CellState.EMPTY) {
-                        haptics.performTick(composeHaptics)
-                        val updated = board.toMutableList()
-                        updated[index] = BoardCell(currentTurnState, false)
-                        board = updated
-                        val (win, line) = checkWinCondition(updated)
-                        if (win != null) {
-                            winner = win
-                            winningLine = line
-                        } else {
-                            if (isPlayerXTurn) playerXPowers = playerXPowers - TttPowerUp.EXTRA_TURN else playerOPowers = playerOPowers - TttPowerUp.EXTRA_TURN
-                            selectedPowerUp = null
-                        }
-                    }
-                }
-                null -> {}
+                TttPowerUp.EXTRA_TURN -> {}
+                else -> {}
             }
         } else {
-            if (cell.state == CellState.EMPTY && winner == null) {
+            if (cell.state == CellState.EMPTY) {
                 haptics.performTick(composeHaptics)
                 val updated = board.toMutableList()
                 updated[index] = BoardCell(currentTurnState, false)
                 board = updated
 
-                val (win, line) = checkWinCondition(updated)
-                if (win != null) {
-                    haptics.performPop()
-                    winner = win
+                val (winState, line) = checkWinCondition(updated)
+                if (winState != null) {
+                    haptics.performHeavyBurst()
+                    winner = winState
                     winningLine = line
-                } else {
-                    isPlayerXTurn = !isPlayerXTurn
+                    return
                 }
+
+                isPlayerXTurn = !isPlayerXTurn
+                syncRemote(isPlayerXTurn)
             }
         }
     }
 
     GameScaffold(
-        title = "POWER-UP TIC-TAC-TOE ⚡",
-        titleColor = currentTurnState.color,
+        title = "POWER-UP TIC TAC TOE ❌⭕",
+        titleColor = Color(0xFF00F2FE),
         gameId = "ultimate_ttt",
         onExitGame = onExitGame
     ) {
-        if (winner == null) {
+        if (gamePhase == "MODE_SELECT") {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                // Turn Status Badge
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("SELECT PLAY MODE", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Black)
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(SurfaceGlassDark)
+                            .border(1.5.dp, Color(0xFF00F2FE), RoundedCornerShape(20.dp))
+                            .clickable {
+                                isRemoteMode = false
+                                gamePhase = "PLAYING"
+                            }
+                            .padding(20.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("📱", fontSize = 36.sp)
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text("Pass & Play (Same Phone)", color = Color(0xFF00F2FE), fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                                Text("Use Erase/Shield power-ups on single device", color = TextMuted, fontSize = 12.sp)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(SurfaceGlassDark)
+                            .border(1.5.dp, Color(0xFFFF007F), RoundedCornerShape(20.dp))
+                            .clickable {
+                                isRemoteMode = true
+                                showRemoteSheet = true
+                            }
+                            .padding(20.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("🌐", fontSize = 36.sp)
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text("Remote Play (Multi-Device)", color = Color(0xFFFF007F), fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                                Text("Real-time power-up grid moves across 2 phones", color = TextMuted, fontSize = 12.sp)
+                            }
+                        }
+                    }
+                }
+            }
+        } else if (winner == null) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Turn Indicator Banner
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(currentTurnState.color.copy(alpha = 0.2f))
-                        .border(1.5.dp, currentTurnState.color, RoundedCornerShape(16.dp))
-                        .padding(horizontal = 20.dp, vertical = 8.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(SurfaceGlassDark)
+                        .border(1.dp, currentTurnState.color, RoundedCornerShape(14.dp))
+                        .padding(horizontal = 18.dp, vertical = 8.dp)
                 ) {
                     Text(
-                        text = "TURN: ${currentTurnState.symbol} ${currentTurnState.name.replace("_", " ")}",
+                        text = "TURN: ${currentTurnState.symbol} ${if (isPlayerXTurn) "PLAYER X" else "PLAYER O"}",
                         color = currentTurnState.color,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Black
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
                     )
                 }
 
-                // 3x3 Grid Canvas Board
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+                // 3x3 Grid Board
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     for (row in 0..2) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             for (col in 0..2) {
-                                val index = row * 3 + col
-                                val cell = board[index]
-                                val isHighlighted = winningLine?.contains(index) == true
+                                val idx = row * 3 + col
+                                val cell = board[idx]
 
                                 Box(
                                     modifier = Modifier
                                         .size(90.dp)
-                                        .clip(RoundedCornerShape(18.dp))
-                                        .background(if (isHighlighted) currentTurnState.color.copy(alpha = 0.4f) else SurfaceGlassDark)
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .background(SurfaceGlassDark)
                                         .border(
-                                            width = if (isHighlighted) 3.dp else 1.5.dp,
-                                            color = if (isHighlighted) currentTurnState.color else BorderGlassDefault,
-                                            shape = RoundedCornerShape(18.dp)
+                                            2.dp,
+                                            if (cell.isShielded) Color(0xFFFFD166) else BorderGlassDefault,
+                                            RoundedCornerShape(16.dp)
                                         )
-                                        .clickable { handleCellClick(index) },
+                                        .clickable { handleCellClick(idx) },
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = cell.state.symbol,
-                                        fontSize = 38.sp
+                                        text = cell.state.symbol + if (cell.isShielded) "🛡️" else "",
+                                        fontSize = 32.sp
                                     )
-
-                                    if (cell.isShielded) {
-                                        Box(
-                                            modifier = Modifier
-                                                .align(Alignment.TopEnd)
-                                                .padding(6.dp)
-                                        ) {
-                                            Text("🛡️", fontSize = 12.sp)
-                                        }
-                                    }
                                 }
                             }
                         }
                     }
                 }
 
-                // Power-Ups Inventory Bar
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "AVAILABLE POWER-UPS (${currentTurnState.symbol})",
-                        color = TextMuted,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                // Power Up Inventory Bar
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("ACTIVE POWER-UPS", color = TextMuted, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(6.dp))
 
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         TttPowerUp.entries.forEach { power ->
                             val isAvailable = currentPowerInventory.contains(power)
                             val isSelected = selectedPowerUp == power
 
                             Box(
                                 modifier = Modifier
-                                    .weight(1f)
                                     .clip(RoundedCornerShape(12.dp))
-                                    .background(if (isSelected) currentTurnState.color.copy(alpha = 0.3f) else SurfaceGlassDark)
-                                    .border(
-                                        1.dp,
-                                        if (isSelected) currentTurnState.color else BorderGlassDefault,
-                                        RoundedCornerShape(12.dp)
-                                    )
+                                    .background(if (isSelected) currentTurnState.color else SurfaceGlassDark)
+                                    .border(1.dp, if (isAvailable) currentTurnState.color else BorderGlassDefault, RoundedCornerShape(12.dp))
                                     .clickable(enabled = isAvailable) {
-                                        haptics.performTick(composeHaptics)
-                                        selectedPowerUp = if (selectedPowerUp == power) null else power
+                                        selectedPowerUp = if (isSelected) null else power
                                     }
-                                    .padding(8.dp),
-                                contentAlignment = Alignment.Center
+                                    .padding(horizontal = 10.dp, vertical = 6.dp)
                             ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(text = power.icon, fontSize = 20.sp)
-                                    Text(
-                                        text = power.title,
-                                        color = if (isAvailable) TextPrimary else TextMuted,
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
+                                Text(
+                                    text = "${power.icon} ${power.title}",
+                                    color = if (isAvailable) Color.White else TextMuted,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
                             }
                         }
                     }
@@ -271,18 +313,37 @@ fun PowerUpTTTScreen(
             }
         } else {
             VictoryCeremonyOverlay(
-                winnerTitle = "PLAYER ${winner?.symbol} WINS! 🎉",
-                subtitle = "Tic-Tac-Toe Mastermind!",
+                winnerTitle = "WINNER: ${winner?.symbol} 🎉",
+                subtitle = "Power-Up Tic Tac Toe Champions!",
                 onPlayAgain = {
                     board = List(9) { BoardCell() }
-                    winner = null
-                    winningLine = null
                     isPlayerXTurn = true
                     selectedPowerUp = null
                     playerXPowers = setOf(TttPowerUp.ERASE, TttPowerUp.SHIELD, TttPowerUp.EXTRA_TURN)
                     playerOPowers = setOf(TttPowerUp.ERASE, TttPowerUp.SHIELD, TttPowerUp.EXTRA_TURN)
+                    winner = null
+                    winningLine = null
+                    gamePhase = "MODE_SELECT"
                 },
                 onBackToHub = onExitGame
+            )
+        }
+
+        if (showRemoteSheet) {
+            RemoteRoomSetupSheet(
+                gameId = "ultimate_ttt",
+                gameName = "Power-Up Tic Tac Toe ❌⭕",
+                onDismiss = {
+                    showRemoteSheet = false
+                    if (roomCode.isBlank()) gamePhase = "MODE_SELECT"
+                },
+                onRoomJoined = { code, hostFlag, _ ->
+                    roomCode = code
+                    isHost = hostFlag
+                    isRemoteMode = true
+                    gamePhase = "PLAYING"
+                    showRemoteSheet = false
+                }
             )
         }
     }

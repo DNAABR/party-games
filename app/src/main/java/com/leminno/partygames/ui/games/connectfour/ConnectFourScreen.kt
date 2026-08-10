@@ -19,7 +19,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.leminno.partygames.data.remote.RemoteRoomRepository
 import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.RemoteRoomSetupSheet
 import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
 
@@ -33,6 +35,10 @@ fun ConnectFourScreen(
     val composeHaptics = LocalHapticFeedback.current
 
     val uiState by viewModel.uiState.collectAsState()
+
+    var selectedMode by remember { mutableStateOf<String?>(null) } // null, LOCAL, REMOTE
+    var showRemoteSheet by remember { mutableStateOf(false) }
+    var roomCode by remember { mutableStateOf("") }
 
     val turnColor by animateColorAsState(
         targetValue = when {
@@ -51,7 +57,63 @@ fun ConnectFourScreen(
         gameId = "connect_four",
         onExitGame = onExitGame
     ) {
-        if (uiState.winnerPlayer == null && !uiState.isDraw) {
+        if (selectedMode == null) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("SELECT PLAY MODE", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Black)
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(SurfaceGlassDark)
+                            .border(1.5.dp, Color(0xFFFF6B6B), RoundedCornerShape(20.dp))
+                            .clickable {
+                                selectedMode = "LOCAL"
+                            }
+                            .padding(20.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("📱", fontSize = 36.sp)
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text("Pass & Play (Same Phone)", color = Color(0xFFFF6B6B), fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                                Text("Shared screen disc drop on single phone", color = TextMuted, fontSize = 12.sp)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(SurfaceGlassDark)
+                            .border(1.5.dp, Color(0xFF00F2FE), RoundedCornerShape(20.dp))
+                            .clickable {
+                                selectedMode = "REMOTE"
+                                showRemoteSheet = true
+                            }
+                            .padding(20.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("🌐", fontSize = 36.sp)
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text("Remote Play (Multi-Device)", color = Color(0xFF00F2FE), fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                                Text("Real-time turn disc drops synced across screens", color = TextMuted, fontSize = 12.sp)
+                            }
+                        }
+                    }
+                }
+            }
+        } else if (uiState.winnerPlayer == null && !uiState.isDraw) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -131,7 +193,6 @@ fun ConnectFourScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Bottom Reset Button
                 Button(
                     onClick = {
                         haptics.performPop()
@@ -156,6 +217,22 @@ fun ConnectFourScreen(
                 subtitle = "Connect Four Champions",
                 onPlayAgain = { viewModel.resetGame() },
                 onBackToHub = onExitGame
+            )
+        }
+
+        if (showRemoteSheet) {
+            RemoteRoomSetupSheet(
+                gameId = "connect_four",
+                gameName = "Connect Four 🔴🟡",
+                onDismiss = {
+                    showRemoteSheet = false
+                    if (roomCode.isBlank()) selectedMode = null
+                },
+                onRoomJoined = { code, _, _ ->
+                    roomCode = code
+                    selectedMode = "REMOTE"
+                    showRemoteSheet = false
+                }
             )
         }
     }
