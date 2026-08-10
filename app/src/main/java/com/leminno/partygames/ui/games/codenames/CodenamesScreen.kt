@@ -17,9 +17,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.leminno.partygames.data.remote.RemoteRoomRepository
 import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.RemoteRoomSetupSheet
 import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
+import kotlinx.coroutines.launch
 
 enum class CodenameCardType(val title: String, val color: Color) {
     RED("Red Team", Color(0xFFFF0055)),
@@ -45,7 +48,14 @@ fun CodenamesScreen(
     onExitGame: () -> Unit
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val haptics = remember { HapticFeedbackManager(context) }
+
+    var gamePhase by remember { mutableStateOf("MODE_SELECT") } // MODE_SELECT, PLAYING
+    var isRemoteMode by remember { mutableStateOf(false) }
+    var showRemoteSheet by remember { mutableStateOf(false) }
+    var roomCode by remember { mutableStateOf("") }
+    var isHost by remember { mutableStateOf(true) }
 
     var isSpymasterView by remember { mutableStateOf(false) }
     var redScore by remember { mutableIntStateOf(0) }
@@ -67,6 +77,34 @@ fun CodenamesScreen(
 
     var gridCards by remember { mutableStateOf(generateGrid()) }
 
+    // Observe Remote Grid State
+    LaunchedEffect(roomCode, isRemoteMode) {
+        if (isRemoteMode && roomCode.isNotBlank()) {
+            RemoteRoomRepository.observeRoom(roomCode).collect { room ->
+                if (room != null && room.gameState.isNotEmpty()) {
+                    val revealedIndices = (room.gameState["revealedIndices"] as? List<*>)?.mapNotNull { (it as? Number)?.toInt() }?.toSet()
+                    if (revealedIndices != null) {
+                        gridCards = gridCards.mapIndexed { idx, card ->
+                            card.copy(isRevealed = revealedIndices.contains(idx))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun syncRemoteRevealed() {
+        if (isRemoteMode && roomCode.isNotBlank()) {
+            val revealedIndices = gridCards.mapIndexedNotNull { idx, card -> if (card.isRevealed) idx else null }
+            scope.launch {
+                RemoteRoomRepository.updateGameState(
+                    roomCode,
+                    mapOf("revealedIndices" to revealedIndices)
+                )
+            }
+        }
+    }
+
     fun handleCardClick(index: Int) {
         if (gameOverWinner != null || gridCards[index].isRevealed) return
 
@@ -75,6 +113,7 @@ fun CodenamesScreen(
         val updated = gridCards.toMutableList()
         updated[index] = card.copy(isRevealed = true)
         gridCards = updated
+        syncRemoteRevealed()
 
         when (card.type) {
             CodenameCardType.RED -> {
@@ -98,78 +137,119 @@ fun CodenamesScreen(
     }
 
     GameScaffold(
-        title = "CODENAMES 🕵️",
-        titleColor = Color(0xFF00F2FE),
+        title = "CODENAMES 🕵️‍♂️",
+        titleColor = Color(0xFFFF0055),
         gameId = "codenames",
         onExitGame = onExitGame
     ) {
-        if (gameOverWinner == null) {
+        if (gamePhase == "MODE_SELECT") {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                // Status Scoreboard
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("SELECT PLAY MODE", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Black)
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(SurfaceGlassDark)
+                            .border(1.5.dp, Color(0xFFFF0055), RoundedCornerShape(20.dp))
+                            .clickable {
+                                isRemoteMode = false
+                                gamePhase = "PLAYING"
+                            }
+                            .padding(20.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("📱", fontSize = 36.sp)
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text("Same Device (Pass & View)", color = Color(0xFFFF0055), fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                                Text("Toggle Spymaster view on single phone", color = TextMuted, fontSize = 12.sp)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(SurfaceGlassDark)
+                            .border(1.5.dp, Color(0xFF00F2FE), RoundedCornerShape(20.dp))
+                            .clickable {
+                                isRemoteMode = true
+                                showRemoteSheet = true
+                            }
+                            .padding(20.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("🌐", fontSize = 36.sp)
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text("Remote Play (Multi-Device)", color = Color(0xFF00F2FE), fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                                Text("Spymaster views key on their phone, operatives tap theirs", color = TextMuted, fontSize = 12.sp)
+                            }
+                        }
+                    }
+                }
+            }
+        } else if (gameOverWinner == null) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Header Score & Turn Indicator
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFFFF0055).copy(alpha = 0.2f))
-                            .border(1.dp, Color(0xFFFF0055), RoundedCornerShape(12.dp))
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Text("RED: $redScore/9", color = Color(0xFFFF0055), fontWeight = FontWeight.Black, fontSize = 13.sp)
-                    }
-
+                    Text("RED: $redScore/9", color = Color(0xFFFF0055), fontSize = 16.sp, fontWeight = FontWeight.Black)
                     Text(
-                        text = if (isRedTurn) "TURN: RED TEAM 🔴" else "TURN: BLUE TEAM 🔵",
+                        text = if (isRedTurn) "RED TURN 🔴" else "BLUE TURN 🔵",
                         color = if (isRedTurn) Color(0xFFFF0055) else Color(0xFF00F2FE),
-                        fontWeight = FontWeight.Black,
-                        fontSize = 14.sp
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Black
                     )
-
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFF00F2FE).copy(alpha = 0.2f))
-                            .border(1.dp, Color(0xFF00F2FE), RoundedCornerShape(12.dp))
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Text("BLUE: $blueScore/8", color = Color(0xFF00F2FE), fontWeight = FontWeight.Black, fontSize = 13.sp)
-                    }
+                    Text("BLUE: $blueScore/8", color = Color(0xFF00F2FE), fontSize = 16.sp, fontWeight = FontWeight.Black)
                 }
 
-                // 5x5 Grid Canvas Cards
+                // 5x5 Grid Board
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    for (row in 0..4) {
+                    for (row in 0 until 5) {
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            for (col in 0..4) {
-                                val index = row * 5 + col
-                                val card = gridCards[index]
-                                val isShown = card.isRevealed || isSpymasterView
+                            for (col in 0 until 5) {
+                                val idx = row * 5 + col
+                                val card = gridCards[idx]
 
-                                val bgColor = if (isShown) card.type.color.copy(alpha = 0.85f) else SurfaceGlassDark
-                                val borderColor = if (isShown) card.type.color else BorderGlassDefault
+                                val cardBg = when {
+                                    card.isRevealed -> card.type.color
+                                    isSpymasterView -> card.type.color.copy(alpha = 0.35f)
+                                    else -> SurfaceGlassDark
+                                }
 
                                 Box(
                                     modifier = Modifier
                                         .weight(1f)
                                         .height(52.dp)
-                                        .clip(RoundedCornerShape(10.dp))
-                                        .background(bgColor)
-                                        .border(1.dp, borderColor, RoundedCornerShape(10.dp))
-                                        .clickable { handleCardClick(index) },
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(cardBg)
+                                        .border(1.dp, if (card.isRevealed) card.type.color else BorderGlassDefault, RoundedCornerShape(8.dp))
+                                        .clickable { handleCardClick(idx) },
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
                                         text = card.word,
-                                        color = if (isShown && card.type == CodenameCardType.ASSASSIN) Color.White else TextPrimary,
+                                        color = if (card.isRevealed) Color.White else TextPrimary,
                                         fontSize = 10.sp,
-                                        fontWeight = FontWeight.Black,
+                                        fontWeight = FontWeight.Bold,
                                         textAlign = TextAlign.Center
                                     )
                                 }
@@ -178,60 +258,58 @@ fun CodenamesScreen(
                     }
                 }
 
-                // Anti-Cheat Spymaster View Toggle
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Button(
-                        onClick = {
-                            haptics.performPop()
-                            isSpymasterView = !isSpymasterView
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isSpymasterView) Color(0xFFFFD166) else Color.White.copy(alpha = 0.15f)
-                        ),
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(52.dp)
+                    OutlinedButton(
+                        onClick = { isSpymasterView = !isSpymasterView },
+                        shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text(
-                            text = if (isSpymasterView) "CLOSE SPYMASTER KEY 🔒" else "SPYMASTER KEY 🔑",
-                            color = if (isSpymasterView) Color.Black else Color.White,
-                            fontWeight = FontWeight.Black,
-                            fontSize = 12.sp
-                        )
+                        Text(if (isSpymasterView) "👁️ Hide Key" else "🔑 Spymaster Key View", color = TextPrimary)
                     }
 
                     Button(
-                        onClick = {
-                            haptics.performPop()
-                            isRedTurn = !isRedTurn
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF9D4EDD)),
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(52.dp)
+                        onClick = { isRedTurn = !isRedTurn },
+                        colors = ButtonDefaults.buttonColors(containerColor = if (isRedTurn) Color(0xFFFF0055) else Color(0xFF00F2FE)),
+                        shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text("END TURN ⏭️", color = Color.White, fontWeight = FontWeight.Black, fontSize = 12.sp)
+                        Text("END TURN ▶", color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 }
             }
         } else {
             VictoryCeremonyOverlay(
-                winnerTitle = gameOverWinner!!,
-                subtitle = "Master Spymasters!",
+                winnerTitle = gameOverWinner ?: "GAME OVER",
+                subtitle = "Codenames Intelligence Ops!",
                 onPlayAgain = {
+                    gridCards = generateGrid()
                     redScore = 0
                     blueScore = 0
                     isRedTurn = true
                     gameOverWinner = null
-                    isSpymasterView = false
-                    gridCards = generateGrid()
+                    gamePhase = "MODE_SELECT"
                 },
                 onBackToHub = onExitGame
+            )
+        }
+
+        if (showRemoteSheet) {
+            RemoteRoomSetupSheet(
+                gameId = "codenames",
+                gameName = "Codenames 🕵️‍♂️",
+                onDismiss = {
+                    showRemoteSheet = false
+                    if (roomCode.isBlank()) gamePhase = "MODE_SELECT"
+                },
+                onRoomJoined = { code, hostFlag, _ ->
+                    roomCode = code
+                    isHost = hostFlag
+                    isRemoteMode = true
+                    isSpymasterView = hostFlag
+                    gamePhase = "PLAYING"
+                    showRemoteSheet = false
+                }
             )
         }
     }

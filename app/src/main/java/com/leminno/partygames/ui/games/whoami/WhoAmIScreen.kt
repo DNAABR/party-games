@@ -8,6 +8,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -22,7 +23,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.leminno.partygames.data.remote.RemoteRoomRepository
 import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.RemoteRoomSetupSheet
 import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
 
@@ -35,6 +38,10 @@ fun WhoAmIScreen(
     val context = LocalContext.current
     val haptics = remember { HapticFeedbackManager(context) }
     val uiState by viewModel.uiState.collectAsState()
+
+    var selectedMode by remember { mutableStateOf<String?>(null) } // null, LOCAL, REMOTE
+    var showRemoteSheet by remember { mutableStateOf(false) }
+    var roomCode by remember { mutableStateOf("") }
 
     LaunchedEffect(timerSec) {
         viewModel.initGame(timerSec)
@@ -77,7 +84,63 @@ fun WhoAmIScreen(
         gameId = "who_am_i",
         onExitGame = onExitGame
     ) {
-        if (!uiState.isGameOver) {
+        if (selectedMode == null) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("SELECT PLAY MODE", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Black)
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(SurfaceGlassDark)
+                            .border(1.5.dp, Color(0xFF9D4EDD), RoundedCornerShape(20.dp))
+                            .clickable {
+                                selectedMode = "LOCAL"
+                            }
+                            .padding(20.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("📱", fontSize = 36.sp)
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text("Forehead Pass (Same Phone)", color = Color(0xFF9D4EDD), fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                                Text("Hold phone on forehead with tilt detection", color = TextMuted, fontSize = 12.sp)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(SurfaceGlassDark)
+                            .border(1.5.dp, Color(0xFF00F2FE), RoundedCornerShape(20.dp))
+                            .clickable {
+                                selectedMode = "REMOTE"
+                                showRemoteSheet = true
+                            }
+                            .padding(20.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("🌐", fontSize = 36.sp)
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text("Remote Play (Multi-Device)", color = Color(0xFF00F2FE), fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                                Text("Card shown on remote screens while guesser asks questions", color = TextMuted, fontSize = 12.sp)
+                            }
+                        }
+                    }
+                }
+            }
+        } else if (!uiState.isGameOver) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -98,7 +161,7 @@ fun WhoAmIScreen(
                         Text(
                             text = "⏱️ ${uiState.timeRemaining}s",
                             color = if (uiState.timeRemaining <= 10) AlertRed else TextPrimary,
-                            fontSize = 18.sp,
+                            fontSize = 16.sp,
                             fontWeight = FontWeight.Black
                         )
                     }
@@ -106,87 +169,94 @@ fun WhoAmIScreen(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0x3300E676))
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                            .background(SurfaceGlassDark)
+                            .padding(horizontal = 14.dp, vertical = 6.dp)
                     ) {
                         Text(
-                            text = "Score: ${uiState.score}",
-                            color = SuccessGreen,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold
+                            text = "SCORE: ${uiState.score}",
+                            color = Color(0xFF9D4EDD),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Black
                         )
                     }
                 }
 
-                // Center Word Display Card
+                // Forehead Card Display Box
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(280.dp)
-                        .clip(RoundedCornerShape(28.dp))
-                        .background(SurfaceGlassDark)
-                        .border(2.dp, Color(0x669D4EDD), RoundedCornerShape(28.dp)),
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(backgroundColor)
+                        .border(2.dp, BorderGlassDefault, RoundedCornerShape(24.dp))
+                        .padding(24.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        val currentWord = uiState.wordList.getOrNull(uiState.currentIndex)
                         Text(
-                            text = uiState.wordList.getOrElse(uiState.currentIndex) { "Finished!" },
-                            color = TextPrimary,
-                            fontSize = 34.sp,
+                            text = currentWord ?: "CARD",
+                            color = Color.White,
+                            fontSize = 32.sp,
                             fontWeight = FontWeight.Black,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 16.dp)
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        val feedbackText = when (uiState.cardFeedbackState) {
-                            "CORRECT" -> "CORRECT! 🟢 (Return upright)"
-                            "SKIP" -> "SKIPPED 🟡 (Return upright)"
-                            else -> "Hold to forehead! Tilt DOWN = Pass, UP = Skip"
-                        }
-
-                        Text(
-                            text = feedbackText,
-                            color = TextSecondary,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
 
-                // Bottom Hint Controls (Manual fallbacks)
+                // Manual Controls
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Button(
-                        onClick = {
-                            haptics.performWarningThud()
-                            viewModel.onManualSkip()
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = AlertRed.copy(alpha = 0.3f))
+                        onClick = { viewModel.onManualSkip() },
+                        colors = ButtonDefaults.buttonColors(containerColor = AlertRed),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(52.dp)
                     ) {
-                        Text("SKIP ⬆️", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text("SKIP ❌", color = Color.White, fontWeight = FontWeight.Black)
                     }
 
                     Button(
-                        onClick = {
-                            haptics.performPop()
-                            viewModel.onManualGotIt()
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = SuccessGreen.copy(alpha = 0.3f))
+                        onClick = { viewModel.onManualGotIt() },
+                        colors = ButtonDefaults.buttonColors(containerColor = SuccessGreen),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(52.dp)
                     ) {
-                        Text("GOT IT! ⬇️", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text("CORRECT ✅", color = Color.Black, fontWeight = FontWeight.Black)
                     }
                 }
             }
         } else {
             VictoryCeremonyOverlay(
-                winnerTitle = "Score: ${uiState.score} Points!",
-                subtitle = "Skips used: ${uiState.skips}",
-                onPlayAgain = { viewModel.initGame(timerSec) },
+                winnerTitle = "FINAL SCORE: ${uiState.score} 🎉",
+                subtitle = "Who Am I Champions!",
+                onPlayAgain = {
+                    viewModel.initGame(timerSec)
+                    selectedMode = null
+                },
                 onBackToHub = onExitGame
+            )
+        }
+
+        if (showRemoteSheet) {
+            RemoteRoomSetupSheet(
+                gameId = "who_am_i",
+                gameName = "Who Am I? 🎭",
+                onDismiss = {
+                    showRemoteSheet = false
+                    if (roomCode.isBlank()) selectedMode = null
+                },
+                onRoomJoined = { code, _, _ ->
+                    roomCode = code
+                    selectedMode = "REMOTE"
+                    showRemoteSheet = false
+                }
             )
         }
     }

@@ -19,8 +19,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.leminno.partygames.data.remote.RemoteRoomRepository
 import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.RemoteRoomSetupSheet
+import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
+import kotlinx.coroutines.launch
 
 data class FakeItQuestion(
     val prompt: String,
@@ -46,14 +50,51 @@ fun FakeItScreen(
     onExitGame: () -> Unit
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val haptics = remember { HapticFeedbackManager(context) }
 
+    var gamePhase by remember { mutableStateOf("MODE_SELECT") } // MODE_SELECT, BLUFF_INPUT, VOTING, REVEAL
+    var isRemoteMode by remember { mutableStateOf(false) }
+    var showRemoteSheet by remember { mutableStateOf(false) }
+    var roomCode by remember { mutableStateOf("") }
+    var isHost by remember { mutableStateOf(true) }
+
     var currentQuestion by remember { mutableStateOf(fakeItQuestions.random()) }
-    var gamePhase by remember { mutableStateOf("BLUFF_INPUT") } // BLUFF_INPUT, VOTING, REVEAL
     var currentPlayerIdx by remember { mutableIntStateOf(0) }
     var bluffInputText by remember { mutableStateOf("") }
     var playerBluffs by remember { mutableStateOf<List<AnswerCard>>(emptyList()) }
     var selectedVoteCard by remember { mutableStateOf<AnswerCard?>(null) }
+
+    // Observe Remote Game State
+    LaunchedEffect(roomCode, isRemoteMode) {
+        if (isRemoteMode && roomCode.isNotBlank()) {
+            RemoteRoomRepository.observeRoom(roomCode).collect { room ->
+                if (room != null && room.gameState.isNotEmpty()) {
+                    val remotePrompt = room.gameState["prompt"] as? String
+                    val remoteRealAns = room.gameState["realAns"] as? String
+                    val remotePhase = room.gameState["phase"] as? String
+
+                    if (!remotePrompt.isNullOrBlank() && !remoteRealAns.isNullOrBlank()) {
+                        currentQuestion = FakeItQuestion(remotePrompt, remoteRealAns)
+                    }
+                    if (remotePhase != null && remotePhase != gamePhase) {
+                        gamePhase = remotePhase
+                    }
+                }
+            }
+        }
+    }
+
+    fun syncRemote(prompt: String, realAns: String, phase: String) {
+        if (isRemoteMode && roomCode.isNotBlank()) {
+            scope.launch {
+                RemoteRoomRepository.updateGameState(
+                    roomCode,
+                    mapOf("prompt" to prompt, "realAns" to realAns, "phase" to phase)
+                )
+            }
+        }
+    }
 
     GameScaffold(
         title = "FAKE IT (BLUFF) 🤥",
@@ -61,183 +102,237 @@ fun FakeItScreen(
         gameId = "fake_it",
         onExitGame = onExitGame
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            // Question Box
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(SurfaceGlassDark)
-                    .border(1.5.dp, Color(0xFFFF007F), RoundedCornerShape(20.dp))
-                    .padding(20.dp),
-                contentAlignment = Alignment.Center
+        if (gamePhase == "MODE_SELECT") {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("OBSCURE TRIVIA PROMPT", color = Color(0xFFFF007F), fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = currentQuestion.prompt,
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Black,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
+                    Text("SELECT PLAY MODE", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Black)
+                    Spacer(modifier = Modifier.height(20.dp))
 
-            if (gamePhase == "BLUFF_INPUT") {
-                val activePlayer = "Player ${currentPlayerIdx + 1}"
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "PASS PHONE TO $activePlayer",
-                        color = Color(0xFFFFD166),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    OutlinedTextField(
-                        value = bluffInputText,
-                        onValueChange = { bluffInputText = it },
-                        label = { Text("Type a believable fake answer") },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFFFF007F), unfocusedBorderColor = BorderGlassDefault)
-                    )
-                }
-
-                Button(
-                    onClick = {
-                        if (bluffInputText.isNotBlank()) {
-                            haptics.performPop()
-                            playerBluffs = playerBluffs + AnswerCard(bluffInputText, false, activePlayer)
-                            bluffInputText = ""
-                            if (currentPlayerIdx + 1 < playerCount) {
-                                currentPlayerIdx++
-                            } else {
-                                // Add real answer and shuffle
-                                val allCards = (playerBluffs + AnswerCard(currentQuestion.realAnswer, true, "TRUTH")).shuffled()
-                                playerBluffs = allCards
-                                gamePhase = "VOTING"
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(SurfaceGlassDark)
+                            .border(1.5.dp, Color(0xFFFF007F), RoundedCornerShape(20.dp))
+                            .clickable {
+                                isRemoteMode = false
+                                gamePhase = "BLUFF_INPUT"
                             }
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF007F)),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    enabled = bluffInputText.isNotBlank()
-                ) {
-                    Text(
-                        text = if (currentPlayerIdx + 1 < playerCount) "SUBMIT FAKE ANSWER & PASS ▶" else "SHUFFLE & START GROUP VOTE 🗳️",
-                        color = Color.White,
-                        fontWeight = FontWeight.Black
-                    )
-                }
-            } else if (gamePhase == "VOTING") {
-                // Shuffled Answer Selection Card Matrix
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "SELECT THE GENUINE TRUTH!",
-                        color = Color(0xFFFFD166),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Black
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    LazyColumn(
-                        modifier = Modifier.height(260.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                            .padding(20.dp)
                     ) {
-                        items(playerBluffs) { card ->
-                            val isSelected = selectedVoteCard == card
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .background(if (isSelected) Color(0x33FF007F) else SurfaceGlassDark)
-                                    .border(1.5.dp, if (isSelected) Color(0xFFFF007F) else BorderGlassDefault, RoundedCornerShape(14.dp))
-                                    .clickable {
-                                        haptics.performPop()
-                                        selectedVoteCard = card
-                                    }
-                                    .padding(16.dp)
-                            ) {
-                                Text(card.text, color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("📱", fontSize = 36.sp)
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text("Pass & Play (Same Phone)", color = Color(0xFFFF007F), fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                                Text("Type fake bluffs & pass single device", color = TextMuted, fontSize = 12.sp)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(SurfaceGlassDark)
+                            .border(1.5.dp, Color(0xFF00F2FE), RoundedCornerShape(20.dp))
+                            .clickable {
+                                isRemoteMode = true
+                                showRemoteSheet = true
+                            }
+                            .padding(20.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("🌐", fontSize = 36.sp)
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text("Remote Play (Multi-Device)", color = Color(0xFF00F2FE), fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                                Text("Balderdash style! Type bluffs on your screen, group votes", color = TextMuted, fontSize = 12.sp)
                             }
                         }
                     }
                 }
-
-                Button(
-                    onClick = {
-                        if (selectedVoteCard != null) {
-                            haptics.performHeavyBurst()
-                            gamePhase = "REVEAL"
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF007F)),
-                    shape = RoundedCornerShape(16.dp),
+            }
+        } else if (gamePhase != "REVEAL") {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Question Box
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp),
-                    enabled = selectedVoteCard != null
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(SurfaceGlassDark)
+                        .border(1.5.dp, Color(0xFFFF007F), RoundedCornerShape(20.dp))
+                        .padding(20.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text("REVEAL TRUTH 🏆", color = Color.White, fontWeight = FontWeight.Black)
-                }
-            } else {
-                // Reveal Phase
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "GENUINE TRUTH: ${currentQuestion.realAnswer}",
-                        color = Color(0xFF00E676),
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Black,
-                        textAlign = TextAlign.Center
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    if (selectedVoteCard?.isReal == true) {
-                        Text("YOU SPOTTED THE TRUTH! +2 POINTS 🟢", color = Color(0xFF00E676), fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                    } else {
-                        Text("YOU GOT FOOLED BY ${selectedVoteCard?.author}'s BLUFF! 🔴", color = Color(0xFFFF0055), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("OBSCURE TRIVIA PROMPT", color = Color(0xFFFF007F), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = currentQuestion.prompt,
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Black,
+                            textAlign = TextAlign.Center
+                        )
                     }
                 }
 
-                Button(
-                    onClick = {
-                        currentQuestion = fakeItQuestions.random()
-                        currentPlayerIdx = 0
-                        bluffInputText = ""
-                        playerBluffs = emptyList()
-                        selectedVoteCard = null
-                        gamePhase = "BLUFF_INPUT"
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF007F)),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                ) {
-                    Text("NEXT TRIVIA PROMPT ▶", color = Color.White, fontWeight = FontWeight.Black)
+                if (gamePhase == "BLUFF_INPUT") {
+                    val activePlayer = "Player ${currentPlayerIdx + 1}"
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "PASS PHONE TO $activePlayer",
+                            color = Color(0xFFFFD166),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        OutlinedTextField(
+                            value = bluffInputText,
+                            onValueChange = { bluffInputText = it },
+                            label = { Text("Write a believable fake answer...") },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFFFF007F), unfocusedBorderColor = BorderGlassDefault)
+                        )
+                    }
+
+                    Button(
+                        onClick = {
+                            if (bluffInputText.isNotBlank()) {
+                                haptics.performPop()
+                                val card = AnswerCard(bluffInputText, false, activePlayer)
+                                playerBluffs = playerBluffs + card
+                                bluffInputText = ""
+
+                                if (currentPlayerIdx < playerCount - 1) {
+                                    currentPlayerIdx++
+                                } else {
+                                    // Add Real Answer into list and shuffle
+                                    val realCard = AnswerCard(currentQuestion.realAnswer, true, "TRUTH")
+                                    playerBluffs = (playerBluffs + realCard).shuffled()
+                                    gamePhase = "VOTING"
+                                    syncRemote(currentQuestion.prompt, currentQuestion.realAnswer, "VOTING")
+                                }
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF007F)),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                    ) {
+                        Text("LOCK BLUFF & PASS DEVICE ▶", color = Color.White, fontWeight = FontWeight.Black)
+                    }
+                } else if (gamePhase == "VOTING") {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("SPOT THE REAL TRUTH!", color = Color(0xFF00F2FE), fontSize = 18.sp, fontWeight = FontWeight.Black)
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        LazyColumn(
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            items(playerBluffs) { card ->
+                                val isSel = selectedVoteCard == card
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(14.dp))
+                                        .background(if (isSel) Color(0xFF00F2FE).copy(alpha = 0.3f) else SurfaceGlassDark)
+                                        .border(1.5.dp, if (isSel) Color(0xFF00F2FE) else BorderGlassDefault, RoundedCornerShape(14.dp))
+                                        .clickable {
+                                            haptics.performTick()
+                                            selectedVoteCard = card
+                                        }
+                                        .padding(16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = card.text,
+                                        color = Color.White,
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Button(
+                        onClick = {
+                            if (selectedVoteCard != null) {
+                                haptics.performHeavyBurst()
+                                gamePhase = "REVEAL"
+                                syncRemote(currentQuestion.prompt, currentQuestion.realAnswer, "REVEAL")
+                            }
+                        },
+                        enabled = selectedVoteCard != null,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00F2FE)),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                    ) {
+                        Text("LOCK FINAL VOTE 🔒", color = Color.Black, fontWeight = FontWeight.Black)
+                    }
                 }
             }
+        } else {
+            val isSuccess = selectedVoteCard?.isReal == true
+            VictoryCeremonyOverlay(
+                winnerTitle = if (isSuccess) "SPOTTED THE TRUTH! 🏆" else "FOOLED BY A BLUFF! 🤥",
+                subtitle = "Real Answer Was: ${currentQuestion.realAnswer}",
+                onPlayAgain = {
+                    currentQuestion = fakeItQuestions.random()
+                    currentPlayerIdx = 0
+                    bluffInputText = ""
+                    playerBluffs = emptyList()
+                    selectedVoteCard = null
+                    gamePhase = "MODE_SELECT"
+                },
+                onBackToHub = onExitGame
+            )
+        }
+
+        if (showRemoteSheet) {
+            RemoteRoomSetupSheet(
+                gameId = "fake_it",
+                gameName = "Fake It (Bluff) 🤥",
+                onDismiss = {
+                    showRemoteSheet = false
+                    if (roomCode.isBlank()) gamePhase = "MODE_SELECT"
+                },
+                onRoomJoined = { code, hostFlag, _ ->
+                    roomCode = code
+                    isHost = hostFlag
+                    isRemoteMode = true
+                    gamePhase = "BLUFF_INPUT"
+                    showRemoteSheet = false
+                    if (hostFlag) {
+                        syncRemote(currentQuestion.prompt, currentQuestion.realAnswer, "BLUFF_INPUT")
+                    }
+                }
+            )
         }
     }
 }
