@@ -11,6 +11,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,13 +26,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.leminno.partygames.data.GameCatalogRepository
+import com.leminno.partygames.data.model.GameCategory
 import com.leminno.partygames.data.repository.UserPreferencesRepository
 import com.leminno.partygames.ui.hub.components.GameCard
 import com.leminno.partygames.ui.hub.components.PartyCompanionSheet
 import com.leminno.partygames.ui.hub.components.PreGameGuideSheet
 import com.leminno.partygames.ui.hub.components.QuickSettingsSheet
 import com.leminno.partygames.ui.model.GameItem
-import com.leminno.partygames.data.model.GameCategory
 import com.leminno.partygames.ui.theme.*
 
 @Composable
@@ -92,70 +94,134 @@ fun ArcadeHubScreen(
         ) {
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Console Title Header & Arcade Emblem + QoL Action Icons
+            // Header Bar & QoL Action Icons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Text(
-                        text = "PARTY GAMES 🕹️",
-                        color = TextPrimary,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 1.sp
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "PARTY GAMES",
+                            color = TextPrimary,
+                            style = MaterialTheme.typography.displayMedium,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = (-0.5).sp
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(AccentCyan.copy(alpha = 0.2f))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = "PRO",
+                                color = AccentCyan,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
                     Text(
                         text = "CHOOSE YOUR CHAOS",
-                        color = Color(0xFF00F2FE),
-                        fontSize = 11.sp,
+                        color = AccentCyan,
+                        style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 2.sp
                     )
                 }
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
                     // Remote Room Code Button
-                    IconButton(onClick = {
-                        haptics.performTick(composeHaptics)
-                        showRemoteRoomSheet = true
-                    }) {
-                        Text("🌐", fontSize = 20.sp)
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(SurfaceGlassDark)
+                            .border(1.dp, BorderGlassDefault, RoundedCornerShape(12.dp))
+                    ) {
+                        IconButton(
+                            onClick = {
+                                haptics.performTick(composeHaptics)
+                                showRemoteRoomSheet = true
+                            },
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Public,
+                                contentDescription = "Remote Room",
+                                tint = AccentCyan,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
 
                     // Party Scorekeeper Button
-                    IconButton(onClick = {
-                        haptics.performTick(composeHaptics)
-                        showPartyCompanion = true
-                    }) {
-                        Text("🏆", fontSize = 20.sp)
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(SurfaceGlassDark)
+                            .border(1.dp, BorderGlassDefault, RoundedCornerShape(12.dp))
+                    ) {
+                        IconButton(
+                            onClick = {
+                                haptics.performTick(composeHaptics)
+                                showPartyCompanion = true
+                            },
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.EmojiEvents,
+                                contentDescription = "Scorekeeper",
+                                tint = WinGold,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
 
                     // Settings Button
-                    IconButton(onClick = {
-                        haptics.performTick(composeHaptics)
-                        showQuickSettings = true
-                    }) {
-                        Text("⚙️", fontSize = 20.sp)
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(SurfaceGlassDark)
+                            .border(1.dp, BorderGlassDefault, RoundedCornerShape(12.dp))
+                    ) {
+                        IconButton(
+                            onClick = {
+                                haptics.performTick(composeHaptics)
+                                showQuickSettings = true
+                            },
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Settings,
+                                contentDescription = "Settings",
+                                tint = TextSecondary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-            // Quick Play Chaos Hero Banner Button
+            // Quick Play Hero Banner Button
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(60.dp)
+                    .height(64.dp)
                     .clip(RoundedCornerShape(20.dp))
                     .background(
                         brush = Brush.horizontalGradient(
                             colors = listOf(
-                                Color(0xFF00F2FE),
-                                Color(0xFF9D4EDD),
-                                Color(0xFFFF007F)
+                                AccentCyan,
+                                AccentViolet,
+                                AccentMagenta
                             )
                         )
                     )
@@ -164,7 +230,7 @@ fun ArcadeHubScreen(
                         val mvpGames = GameCatalogRepository.allGames.filter { it.isMvp }
                         selectedGameForSheet = mvpGames.random()
                     }
-                    .padding(horizontal = 20.dp),
+                    .padding(horizontal = 18.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
                 Row(
@@ -173,40 +239,68 @@ fun ArcadeHubScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = "⚡", fontSize = 24.sp)
-                        Spacer(modifier = Modifier.width(10.dp))
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color.White.copy(alpha = 0.25f))
+                                .padding(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Bolt,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
                                 text = "QUICK PLAY",
                                 color = Color.White,
-                                fontSize = 15.sp,
+                                style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Black,
-                                letterSpacing = 1.sp
+                                letterSpacing = 0.8.sp
                             )
                             Text(
                                 text = "Random 5-Min Challenge",
-                                color = Color.White.copy(alpha = 0.85f),
-                                fontSize = 11.sp
+                                color = Color.White.copy(alpha = 0.9f),
+                                style = MaterialTheme.typography.bodyMedium
                             )
                         }
                     }
 
-                    Text(
-                        text = "PLAY NOW ▶",
-                        color = Color.White,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Black
-                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.White)
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "PLAY NOW",
+                                color = TextOnAccent,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Black
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Icon(
+                                imageVector = Icons.Rounded.PlayArrow,
+                                contentDescription = null,
+                                tint = TextOnAccent,
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
+                    }
                 }
             }
 
             // Recently Played Carousel (if available)
             if (recentGames.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = "🕒 RECENTLY PLAYED",
-                    color = TextSecondary,
-                    fontSize = 11.sp,
+                    text = "RECENTLY PLAYED",
+                    color = TextMuted,
+                    style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
                 )
@@ -220,7 +314,7 @@ fun ArcadeHubScreen(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(SurfaceGlassDark)
-                                .border(1.dp, Color(0xFF00F2FE).copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+                                .border(1.dp, AccentCyan.copy(alpha = 0.35f), RoundedCornerShape(12.dp))
                                 .clickable {
                                     haptics.performTick(composeHaptics)
                                     selectedGameForSheet = game
@@ -233,7 +327,7 @@ fun ArcadeHubScreen(
                                 Text(
                                     text = game.title,
                                     color = TextPrimary,
-                                    fontSize = 12.sp,
+                                    style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -242,19 +336,39 @@ fun ArcadeHubScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // Search Bar
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text("Search games...", color = TextMuted, fontSize = 13.sp) },
+                placeholder = { Text("Search games...", color = TextMuted, style = MaterialTheme.typography.bodyMedium) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Rounded.Search,
+                        contentDescription = "Search",
+                        tint = TextSecondary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                },
+                trailingIcon = {
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { searchQuery = "" }) {
+                            Icon(
+                                imageVector = Icons.Rounded.Close,
+                                contentDescription = "Clear search",
+                                tint = TextMuted,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(14.dp))
                     .background(SurfaceGlassDark),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFF00F2FE),
+                    focusedBorderColor = AccentCyan,
                     unfocusedBorderColor = BorderGlassDefault,
                     focusedTextColor = TextPrimary,
                     unfocusedTextColor = TextPrimary
@@ -262,40 +376,42 @@ fun ArcadeHubScreen(
                 singleLine = true
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
-            // Category & Favorites Filter Badges Row
-            Row(
+            // Category & Favorites Scrollable Chips Row
+            LazyRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // ALL Chip
-                CategoryChip(
-                    label = "All",
-                    icon = "🌟",
-                    isSelected = selectedCategory == null && !showOnlyFavorites,
-                    accentColor = Color(0xFF00F2FE),
-                    onClick = {
-                        haptics.performTick(composeHaptics)
-                        selectedCategory = null
-                        showOnlyFavorites = false
-                    }
-                )
+                item {
+                    CategoryChip(
+                        label = "All",
+                        icon = "🌟",
+                        isSelected = selectedCategory == null && !showOnlyFavorites,
+                        accentColor = AccentCyan,
+                        onClick = {
+                            haptics.performTick(composeHaptics)
+                            selectedCategory = null
+                            showOnlyFavorites = false
+                        }
+                    )
+                }
 
-                // Favorites Chip
-                CategoryChip(
-                    label = "Favs",
-                    icon = "❤️",
-                    isSelected = showOnlyFavorites,
-                    accentColor = Color(0xFFFF0055),
-                    onClick = {
-                        haptics.performTick(composeHaptics)
-                        showOnlyFavorites = !showOnlyFavorites
-                        if (showOnlyFavorites) selectedCategory = null
-                    }
-                )
+                item {
+                    CategoryChip(
+                        label = "Favorites",
+                        icon = "❤️",
+                        isSelected = showOnlyFavorites,
+                        accentColor = Color(0xFFFF2A6D),
+                        onClick = {
+                            haptics.performTick(composeHaptics)
+                            showOnlyFavorites = !showOnlyFavorites
+                            if (showOnlyFavorites) selectedCategory = null
+                        }
+                    )
+                }
 
-                GameCategory.entries.forEach { category ->
+                items(GameCategory.entries.toTypedArray()) { category ->
                     val token = CategoryThemeToken.forCategory(category)
                     CategoryChip(
                         label = category.title.split(" ").first(),
@@ -311,60 +427,111 @@ fun ArcadeHubScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            // Player Count Pill Selector
-            Row(
+            // Player Count Pill Selector Row
+            LazyRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                listOf("ALL" to "Any Size", "2P" to "2 Players", "3-6P" to "3-6 Group", "8P+" to "8+ Party").forEach { (code, label) ->
+                items(
+                    listOf("ALL" to "Any Size", "2P" to "2 Players", "3-6P" to "3-6 Group", "8P+" to "8+ Party")
+                ) { (code, label) ->
                     val isSel = selectedPlayerFilter == code
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
-                            .background(if (isSel) Color(0x3300F2FE) else SurfaceGlassDark)
-                            .border(1.dp, if (isSel) Color(0xFF00F2FE) else BorderGlassDefault, RoundedCornerShape(10.dp))
+                            .background(if (isSel) AccentCyan.copy(alpha = 0.2f) else SurfaceGlassDark)
+                            .border(1.dp, if (isSel) AccentCyan else BorderGlassDefault, RoundedCornerShape(10.dp))
                             .clickable {
                                 haptics.performTick(composeHaptics)
                                 selectedPlayerFilter = code
                             }
-                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
                         Text(
                             text = label,
-                            color = if (isSel) Color(0xFF00F2FE) else TextSecondary,
-                            fontSize = 11.sp,
+                            color = if (isSel) AccentCyan else TextSecondary,
+                            style = MaterialTheme.typography.labelSmall,
                             fontWeight = if (isSel) FontWeight.Bold else FontWeight.Medium
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            // Games Grid
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(bottom = 24.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(filteredGames, key = { it.id }) { game ->
-                    val isFav = favoriteGameIds.contains(game.id)
-                    GameCard(
-                        game = game,
-                        isFavorite = isFav,
-                        onToggleFavorite = {
-                            haptics.performTick(composeHaptics)
-                            UserPreferencesRepository.toggleFavorite(game.id)
-                        },
-                        onClick = {
-                            haptics.performTick(composeHaptics)
-                            selectedGameForSheet = game
+            // Games Grid or Empty State
+            if (filteredGames.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(text = "🔍", fontSize = 36.sp)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "No games found",
+                            color = TextPrimary,
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Try adjusting your search or category filter",
+                            color = TextMuted,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(SurfaceGlassDark)
+                                .border(1.dp, BorderGlassDefault, RoundedCornerShape(12.dp))
+                                .clickable {
+                                    searchQuery = ""
+                                    selectedCategory = null
+                                    showOnlyFavorites = false
+                                    selectedPlayerFilter = "ALL"
+                                }
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        ) {
+                            Text(
+                                text = "RESET FILTERS",
+                                color = AccentCyan,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
-                    )
+                    }
+                }
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(bottom = 24.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(filteredGames, key = { it.id }) { game ->
+                        val isFav = favoriteGameIds.contains(game.id)
+                        GameCard(
+                            game = game,
+                            isFavorite = isFav,
+                            onToggleFavorite = {
+                                haptics.performTick(composeHaptics)
+                                UserPreferencesRepository.toggleFavorite(game.id)
+                            },
+                            onClick = {
+                                haptics.performTick(composeHaptics)
+                                selectedGameForSheet = game
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -424,18 +591,18 @@ private fun CategoryChip(
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(12.dp))
-            .background(if (isSelected) accentColor.copy(alpha = 0.25f) else SurfaceGlassDark)
+            .background(if (isSelected) accentColor.copy(alpha = 0.2f) else SurfaceGlassDark)
             .border(1.dp, if (isSelected) accentColor else BorderGlassDefault, RoundedCornerShape(12.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 6.dp)
+            .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(text = icon, fontSize = 13.sp)
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(6.dp))
             Text(
                 text = label,
                 color = if (isSelected) accentColor else TextSecondary,
-                fontSize = 11.sp,
+                style = MaterialTheme.typography.labelSmall,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
             )
         }

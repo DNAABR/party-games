@@ -20,9 +20,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFF00F2FE),
-    secondary = Color(0xFF9D4EDD),
-    tertiary = Color(0xFFFF6B6B),
+    primary = AccentCyan,
+    secondary = AccentViolet,
+    tertiary = AccentMagenta,
     background = BackgroundObsidian,
     surface = SurfaceGlassDark,
     onBackground = TextPrimary,
@@ -35,6 +35,7 @@ fun PartyGamesTheme(
 ) {
     MaterialTheme(
         colorScheme = DarkColorScheme,
+        typography = PartyTypography,
         content = {
             // Obsidian background canvas with subtle low-intensity radial gradient ambient light
             Box(
@@ -43,7 +44,7 @@ fun PartyGamesTheme(
                     .background(
                         brush = Brush.radialGradient(
                             colors = listOf(
-                                Color(0xFF131B2E),
+                                Color(0xFF111726),
                                 BackgroundNavySlate,
                                 BackgroundObsidian
                             ),
@@ -56,6 +57,7 @@ fun PartyGamesTheme(
         }
     )
 }
+
 
 /**
  * Modifier helper to apply a translucent physical glass surface with border stroke & rounded corners.

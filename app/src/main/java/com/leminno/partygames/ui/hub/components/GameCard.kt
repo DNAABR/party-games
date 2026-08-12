@@ -27,6 +27,12 @@ import androidx.compose.ui.unit.sp
 import com.leminno.partygames.ui.model.GameItem
 import com.leminno.partygames.ui.theme.*
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+
 @Composable
 fun GameCard(
     game: GameItem,
@@ -75,7 +81,7 @@ fun GameCard(
                 indication = null,
                 onClick = onClick
             )
-            .padding(16.dp)
+            .padding(14.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -89,15 +95,15 @@ fun GameCard(
                 // Category Icon Symbol + Title Badge
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(10.dp))
                         .background(categoryToken.primaryAccent.copy(alpha = 0.2f))
-                        .border(1.dp, categoryToken.primaryAccent.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                        .border(1.dp, categoryToken.primaryAccent.copy(alpha = 0.4f), RoundedCornerShape(10.dp))
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Text(
                         text = "${game.category.iconSymbol} ${game.category.title.split(" ").first()}",
                         color = categoryToken.primaryAccent,
-                        fontSize = 11.sp,
+                        style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -106,39 +112,44 @@ fun GameCard(
                     // Setup Type Badge
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(Color(0x33FFFFFF))
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(SurfaceGlassLight)
                             .padding(horizontal = 6.dp, vertical = 3.dp)
                     ) {
                         Text(
                             text = "${game.setupType.badgeIcon}",
                             color = TextSecondary,
-                            fontSize = 11.sp,
+                            style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Medium
                         )
                     }
 
                     if (onToggleFavorite != null) {
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = if (isFavorite) "❤️" else "🤍",
-                            fontSize = 14.sp,
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(8.dp))
                                 .clickable(onClick = onToggleFavorite)
                                 .padding(4.dp)
-                        )
+                        ) {
+                            Icon(
+                                imageVector = if (isFavorite) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                                contentDescription = "Favorite",
+                                tint = if (isFavorite) Color(0xFFFF2A6D) else TextMuted,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             // Game Title
             Text(
                 text = game.title,
                 color = TextPrimary,
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.ExtraBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -150,13 +161,12 @@ fun GameCard(
             Text(
                 text = game.tagLine,
                 color = TextSecondary,
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                lineHeight = 16.sp
+                overflow = TextOverflow.Ellipsis
             )
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // Bottom Info Bar: Players & Estimated Time
             Row(
@@ -167,17 +177,18 @@ fun GameCard(
                 Text(
                     text = "👥 ${game.minPlayers}-${game.maxPlayers} Players",
                     color = TextMuted,
-                    fontSize = 11.sp,
+                    style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.SemiBold
                 )
 
                 Text(
                     text = "⏱️ ~${game.estTimeMinutes}m",
                     color = TextMuted,
-                    fontSize = 11.sp,
+                    style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.SemiBold
                 )
             }
         }
     }
 }
+

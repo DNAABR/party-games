@@ -22,6 +22,10 @@ import com.leminno.partygames.data.GameCatalogRepository
 import com.leminno.partygames.data.repository.UserPreferencesRepository
 import com.leminno.partygames.ui.theme.*
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Info
+
 /**
  * Reusable layout scaffold for all in-game screens.
  * Includes standardized top header bar, edge-to-edge padding, system BackHandler exit confirmation,
@@ -77,7 +81,7 @@ fun GameScaffold(
             .background(BackgroundNavySlate)
             .statusBarsPadding()
             .navigationBarsPadding()
-            .padding(20.dp)
+            .padding(horizontal = 20.dp, vertical = 12.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -86,34 +90,68 @@ fun GameScaffold(
         ) {
             // Header Bar
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { handleExitAttempt() }) {
-                    Text("✕", color = TextSecondary, fontSize = 22.sp)
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(SurfaceGlassDark)
+                        .border(1.dp, BorderGlassDefault, RoundedCornerShape(12.dp))
+                ) {
+                    IconButton(
+                        onClick = { handleExitAttempt() },
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Close,
+                            contentDescription = "Exit",
+                            tint = TextSecondary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
 
                 Text(
                     text = title.uppercase(),
                     color = titleColor,
-                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Black,
-                    letterSpacing = 1.sp
+                    letterSpacing = 1.2.sp,
+                    maxLines = 1
                 )
 
                 if (matchedGameItem != null) {
-                    IconButton(onClick = { showRulesSheet = true }) {
-                        Text("ℹ️", fontSize = 20.sp)
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(SurfaceGlassDark)
+                            .border(1.dp, BorderGlassDefault, RoundedCornerShape(12.dp))
+                    ) {
+                        IconButton(
+                            onClick = { showRulesSheet = true },
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Info,
+                                contentDescription = "Rules",
+                                tint = AccentCyan,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
                 } else {
-                    Spacer(modifier = Modifier.width(48.dp))
+                    Spacer(modifier = Modifier.width(40.dp))
                 }
             }
 
             // Game Content
             content()
         }
+
 
         // Mid-Game Rules Peek Sheet Modal
         if (showRulesSheet && matchedGameItem != null) {

@@ -6,6 +6,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowForward
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.PrimaryPartyButton
 import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
 
@@ -48,8 +53,8 @@ fun NeverHaveIEverScreen(
     var livesRemaining by remember { mutableIntStateOf(10) }
 
     GameScaffold(
-        title = "Never Have I Ever 🖐️",
-        titleColor = Color(0xFFFF007F),
+        title = "NEVER HAVE I EVER",
+        titleColor = AccentMagenta,
         gameId = "never_have_i_ever",
         onExitGame = onExitGame
     ) {
@@ -63,49 +68,79 @@ fun NeverHaveIEverScreen(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0x33FF007F))
+                        .background(AccentMagenta.copy(alpha = 0.2f))
+                        .border(1.dp, AccentMagenta.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
                         .padding(horizontal = 16.dp, vertical = 6.dp)
                 ) {
-                    Text("❤️ $livesRemaining Lives Remaining", color = Color(0xFFFF007F), fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Rounded.Favorite,
+                            contentDescription = null,
+                            tint = AccentMagenta,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "$livesRemaining LIVES REMAINING",
+                            color = AccentMagenta,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 1.sp
+                        )
+                    }
                 }
 
                 // Center Prompt Card
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(280.dp)
-                        .clip(RoundedCornerShape(28.dp))
+                        .weight(1f)
+                        .padding(vertical = 16.dp)
+                        .clip(RoundedCornerShape(24.dp))
                         .background(SurfaceGlassDark)
-                        .border(2.dp, Color(0x66FF007F), RoundedCornerShape(28.dp))
+                        .border(1.5.dp, AccentMagenta.copy(alpha = 0.5f), RoundedCornerShape(24.dp))
                         .padding(24.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "NEVER HAVE I EVER...",
-                            color = Color(0xFFFF007F),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 2.sp
-                        )
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(AccentMagenta.copy(alpha = 0.2f))
+                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = "NEVER HAVE I EVER...",
+                                color = AccentMagenta,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 2.sp
+                            )
+                        }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
 
                         Text(
                             text = prompts[currentPromptIndex % prompts.size],
                             color = TextPrimary,
-                            fontSize = 22.sp,
+                            style = MaterialTheme.typography.headlineLarge,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
-                            lineHeight = 30.sp
+                            lineHeight = 32.sp
                         )
                     }
                 }
 
                 // Lives Tracker Hearts Display
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("TAP HEART IF YOU HAVE DONE THIS:", color = TextMuted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "TAP HEART IF YOU HAVE DONE THIS:",
+                        color = TextMuted,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 0.5.sp
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -115,9 +150,10 @@ fun NeverHaveIEverScreen(
                             val isAlive = index < livesRemaining
                             Box(
                                 modifier = Modifier
-                                    .size(28.dp)
+                                    .size(30.dp)
                                     .clip(CircleShape)
-                                    .background(if (isAlive) Color(0xFFFF007F) else Color(0x22FFFFFF))
+                                    .background(if (isAlive) AccentMagenta.copy(alpha = 0.2f) else SurfaceGlassLight)
+                                    .border(1.dp, if (isAlive) AccentMagenta else BorderGlassDefault, CircleShape)
                                     .clickable {
                                         if (livesRemaining > 0) {
                                             livesRemaining--
@@ -126,25 +162,30 @@ fun NeverHaveIEverScreen(
                                     },
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(if (isAlive) "❤️" else "🖤", fontSize = 14.sp)
+                                Icon(
+                                    imageVector = if (isAlive) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                                    contentDescription = null,
+                                    tint = if (isAlive) AccentMagenta else TextMuted,
+                                    modifier = Modifier.size(16.dp)
+                                )
                             }
                         }
                     }
                 }
 
+                Spacer(modifier = Modifier.height(16.dp))
+
                 // Next Prompt Button
-                Button(
+                PrimaryPartyButton(
+                    text = "NEXT PROMPT",
+                    icon = Icons.Rounded.ArrowForward,
+                    accentColor = AccentCyan,
                     onClick = {
                         currentPromptIndex++
                         haptics.performPop()
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(54.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00F2FE))
-                ) {
-                    Text("NEXT PROMPT ▶", color = BackgroundObsidian, fontSize = 16.sp, fontWeight = FontWeight.Black)
-                }
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         } else {
             VictoryCeremonyOverlay(

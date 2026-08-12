@@ -11,6 +11,11 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Phonelink
+import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,8 +28,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.leminno.partygames.data.remote.RemoteRoomRepository
 import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.PrimaryPartyButton
 import com.leminno.partygames.ui.components.RemoteRoomSetupSheet
 import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
@@ -36,7 +41,6 @@ fun WhoAmIScreen(
     onExitGame: () -> Unit
 ) {
     val context = LocalContext.current
-    val haptics = remember { HapticFeedbackManager(context) }
     val uiState by viewModel.uiState.collectAsState()
 
     var selectedMode by remember { mutableStateOf<String?>(null) } // null, LOCAL, REMOTE
@@ -72,15 +76,15 @@ fun WhoAmIScreen(
         targetValue = when (uiState.cardFeedbackState) {
             "CORRECT" -> SuccessGreen.copy(alpha = 0.85f)
             "SKIP" -> AlertRed.copy(alpha = 0.85f)
-            else -> BackgroundNavySlate
+            else -> SurfaceGlassDark
         },
         animationSpec = tween(300),
         label = "bgColor"
     )
 
     GameScaffold(
-        title = "Who Am I?",
-        titleColor = Color(0xFF9D4EDD),
+        title = "WHO AM I?",
+        titleColor = AccentViolet,
         gameId = "who_am_i",
         onExitGame = onExitGame
     ) {
@@ -91,7 +95,12 @@ fun WhoAmIScreen(
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("SELECT PLAY MODE", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Black)
+                    Text(
+                        text = "SELECT PLAY MODE",
+                        color = TextPrimary,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Black
+                    )
                     Spacer(modifier = Modifier.height(20.dp))
 
                     Box(
@@ -99,18 +108,39 @@ fun WhoAmIScreen(
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(20.dp))
                             .background(SurfaceGlassDark)
-                            .border(1.5.dp, Color(0xFF9D4EDD), RoundedCornerShape(20.dp))
+                            .border(1.5.dp, AccentViolet, RoundedCornerShape(20.dp))
                             .clickable {
                                 selectedMode = "LOCAL"
                             }
                             .padding(20.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("📱", fontSize = 36.sp)
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(AccentViolet.copy(alpha = 0.2f))
+                                    .padding(12.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Phonelink,
+                                    contentDescription = null,
+                                    tint = AccentViolet,
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            }
                             Spacer(modifier = Modifier.width(16.dp))
                             Column {
-                                Text("Forehead Pass (Same Phone)", color = Color(0xFF9D4EDD), fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                                Text("Hold phone on forehead with tilt detection", color = TextMuted, fontSize = 12.sp)
+                                Text(
+                                    text = "Forehead Pass (Same Phone)",
+                                    color = AccentViolet,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "Hold phone on forehead with tilt detection",
+                                    color = TextMuted,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
                             }
                         }
                     }
@@ -122,7 +152,7 @@ fun WhoAmIScreen(
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(20.dp))
                             .background(SurfaceGlassDark)
-                            .border(1.5.dp, Color(0xFF00F2FE), RoundedCornerShape(20.dp))
+                            .border(1.5.dp, AccentCyan, RoundedCornerShape(20.dp))
                             .clickable {
                                 selectedMode = "REMOTE"
                                 showRemoteSheet = true
@@ -130,11 +160,32 @@ fun WhoAmIScreen(
                             .padding(20.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("🌐", fontSize = 36.sp)
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(AccentCyan.copy(alpha = 0.2f))
+                                    .padding(12.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Public,
+                                    contentDescription = null,
+                                    tint = AccentCyan,
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            }
                             Spacer(modifier = Modifier.width(16.dp))
                             Column {
-                                Text("Remote Play (Multi-Device)", color = Color(0xFF00F2FE), fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                                Text("Card shown on remote screens while guesser asks questions", color = TextMuted, fontSize = 12.sp)
+                                Text(
+                                    text = "Remote Play (Multi-Device)",
+                                    color = AccentCyan,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "Card shown on remote screens while guesser asks questions",
+                                    color = TextMuted,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
                             }
                         }
                     }
@@ -156,12 +207,13 @@ fun WhoAmIScreen(
                         modifier = Modifier
                             .clip(RoundedCornerShape(12.dp))
                             .background(SurfaceGlassDark)
+                            .border(1.dp, BorderGlassDefault, RoundedCornerShape(12.dp))
                             .padding(horizontal = 14.dp, vertical = 6.dp)
                     ) {
                         Text(
                             text = "⏱️ ${uiState.timeRemaining}s",
                             color = if (uiState.timeRemaining <= 10) AlertRed else TextPrimary,
-                            fontSize = 16.sp,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Black
                         )
                     }
@@ -170,12 +222,13 @@ fun WhoAmIScreen(
                         modifier = Modifier
                             .clip(RoundedCornerShape(12.dp))
                             .background(SurfaceGlassDark)
+                            .border(1.dp, AccentViolet.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
                             .padding(horizontal = 14.dp, vertical = 6.dp)
                     ) {
                         Text(
                             text = "SCORE: ${uiState.score}",
-                            color = Color(0xFF9D4EDD),
-                            fontSize = 16.sp,
+                            color = AccentViolet,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Black
                         )
                     }
@@ -185,10 +238,11 @@ fun WhoAmIScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(280.dp)
+                        .weight(1f)
+                        .padding(vertical = 16.dp)
                         .clip(RoundedCornerShape(24.dp))
                         .background(backgroundColor)
-                        .border(2.dp, BorderGlassDefault, RoundedCornerShape(24.dp))
+                        .border(1.5.dp, AccentViolet.copy(alpha = 0.5f), RoundedCornerShape(24.dp))
                         .padding(24.dp),
                     contentAlignment = Alignment.Center
                 ) {
@@ -196,8 +250,8 @@ fun WhoAmIScreen(
                         val currentWord = uiState.wordList.getOrNull(uiState.currentIndex)
                         Text(
                             text = currentWord ?: "CARD",
-                            color = Color.White,
-                            fontSize = 32.sp,
+                            color = TextPrimary,
+                            style = MaterialTheme.typography.displayLarge,
                             fontWeight = FontWeight.Black,
                             textAlign = TextAlign.Center
                         )
@@ -209,27 +263,21 @@ fun WhoAmIScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Button(
+                    PrimaryPartyButton(
+                        text = "SKIP",
+                        icon = Icons.Rounded.Close,
+                        accentColor = AlertRed,
                         onClick = { viewModel.onManualSkip() },
-                        colors = ButtonDefaults.buttonColors(containerColor = AlertRed),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(52.dp)
-                    ) {
-                        Text("SKIP ❌", color = Color.White, fontWeight = FontWeight.Black)
-                    }
+                        modifier = Modifier.weight(1f)
+                    )
 
-                    Button(
+                    PrimaryPartyButton(
+                        text = "CORRECT",
+                        icon = Icons.Rounded.Check,
+                        accentColor = SuccessGreen,
                         onClick = { viewModel.onManualGotIt() },
-                        colors = ButtonDefaults.buttonColors(containerColor = SuccessGreen),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(52.dp)
-                    ) {
-                        Text("CORRECT ✅", color = Color.Black, fontWeight = FontWeight.Black)
-                    }
+                        modifier = Modifier.weight(1f)
+                    )
                 }
             }
         } else {

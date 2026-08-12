@@ -7,6 +7,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowForward
+import androidx.compose.material.icons.rounded.Phonelink
+import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.leminno.partygames.data.remote.RemoteRoomRepository
 import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.PrimaryPartyButton
 import com.leminno.partygames.ui.components.RemoteRoomSetupSheet
 import com.leminno.partygames.ui.theme.*
 import kotlinx.coroutines.launch
@@ -87,8 +92,8 @@ fun WouldYouRatherScreen(
     }
 
     GameScaffold(
-        title = "Would You Rather ⚖️",
-        titleColor = Color(0xFF00F2FE),
+        title = "WOULD YOU RATHER",
+        titleColor = AccentCyan,
         gameId = "would_you_rather",
         onExitGame = onExitGame
     ) {
@@ -99,7 +104,12 @@ fun WouldYouRatherScreen(
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("SELECT PLAY MODE", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Black)
+                    Text(
+                        text = "SELECT PLAY MODE",
+                        color = TextPrimary,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Black
+                    )
                     Spacer(modifier = Modifier.height(20.dp))
 
                     Box(
@@ -107,7 +117,7 @@ fun WouldYouRatherScreen(
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(20.dp))
                             .background(SurfaceGlassDark)
-                            .border(1.5.dp, Color(0xFF00F2FE), RoundedCornerShape(20.dp))
+                            .border(1.5.dp, AccentCyan, RoundedCornerShape(20.dp))
                             .clickable {
                                 isRemoteMode = false
                                 gamePhase = "PLAYING"
@@ -115,11 +125,32 @@ fun WouldYouRatherScreen(
                             .padding(20.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("📱", fontSize = 36.sp)
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(AccentCyan.copy(alpha = 0.2f))
+                                    .padding(12.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Phonelink,
+                                    contentDescription = null,
+                                    tint = AccentCyan,
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            }
                             Spacer(modifier = Modifier.width(16.dp))
                             Column {
-                                Text("Solo / Same Phone", color = Color(0xFF00F2FE), fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                                Text("Tap option to reveal global choice percentage", color = TextMuted, fontSize = 12.sp)
+                                Text(
+                                    text = "Solo / Same Phone",
+                                    color = AccentCyan,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "Tap option to reveal global choice percentage",
+                                    color = TextMuted,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
                             }
                         }
                     }
@@ -131,7 +162,7 @@ fun WouldYouRatherScreen(
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(20.dp))
                             .background(SurfaceGlassDark)
-                            .border(1.5.dp, Color(0xFFFF007F), RoundedCornerShape(20.dp))
+                            .border(1.5.dp, AccentMagenta, RoundedCornerShape(20.dp))
                             .clickable {
                                 isRemoteMode = true
                                 showRemoteSheet = true
@@ -139,11 +170,32 @@ fun WouldYouRatherScreen(
                             .padding(20.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("🌐", fontSize = 36.sp)
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(AccentMagenta.copy(alpha = 0.2f))
+                                    .padding(12.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Public,
+                                    contentDescription = null,
+                                    tint = AccentMagenta,
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            }
                             Spacer(modifier = Modifier.width(16.dp))
                             Column {
-                                Text("Remote Play (Multi-Device)", color = Color(0xFFFF007F), fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                                Text("Synchronized dilemmas & live polling across screens", color = TextMuted, fontSize = 12.sp)
+                                Text(
+                                    text = "Remote Play (Multi-Device)",
+                                    color = AccentMagenta,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "Synchronized dilemmas & live polling across screens",
+                                    color = TextMuted,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
                             }
                         }
                     }
@@ -159,9 +211,16 @@ fun WouldYouRatherScreen(
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
                         .background(SurfaceGlassDark)
+                        .border(1.dp, BorderGlassDefault, RoundedCornerShape(12.dp))
                         .padding(horizontal = 14.dp, vertical = 6.dp)
                 ) {
-                    Text("Dilemma #${currentIndex + 1}", color = TextSecondary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = "DILEMMA #${currentIndex + 1}",
+                        color = TextSecondary,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -172,8 +231,8 @@ fun WouldYouRatherScreen(
                         .fillMaxWidth()
                         .weight(1f)
                         .clip(RoundedCornerShape(24.dp))
-                        .background(if (selectedOption == "A") Color(0x4400F2FE) else SurfaceGlassDark)
-                        .border(2.dp, if (selectedOption == "A") Color(0xFF00F2FE) else BorderGlassDefault, RoundedCornerShape(24.dp))
+                        .background(if (selectedOption == "A") AccentCyan.copy(alpha = 0.25f) else SurfaceGlassDark)
+                        .border(1.5.dp, if (selectedOption == "A") AccentCyan else BorderGlassDefault, RoundedCornerShape(24.dp))
                         .clickable {
                             selectedOption = "A"
                             haptics.performPop()
@@ -183,21 +242,27 @@ fun WouldYouRatherScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("OPTION A 🅰️", color = Color(0xFF00F2FE), fontSize = 12.sp, fontWeight = FontWeight.Black)
+                        Text(
+                            text = "OPTION A",
+                            color = AccentCyan,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 2.sp
+                        )
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
                             text = currentScenario.optionA,
                             color = TextPrimary,
-                            fontSize = 18.sp,
+                            style = MaterialTheme.typography.headlineLarge,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center
                         )
                         if (selectedOption != null) {
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
                             Text(
                                 text = "${animatedPercentA.toInt()}% Voted This",
-                                color = Color(0xFF00F2FE),
-                                fontSize = 16.sp,
+                                color = AccentCyan,
+                                style = MaterialTheme.typography.headlineMedium,
                                 fontWeight = FontWeight.Black
                             )
                         }
@@ -212,8 +277,8 @@ fun WouldYouRatherScreen(
                         .fillMaxWidth()
                         .weight(1f)
                         .clip(RoundedCornerShape(24.dp))
-                        .background(if (selectedOption == "B") Color(0x44FF007F) else SurfaceGlassDark)
-                        .border(2.dp, if (selectedOption == "B") Color(0xFFFF007F) else BorderGlassDefault, RoundedCornerShape(24.dp))
+                        .background(if (selectedOption == "B") AccentMagenta.copy(alpha = 0.25f) else SurfaceGlassDark)
+                        .border(1.5.dp, if (selectedOption == "B") AccentMagenta else BorderGlassDefault, RoundedCornerShape(24.dp))
                         .clickable {
                             selectedOption = "B"
                             haptics.performPop()
@@ -223,44 +288,47 @@ fun WouldYouRatherScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("OPTION B 🅱️", color = Color(0xFFFF007F), fontSize = 12.sp, fontWeight = FontWeight.Black)
+                        Text(
+                            text = "OPTION B",
+                            color = AccentMagenta,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 2.sp
+                        )
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
                             text = currentScenario.optionB,
                             color = TextPrimary,
-                            fontSize = 18.sp,
+                            style = MaterialTheme.typography.headlineLarge,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center
                         )
                         if (selectedOption != null) {
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
                             Text(
                                 text = "${100 - animatedPercentA.toInt()}% Voted This",
-                                color = Color(0xFFFF007F),
-                                fontSize = 16.sp,
+                                color = AccentMagenta,
+                                style = MaterialTheme.typography.headlineMedium,
                                 fontWeight = FontWeight.Black
                             )
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                Button(
+                PrimaryPartyButton(
+                    text = "NEXT DILEMMA",
+                    icon = Icons.Rounded.ArrowForward,
+                    accentColor = AccentCyan,
+                    enabled = selectedOption != null,
                     onClick = {
                         selectedOption = null
                         currentIndex++
                         syncRemote(currentIndex, null)
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00F2FE)),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    enabled = selectedOption != null
-                ) {
-                    Text("NEXT DILEMMA ▶", color = Color.Black, fontWeight = FontWeight.Black)
-                }
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
 
