@@ -1,26 +1,24 @@
 package com.leminno.partygames.ui.games.undercover
 
-import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.leminno.partygames.data.remote.RemoteRoomRepository
 import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.PrimaryPartyButton
 import com.leminno.partygames.ui.components.RemoteRoomSetupSheet
 import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
@@ -39,7 +37,7 @@ fun UndercoverSpyScreen(
         listOf("Submarine", "Airplane", "Space Station", "Movie Studio", "Hospital", "Casino", "Supermarket", "Circus", "Polar Station")
     }
 
-    var gamePhase by remember { mutableStateOf("MODE_SELECT") } // MODE_SELECT, SETUP, DISCUSSION
+    var gamePhase by remember { mutableStateOf("MODE_SELECT") }
     var isRemoteMode by remember { mutableStateOf(false) }
     var showRemoteSheet by remember { mutableStateOf(false) }
     var roomCode by remember { mutableStateOf("") }
@@ -83,8 +81,8 @@ fun UndercoverSpyScreen(
     }
 
     GameScaffold(
-        title = "Undercover Spy 🕵️",
-        titleColor = Color(0xFF00E676),
+        title = "UNDERCOVER SPY",
+        titleColor = PixelEmeraldGreen,
         gameId = "undercover_spy",
         onExitGame = onExitGame
     ) {
@@ -95,51 +93,106 @@ fun UndercoverSpyScreen(
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("SELECT PLAY MODE", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Black)
+                    Text(
+                        text = "SELECT PLAY MODE",
+                        color = PixelEmeraldGreen,
+                        fontFamily = PressStart2PFont,
+                        fontSize = 12.sp
+                    )
                     Spacer(modifier = Modifier.height(20.dp))
 
+                    // Pass & Play Card
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.5.dp, Color(0xFF00E676), RoundedCornerShape(20.dp))
+                            .border(3.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
+                            .background(
+                                brush = pixelBandedVertical(listOf(PixelVioletElevated, PixelVioletBase))
+                            )
                             .clickable {
                                 isRemoteMode = false
                                 gamePhase = "SETUP"
                             }
-                            .padding(20.dp)
+                            .padding(16.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("📱", fontSize = 36.sp)
-                            Spacer(modifier = Modifier.width(16.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .border(1.5.dp, PixelOutlineBlack)
+                                    .background(PixelEmeraldGreen),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = PixelIcons.Eye,
+                                    contentDescription = null,
+                                    tint = PixelOutlineBlack,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(14.dp))
                             Column {
-                                Text("Pass & Play (Same Phone)", color = Color(0xFF00E676), fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                                Text("Hold scanner to reveal role on single phone", color = TextMuted, fontSize = 12.sp)
+                                Text(
+                                    text = "PASS & PLAY",
+                                    color = PixelEmeraldGreen,
+                                    fontFamily = PressStart2PFont,
+                                    fontSize = 10.sp
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Hold scanner to reveal role on single phone",
+                                    color = TextSecondary,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
                             }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
+                    // Remote Play Card
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.5.dp, Color(0xFF00F2FE), RoundedCornerShape(20.dp))
+                            .border(3.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
+                            .background(
+                                brush = pixelBandedVertical(listOf(PixelVioletElevated, PixelVioletBase))
+                            )
                             .clickable {
                                 isRemoteMode = true
                                 showRemoteSheet = true
                             }
-                            .padding(20.dp)
+                            .padding(16.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("🌐", fontSize = 36.sp)
-                            Spacer(modifier = Modifier.width(16.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .border(1.5.dp, PixelOutlineBlack)
+                                    .background(PixelCrtCyan),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = PixelIcons.Users,
+                                    contentDescription = null,
+                                    tint = PixelOutlineBlack,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(14.dp))
                             Column {
-                                Text("Remote Play (Multi-Device)", color = Color(0xFF00F2FE), fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                                Text("Roles & locations sent directly to separate phone screens", color = TextMuted, fontSize = 12.sp)
+                                Text(
+                                    text = "REMOTE PLAY",
+                                    color = PixelCrtCyan,
+                                    fontFamily = PressStart2PFont,
+                                    fontSize = 10.sp
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Multi-device room code sync",
+                                    color = TextSecondary,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
                             }
                         }
                     }
@@ -153,21 +206,29 @@ fun UndercoverSpyScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0x3300E676))
-                        .padding(horizontal = 16.dp, vertical = 6.dp)
+                        .border(2.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
+                        .background(PixelVioletElevated)
+                        .padding(horizontal = 14.dp, vertical = 6.dp)
                 ) {
-                    Text("Player ${currentPlayerTurn + 1} / $playerCount", color = Color(0xFF00E676), fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = "PLAYER ${currentPlayerTurn + 1} OF $playerCount",
+                        color = PixelEmeraldGreen,
+                        fontFamily = PressStart2PFont,
+                        fontSize = 10.sp
+                    )
                 }
 
                 if (gamePhase == "SETUP") {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(340.dp)
-                            .clip(RoundedCornerShape(28.dp))
-                            .background(SurfaceGlassDark)
-                            .border(2.dp, if (isRevealingRole) Color(0xFF00E676) else BorderGlassDefault, RoundedCornerShape(28.dp))
+                            .weight(1f)
+                            .padding(vertical = 14.dp)
+                            .border(3.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
+                            .background(
+                                if (isRevealingRole) PixelCrtDarkCanvas else PixelVioletElevated
+                            )
+                            .crtScanlines()
                             .pointerInput(Unit) {
                                 detectTapGestures(
                                     onPress = {
@@ -177,37 +238,64 @@ fun UndercoverSpyScreen(
                                         isRevealingRole = false
                                     }
                                 )
-                            },
+                            }
+                            .padding(20.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         if (isRevealingRole) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 val isSpy = currentPlayerTurn == spyIndex
+                                Icon(
+                                    imageVector = if (isSpy) PixelIcons.Eye else PixelIcons.Spy,
+                                    contentDescription = null,
+                                    tint = if (isSpy) PixelAlertRed else PixelEmeraldGreen,
+                                    modifier = Modifier.size(40.dp)
+                                )
+                                Spacer(modifier = Modifier.height(14.dp))
                                 Text(
-                                    text = if (isSpy) "YOU ARE THE SPY! 🕵️" else "LOCATION: $secretLocation",
-                                    color = if (isSpy) Color(0xFFFF007F) else Color(0xFF00E676),
-                                    fontSize = 24.sp,
-                                    fontWeight = FontWeight.Black,
+                                    text = if (isSpy) "YOU ARE THE SPY!" else "LOCATION: ${secretLocation.uppercase()}",
+                                    color = if (isSpy) PixelAlertRed else PixelEmeraldGreen,
+                                    fontFamily = PressStart2PFont,
+                                    fontSize = 12.sp,
                                     textAlign = TextAlign.Center
                                 )
-                                Spacer(modifier = Modifier.height(12.dp))
+                                Spacer(modifier = Modifier.height(10.dp))
                                 Text(
-                                    text = if (isSpy) "Try to blend in and guess the location!" else "Ask subtle questions to spot the imposter!",
-                                    color = TextMuted,
-                                    fontSize = 12.sp,
+                                    text = if (isSpy) "Blend in and guess the location!" else "Ask subtle questions to spot the spy!",
+                                    color = TextSecondary,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     textAlign = TextAlign.Center
                                 )
                             }
                         } else {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("👆 HOLD TO REVEAL ROLE", color = Color(0xFF00E676), fontSize = 18.sp, fontWeight = FontWeight.Black)
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text("Keep screen secret from other players!", color = TextMuted, fontSize = 12.sp)
+                                Icon(
+                                    imageVector = PixelIcons.Eye,
+                                    contentDescription = null,
+                                    tint = PixelEmeraldGreen,
+                                    modifier = Modifier.size(44.dp)
+                                )
+                                Spacer(modifier = Modifier.height(14.dp))
+                                Text(
+                                    text = "HOLD TO SCAN ROLE",
+                                    color = PixelEmeraldGreen,
+                                    fontFamily = PressStart2PFont,
+                                    fontSize = 11.sp
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = "Keep screen hidden from other players!",
+                                    color = TextMuted,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
                             }
                         }
                     }
 
-                    Button(
+                    PrimaryPartyButton(
+                        text = if (currentPlayerTurn < playerCount - 1) "NEXT PLAYER" else "START DISCUSSION",
+                        icon = PixelIcons.Zap,
+                        accentColor = PixelEmeraldGreen,
                         onClick = {
                             if (currentPlayerTurn < playerCount - 1) {
                                 currentPlayerTurn++
@@ -216,41 +304,57 @@ fun UndercoverSpyScreen(
                                 syncRemote(secretLocation, spyIndex, "DISCUSSION")
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E676)),
-                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                } else {
+                    // Discussion Phase CRT Box
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(56.dp)
+                            .weight(1f)
+                            .padding(vertical = 14.dp)
+                            .border(3.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
+                            .background(PixelCrtDarkCanvas)
+                            .crtScanlines()
+                            .padding(20.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = if (currentPlayerTurn < playerCount - 1) "NEXT PLAYER ▶" else "START GROUP DISCUSSION 💬",
-                            color = Color.Black,
-                            fontWeight = FontWeight.Black
-                        )
-                    }
-                } else {
-                    // Discussion Phase
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("GROUP DISCUSSION IN PROGRESS 💬", color = Color(0xFF00E676), fontSize = 18.sp, fontWeight = FontWeight.Black)
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text("Ask each other questions to spot the Undercover Spy!", color = TextMuted, fontSize = 13.sp, textAlign = TextAlign.Center)
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                imageVector = PixelIcons.Users,
+                                contentDescription = null,
+                                tint = PixelEmeraldGreen,
+                                modifier = Modifier.size(40.dp)
+                            )
+                            Spacer(modifier = Modifier.height(14.dp))
+                            Text(
+                                text = "GROUP DISCUSSION",
+                                color = PixelEmeraldGreen,
+                                fontFamily = PressStart2PFont,
+                                fontSize = 12.sp
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Text(
+                                text = "Interrogate suspects to find the Undercover Spy!",
+                                color = TextSecondary,
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
 
-                    Button(
+                    PrimaryPartyButton(
+                        text = "REVEAL THE SPY",
+                        icon = PixelIcons.Eye,
+                        accentColor = PixelMagentaHot,
                         onClick = { isFinished = true },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF007F)),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp)
-                    ) {
-                        Text("REVEAL THE SPY 🕵️", color = Color.White, fontWeight = FontWeight.Black)
-                    }
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         } else {
             VictoryCeremonyOverlay(
-                winnerTitle = "THE SPY WAS PLAYER ${spyIndex + 1}! 🕵️",
+                winnerTitle = "THE SPY WAS PLAYER ${spyIndex + 1}!",
                 subtitle = "Secret Location Was: $secretLocation",
                 onPlayAgain = {
                     secretLocation = locations.random()
@@ -266,7 +370,7 @@ fun UndercoverSpyScreen(
         if (showRemoteSheet) {
             RemoteRoomSetupSheet(
                 gameId = "undercover_spy",
-                gameName = "Undercover Spy 🕵️",
+                gameName = "Undercover Spy",
                 onDismiss = {
                     showRemoteSheet = false
                     if (roomCode.isBlank()) gamePhase = "MODE_SELECT"

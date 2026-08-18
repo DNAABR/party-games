@@ -1,8 +1,8 @@
 package com.leminno.partygames.ui.hub.components
 
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.Spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,28 +10,24 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.leminno.partygames.data.model.GameCategory
 import com.leminno.partygames.ui.model.GameItem
 import com.leminno.partygames.ui.theme.*
-
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Favorite
-import androidx.compose.material.icons.rounded.FavoriteBorder
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 
 @Composable
 fun GameCard(
@@ -41,154 +37,162 @@ fun GameCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val categoryToken = CategoryThemeToken.forCategory(game.category)
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
-    // Tactile physical scale-down on press with spring physics
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.95f else 1.0f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMediumLow
-        ),
-        label = "cardScale"
-    )
+    val offsetY = if (isPressed) 3.dp else 0.dp
+    val borderColor = if (isPressed) PixelMagentaHot else PixelOutlineBlack
 
-    // Border brightens on interaction
-    val borderAlpha = if (isPressed) 0.9f else 0.4f
-    val borderColor = categoryToken.primaryAccent.copy(alpha = borderAlpha)
+    val categoryIcon: ImageVector = when (game.category) {
+        GameCategory.TRIVIA -> PixelIcons.Lightbulb
+        GameCategory.ACTION -> PixelIcons.Zap
+        GameCategory.MYSTERY -> PixelIcons.Eye
+        GameCategory.BOARD -> PixelIcons.Dice
+    }
 
     Box(
         modifier = modifier
-            .scale(scale)
-            .clip(RoundedCornerShape(categoryToken.cornerRadius))
+            .offset(y = offsetY)
+            .border(width = 3.dp, color = borderColor, shape = RoundedCornerShape(2.dp))
             .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        SurfaceGlassDark,
-                        categoryToken.backgroundGlow
+                brush = pixelBandedVertical(
+                    listOf(
+                        PixelVioletElevated,
+                        PixelVioletBase,
+                        PixelVioletDark
                     )
-                )
-            )
-            .border(
-                width = 1.dp,
-                color = borderColor,
-                shape = RoundedCornerShape(categoryToken.cornerRadius)
+                ),
+                shape = RoundedCornerShape(2.dp)
             )
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
                 onClick = onClick
             )
-            .padding(14.dp)
+            .padding(12.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
-            // Top Row: Category Icon, Setup Type & Favorite Heart Button
+            // Top Row: Category Badge & Favorite Button
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Category Icon Symbol + Title Badge
-                Box(
+                // Category Stepped Pixel Badge
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(categoryToken.primaryAccent.copy(alpha = 0.2f))
-                        .border(1.dp, categoryToken.primaryAccent.copy(alpha = 0.4f), RoundedCornerShape(10.dp))
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .border(1.5.dp, PixelOutlineBlack, RoundedCornerShape(0.dp))
+                        .background(
+                            brush = pixelBandedVertical(
+                                listOf(PixelMagentaHighlight, PixelMagentaHot, PixelMagentaShadow)
+                            )
+                        )
+                        .padding(horizontal = 6.dp, vertical = 3.dp)
                 ) {
+                    Icon(
+                        imageVector = categoryIcon,
+                        contentDescription = null,
+                        tint = PixelOutlineBlack,
+                        modifier = Modifier.size(12.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "${game.category.iconSymbol} ${game.category.title.split(" ").first()}",
-                        color = categoryToken.primaryAccent,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold
+                        text = game.category.title.split(" ").first().uppercase(),
+                        color = PixelOutlineBlack,
+                        fontFamily = PressStart2PFont,
+                        fontSize = 8.sp
                     )
                 }
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Setup Type Badge
+                if (onToggleFavorite != null) {
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(SurfaceGlassLight)
-                            .padding(horizontal = 6.dp, vertical = 3.dp)
+                            .size(48.dp) // Minimum 48dp touch target
+                            .clickable(onClick = onToggleFavorite),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "${game.setupType.badgeIcon}",
-                            color = TextSecondary,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Medium
+                        Icon(
+                            imageVector = if (isFavorite) PixelIcons.Heart else PixelIcons.HeartBorder,
+                            contentDescription = "Toggle Favorite",
+                            tint = if (isFavorite) PixelAlertRed else TextMuted,
+                            modifier = Modifier.size(18.dp)
                         )
-                    }
-
-                    if (onToggleFavorite != null) {
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .clickable(onClick = onToggleFavorite)
-                                .padding(4.dp)
-                        ) {
-                            Icon(
-                                imageVector = if (isFavorite) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
-                                contentDescription = "Favorite",
-                                tint = if (isFavorite) Color(0xFFFF2A6D) else TextMuted,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
                     }
                 }
             }
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Game Title
+            // Game Title (Arcade Pixel Marquee)
             Text(
-                text = game.title,
-                color = TextPrimary,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.ExtraBold,
+                text = game.title.uppercase(),
+                color = PixelCrtCyan,
+                fontFamily = PressStart2PFont,
+                fontSize = 11.sp,
+                lineHeight = 15.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
-            // Tagline / Short description
+            // Tagline
             Text(
                 text = game.tagLine,
                 color = TextSecondary,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodySmall,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Bottom Info Bar: Players & Estimated Time
+            // Bottom Info CRT Strip (Banded Scanline Background)
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.5.dp, PixelOutlineBlack)
+                    .background(PixelCrtDarkCanvas)
+                    .crtScanlines()
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "👥 ${game.minPlayers}-${game.maxPlayers} Players",
-                    color = TextMuted,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.SemiBold
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = PixelIcons.Users,
+                        contentDescription = "Player count",
+                        tint = PixelAmberGold,
+                        modifier = Modifier.size(12.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "${game.minPlayers}-${game.maxPlayers}P",
+                        color = PixelAmberGold,
+                        fontFamily = PressStart2PFont,
+                        fontSize = 8.sp
+                    )
+                }
 
-                Text(
-                    text = "⏱️ ~${game.estTimeMinutes}m",
-                    color = TextMuted,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.SemiBold
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = PixelIcons.Clock,
+                        contentDescription = "Duration",
+                        tint = PixelAmberGold,
+                        modifier = Modifier.size(12.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "${game.estTimeMinutes}M",
+                        color = PixelAmberGold,
+                        fontFamily = PressStart2PFont,
+                        fontSize = 8.sp
+                    )
+                }
             }
         }
     }
 }
-

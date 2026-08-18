@@ -22,9 +22,9 @@ object GameCatalogRepository {
             isMvp = true,
             antiCheatNotice = "Keep screen facing away from your eyes during turn!",
             rules = listOf(
-                GameRuleStep(1, "Place on Forehead", "Hold device facing outwards so players can see the secret word.", "📱"),
-                GameRuleStep(2, "Ask & Listen", "Teammates shout clues without saying the secret word directly.", "🗣️"),
-                GameRuleStep(3, "Tilt to Score", "Tilt phone DOWN when you guess right, tilt UP to skip!", "↔️")
+                GameRuleStep(1, "Place on Forehead", "Hold device facing outwards so players can see the secret word.", "phone_android"),
+                GameRuleStep(2, "Ask & Listen", "Teammates shout clues without saying the secret word directly.", "record_voice_over"),
+                GameRuleStep(3, "Tilt to Score", "Tilt phone DOWN when you guess right, tilt UP to skip!", "swap_horiz")
             )
         ),
         // MVP Game 2
@@ -41,9 +41,9 @@ object GameCatalogRepository {
             isMvp = true,
             antiCheatNotice = "Player selected by bottle MUST answer or complete dare!",
             rules = listOf(
-                GameRuleStep(1, "Flick to Spin", "Swipe across screen to spin the bottle with realistic physics.", "🍾"),
-                GameRuleStep(2, "Select Challenge", "Chosen player picks Truth or Dare from deck.", "🃏"),
-                GameRuleStep(3, "Execute or Pass", "Complete prompt to earn group approval!", "🔥")
+                GameRuleStep(1, "Flick to Spin", "Swipe across screen to spin the bottle with realistic physics.", "local_bar"),
+                GameRuleStep(2, "Select Challenge", "Chosen player picks Truth or Dare from deck.", "style"),
+                GameRuleStep(3, "Execute or Pass", "Complete prompt to earn group approval!", "local_fire_department")
             )
         ),
         // MVP Game 3
@@ -60,9 +60,9 @@ object GameCatalogRepository {
             isMvp = true,
             antiCheatNotice = "Be honest! Tap your heart to drop a life when guilty.",
             rules = listOf(
-                GameRuleStep(1, "Read Prompt", "App displays statement: 'Never have I ever...'", "📖"),
-                GameRuleStep(2, "Tap to Lose Life", "If you've done it, tap your life heart to drop 1 life.", "💔"),
-                GameRuleStep(3, "Last Standing Wins", "Survive with the most remaining lives!", "👑")
+                GameRuleStep(1, "Read Prompt", "App displays statement: 'Never have I ever...'", "menu_book"),
+                GameRuleStep(2, "Tap to Lose Life", "If you've done it, tap your life heart to drop 1 life.", "favorite"),
+                GameRuleStep(3, "Last Standing Wins", "Survive with the most remaining lives!", "emoji_events")
             )
         ),
         // MVP Game 4
@@ -79,9 +79,9 @@ object GameCatalogRepository {
             isMvp = true,
             antiCheatNotice = "Long-press fingerprint scanner to view role secretly before passing phone!",
             rules = listOf(
-                GameRuleStep(1, "Secret Role View", "Hold finger on scanner overlay to reveal your role safely.", "🔒"),
-                GameRuleStep(2, "Cross-Examine", "Ask players questions about the location without giving it away.", "💬"),
-                GameRuleStep(3, "Vote & Accuse", "Group votes on suspected spy before timer expires!", "🕵️")
+                GameRuleStep(1, "Secret Role View", "Hold finger on scanner overlay to reveal your role safely.", "fingerprint"),
+                GameRuleStep(2, "Cross-Examine", "Ask players questions about the location without giving it away.", "forum"),
+                GameRuleStep(3, "Vote & Accuse", "Group votes on suspected spy before timer expires!", "visibility_off")
             )
         ),
         // MVP Game 5
@@ -98,9 +98,9 @@ object GameCatalogRepository {
             isMvp = true,
             antiCheatNotice = "You MUST speak answer out loud before passing phone!",
             rules = listOf(
-                GameRuleStep(1, "Read Prompt", "Shout an answer fitting the category on screen.", "🗣️"),
-                GameRuleStep(2, "Pass Phone", "Hand phone immediately to player on your left.", "🔄"),
-                GameRuleStep(3, "Don't Get Caught", "If timer expires in your hands, phone explodes!", "💥")
+                GameRuleStep(1, "Read Prompt", "Shout an answer fitting the category on screen.", "record_voice_over"),
+                GameRuleStep(2, "Pass Phone", "Hand phone immediately to player on your left.", "sync"),
+                GameRuleStep(3, "Don't Get Caught", "If timer expires in your hands, phone explodes!", "bolt")
             )
         ),
         // MVP Game 6
@@ -117,9 +117,9 @@ object GameCatalogRepository {
             isMvp = true,
             antiCheatNotice = "Touch targets track individual finger IDs down to the millisecond!",
             rules = listOf(
-                GameRuleStep(1, "Hold Touch Zone", "Each player puts a index finger on a screen corner.", "👇"),
-                GameRuleStep(2, "Listen / Watch Prompt", "Prompt calls: '[Object] FLIES!'", "🦅"),
-                GameRuleStep(3, "Lift or Hold", "LIFT finger if item can fly. HOLD if item cannot fly!", "⚡")
+                GameRuleStep(1, "Hold Touch Zone", "Each player puts a index finger on a screen corner.", "touch_app"),
+                GameRuleStep(2, "Listen / Watch Prompt", "Prompt calls: '[Object] FLIES!'", "air"),
+                GameRuleStep(3, "Lift or Hold", "LIFT finger if item can fly. HOLD if item cannot fly!", "bolt")
             )
         ),
         // MVP Game 7
@@ -136,9 +136,9 @@ object GameCatalogRepository {
             isMvp = true,
             antiCheatNotice = "Vote secretly before group discussion!",
             rules = listOf(
-                GameRuleStep(1, "Compare Options", "Read Option A vs Option B.", "⚖️"),
-                GameRuleStep(2, "Swipe to Choose", "Swipe LEFT for Option A or RIGHT for Option B.", "👈"),
-                GameRuleStep(3, "View Stats", "See live percentage breakdown of player choices!", "📊")
+                GameRuleStep(1, "Compare Options", "Read Option A vs Option B.", "balance"),
+                GameRuleStep(2, "Swipe to Choose", "Swipe LEFT for Option A or RIGHT for Option B.", "swipe"),
+                GameRuleStep(3, "View Stats", "See live percentage breakdown of player choices!", "bar_chart")
             )
         ),
         // MVP Game 8
@@ -155,12 +155,11 @@ object GameCatalogRepository {
             isMvp = true,
             antiCheatNotice = "Alternate turns side by side or pass device.",
             rules = listOf(
-                GameRuleStep(1, "Select Column", "Tap column to drop your colored disc.", "🔴"),
-                GameRuleStep(2, "Block & Line Up", "Connect 4 discs horizontally, vertically, or diagonally.", "🟡"),
-                GameRuleStep(3, "Claim Victory", "First to connect four claims victory highlight!", "🏆")
+                GameRuleStep(1, "Select Column", "Tap column to drop your colored disc.", "grid_view"),
+                GameRuleStep(2, "Block & Line Up", "Connect 4 discs horizontally, vertically, or diagonally.", "widgets"),
+                GameRuleStep(3, "Claim Victory", "First to connect four claims victory highlight!", "emoji_events")
             )
         ),
-
         // Phase 2 Expansion Games
         GameItem(
             id = "charades",
@@ -175,9 +174,9 @@ object GameCatalogRepository {
             isMvp = false,
             antiCheatNotice = "Keep screen facing away from the actor's eyes!",
             rules = listOf(
-                GameRuleStep(1, "Forehead Position", "Place phone on forehead facing your teammates.", "📱"),
-                GameRuleStep(2, "Act Out Words", "Teammates act out the secret word without talking.", "🎭"),
-                GameRuleStep(3, "Tilt Sensor", "Tilt DOWN on correct guess, tilt UP to skip!", "↕️")
+                GameRuleStep(1, "Forehead Position", "Place phone on forehead facing your teammates.", "phone_android"),
+                GameRuleStep(2, "Act Out Words", "Teammates act out the secret word without talking.", "theater_comedy"),
+                GameRuleStep(3, "Tilt Sensor", "Tilt DOWN on correct guess, tilt UP to skip!", "swap_horiz")
             )
         ),
         GameItem(
@@ -193,9 +192,9 @@ object GameCatalogRepository {
             isMvp = false,
             antiCheatNotice = "Use the 2-second hold-to-reveal card so nearby players can't peek!",
             rules = listOf(
-                GameRuleStep(1, "Secret Role Reveal", "Hold screen for 2 seconds to view secret profession safely.", "🔒"),
-                GameRuleStep(2, "Give 3 Clues", "Give subtle clues without naming the profession.", "💡"),
-                GameRuleStep(3, "Guess & Score", "Players guess before 30-second timer runs out!", "⏱️")
+                GameRuleStep(1, "Secret Role Reveal", "Hold screen for 2 seconds to view secret profession safely.", "lock"),
+                GameRuleStep(2, "Give 3 Clues", "Give subtle clues without naming the profession.", "lightbulb"),
+                GameRuleStep(3, "Guess & Score", "Players guess before 30-second timer runs out!", "timer")
             )
         ),
         GameItem(
@@ -211,9 +210,9 @@ object GameCatalogRepository {
             isMvp = false,
             antiCheatNotice = "Enter statements privately before passing the phone.",
             rules = listOf(
-                GameRuleStep(1, "Create Statements", "Type 2 true facts and 1 convincing lie.", "✍️"),
-                GameRuleStep(2, "Group Vote", "Pass phone and let players select the statement they think is a lie.", "🗳️"),
-                GameRuleStep(3, "Reveal & Tally", "Score points for spotting lies and tricking others!", "🏆")
+                GameRuleStep(1, "Create Statements", "Type 2 true facts and 1 convincing lie.", "edit"),
+                GameRuleStep(2, "Group Vote", "Pass phone and let players select the statement they think is a lie.", "how_to_vote"),
+                GameRuleStep(3, "Reveal & Tally", "Score points for spotting lies and tricking others!", "emoji_events")
             )
         ),
         GameItem(
@@ -229,9 +228,9 @@ object GameCatalogRepository {
             isMvp = false,
             antiCheatNotice = "Cast secret votes on phone before group discussion!",
             rules = listOf(
-                GameRuleStep(1, "Read Scenario", "App shows: 'Who is most likely to...'", "📜"),
-                GameRuleStep(2, "Secret Vote", "Each player selects who fits the prompt best.", "👆"),
-                GameRuleStep(3, "View Stats", "See live percentage charts of everyone's votes!", "📊")
+                GameRuleStep(1, "Read Scenario", "App shows: 'Who is most likely to...'", "description"),
+                GameRuleStep(2, "Secret Vote", "Each player selects who fits the prompt best.", "touch_app"),
+                GameRuleStep(3, "View Stats", "See live percentage charts of everyone's votes!", "bar_chart")
             )
         ),
         GameItem(
@@ -247,9 +246,9 @@ object GameCatalogRepository {
             isMvp = false,
             antiCheatNotice = "Hold mic 6 inches from mouth during sound challenges!",
             rules = listOf(
-                GameRuleStep(1, "Choose Mode", "Select Whisper (<15dB), Max Scream, or Steady Hum.", "🎙️"),
-                GameRuleStep(2, "Make Noise", "Perform challenge when countdown hits zero.", "🔊"),
-                GameRuleStep(3, "Check Gauge", "Live decibel meter measures peak volume!", "📈")
+                GameRuleStep(1, "Choose Mode", "Select Whisper (<15dB), Max Scream, or Steady Hum.", "mic"),
+                GameRuleStep(2, "Make Noise", "Perform challenge when countdown hits zero.", "volume_up"),
+                GameRuleStep(3, "Check Gauge", "Live decibel meter measures peak volume!", "graphic_eq")
             )
         ),
         GameItem(
@@ -265,9 +264,9 @@ object GameCatalogRepository {
             isMvp = false,
             antiCheatNotice = "No smiling or laughing — let the group decide if the player cracked!",
             rules = listOf(
-                GameRuleStep(1, "Draw Task", "Active player receives a funny task card.", "🃏"),
-                GameRuleStep(2, "Hold Straight Face", "Perform task for 30 seconds with straight face.", "😐"),
-                GameRuleStep(3, "Distraction Wave", "App triggers funny sounds to break your focus!", "🦆")
+                GameRuleStep(1, "Draw Task", "Active player receives a funny task card.", "style"),
+                GameRuleStep(2, "Hold Straight Face", "Perform task for 30 seconds with straight face.", "face"),
+                GameRuleStep(3, "Distraction Wave", "App triggers funny sounds to break your focus!", "volume_down")
             )
         ),
         GameItem(
@@ -283,9 +282,9 @@ object GameCatalogRepository {
             isMvp = false,
             antiCheatNotice = "Power-ups are limited to 1 per game round per player!",
             rules = listOf(
-                GameRuleStep(1, "Place or Power-Up", "Tap cell to place mark OR deploy a Power-Up card.", "⚡"),
-                GameRuleStep(2, "Erase & Shield", "Use Erase to wipe cell, or Shield to lock your square.", "🛡️"),
-                GameRuleStep(3, "Connect Three", "First to align 3 symbols in a row wins!", "🎉")
+                GameRuleStep(1, "Place or Power-Up", "Tap cell to place mark OR deploy a Power-Up card.", "bolt"),
+                GameRuleStep(2, "Erase & Shield", "Use Erase to wipe cell, or Shield to lock your square.", "shield"),
+                GameRuleStep(3, "Connect Three", "First to align 3 symbols in a row wins!", "celebration")
             )
         ),
         GameItem(
@@ -301,9 +300,9 @@ object GameCatalogRepository {
             isMvp = false,
             antiCheatNotice = "In split-screen, tap your choice at the same time!",
             rules = listOf(
-                GameRuleStep(1, "Select Mode", "Choose 1v1 Split-Screen or Team Match (Multi-Device / Online Room).", "📲"),
-                GameRuleStep(2, "Tap 1 to 6", "Batter & Bowler pick finger numbers simultaneously.", "🔢"),
-                GameRuleStep(3, "Runs vs OUT!", "Same number = OUT! Different numbers = Runs added to total!", "🏏")
+                GameRuleStep(1, "Select Mode", "Choose 1v1 Split-Screen or Team Match (Multi-Device / Online Room).", "splitscreen"),
+                GameRuleStep(2, "Tap 1 to 6", "Batter & Bowler pick finger numbers simultaneously.", "pin"),
+                GameRuleStep(3, "Runs vs OUT!", "Same number = OUT! Different numbers = Runs added to total!", "sports_cricket")
             )
         ),
 
@@ -321,9 +320,9 @@ object GameCatalogRepository {
             isMvp = false,
             antiCheatNotice = "Keep screen faced down and eyes closed during night phase instructions!",
             rules = listOf(
-                GameRuleStep(1, "Assign Roles", "Pass phone so every player views their secret role.", "🕵️"),
-                GameRuleStep(2, "Night Phase", "Narrator guides Mafia, Doctor, and Detective actions step-by-step.", "🌙"),
-                GameRuleStep(3, "Day Voting", "Group discusses clues and votes to eliminate a suspect!", "☀️")
+                GameRuleStep(1, "Assign Roles", "Pass phone so every player views their secret role.", "visibility_off"),
+                GameRuleStep(2, "Night Phase", "Narrator guides Mafia, Doctor, and Detective actions step-by-step.", "nights_stay"),
+                GameRuleStep(3, "Day Voting", "Group discusses clues and votes to eliminate a suspect!", "wb_sunny")
             )
         ),
         GameItem(
@@ -339,9 +338,9 @@ object GameCatalogRepository {
             isMvp = false,
             antiCheatNotice = "Pass device between turns without showing the previous prompt!",
             rules = listOf(
-                GameRuleStep(1, "Write Prompt", "Player 1 writes a hilarious secret prompt.", "✍️"),
-                GameRuleStep(2, "Draw What You See", "Player 2 draws the prompt on the vector canvas.", "🎨"),
-                GameRuleStep(3, "Album Reveal", "Pass phone and view the hilarious chain transformation!", "🖼️")
+                GameRuleStep(1, "Write Prompt", "Player 1 writes a hilarious secret prompt.", "edit"),
+                GameRuleStep(2, "Draw What You See", "Player 2 draws the prompt on the vector canvas.", "palette"),
+                GameRuleStep(3, "Album Reveal", "Pass phone and view the hilarious chain transformation!", "collections")
             )
         ),
         GameItem(
@@ -357,9 +356,9 @@ object GameCatalogRepository {
             isMvp = false,
             antiCheatNotice = "Psychic views hidden target slice before closing target cover!",
             rules = listOf(
-                GameRuleStep(1, "Psychic Clue", "Psychic sees target position and gives a spectrum clue.", "🔮"),
-                GameRuleStep(2, "Turn the Dial", "Teammates turn the physical wheel dial on screen.", "🎡"),
-                GameRuleStep(3, "Score Zone", "Reveal target slice and score 2 to 4 points based on accuracy!", "🎯")
+                GameRuleStep(1, "Psychic Clue", "Psychic sees target position and gives a spectrum clue.", "psychology"),
+                GameRuleStep(2, "Turn the Dial", "Teammates turn the physical wheel dial on screen.", "adjust"),
+                GameRuleStep(3, "Score Zone", "Reveal target slice and score 2 to 4 points based on accuracy!", "track_changes")
             )
         ),
         GameItem(
@@ -375,9 +374,9 @@ object GameCatalogRepository {
             isMvp = false,
             antiCheatNotice = "Spymaster view is guarded by pass-and-play confirmation overlay before revealing key.",
             rules = listOf(
-                GameRuleStep(1, "Spymaster Key", "Spymaster views secret color key for 25 grid words.", "🔑"),
-                GameRuleStep(2, "Give One Word Clue", "Give a single word clue and number of matching cards.", "🗣️"),
-                GameRuleStep(3, "Contact Agents", "Field agents tap cards to reveal team colors!", "🕵️")
+                GameRuleStep(1, "Spymaster Key", "Spymaster views secret color key for 25 grid words.", "vpn_key"),
+                GameRuleStep(2, "Give One Word Clue", "Give a single word clue and number of matching cards.", "record_voice_over"),
+                GameRuleStep(3, "Contact Agents", "Field agents tap cards to reveal team colors!", "visibility_off")
             )
         ),
         GameItem(
@@ -393,9 +392,9 @@ object GameCatalogRepository {
             isMvp = false,
             antiCheatNotice = "Guesses are laid out on a spectrum without showing player names until bets are placed!",
             rules = listOf(
-                GameRuleStep(1, "Submit Guess", "Write a secret numerical estimate to the trivia prompt.", "🔢"),
-                GameRuleStep(2, "Place Bets", "Place betting chips on the guess closest without going over.", "🎰"),
-                GameRuleStep(3, "Payout", "Correct answer pays out points to closest guess and bettors!", "💰")
+                GameRuleStep(1, "Submit Guess", "Write a secret numerical estimate to the trivia prompt.", "tag"),
+                GameRuleStep(2, "Place Bets", "Place betting chips on the guess closest without going over.", "casino"),
+                GameRuleStep(3, "Payout", "Correct answer pays out points to closest guess and bettors!", "payments")
             )
         ),
         GameItem(
@@ -411,9 +410,9 @@ object GameCatalogRepository {
             isMvp = false,
             antiCheatNotice = "Type fake answers privately on screen.",
             rules = listOf(
-                GameRuleStep(1, "Write Bluff", "Type a convincing fake answer to the obscure question.", "🤥"),
-                GameRuleStep(2, "Vote Answer", "Select the answer you believe is the genuine truth.", "🗳️"),
-                GameRuleStep(3, "Score Points", "Earn points for guessing truth and fooling friends with your bluff!", "🏆")
+                GameRuleStep(1, "Write Bluff", "Type a convincing fake answer to the obscure question.", "edit"),
+                GameRuleStep(2, "Vote Answer", "Select the answer you believe is the genuine truth.", "how_to_vote"),
+                GameRuleStep(3, "Score Points", "Earn points for guessing truth and fooling friends with your bluff!", "emoji_events")
             )
         ),
         GameItem(
@@ -429,9 +428,9 @@ object GameCatalogRepository {
             isMvp = false,
             antiCheatNotice = "Responses are voted on anonymously without showing author names!",
             rules = listOf(
-                GameRuleStep(1, "Write Answer", "Two players write hilarious answers to absurd question.", "⚡"),
-                GameRuleStep(2, "Head-to-Head Duel", "App displays both answers side by side.", "⚔️"),
-                GameRuleStep(3, "Group Vote", "Rest of group votes on funnier answer!", "👏")
+                GameRuleStep(1, "Write Answer", "Two players write hilarious answers to absurd question.", "bolt"),
+                GameRuleStep(2, "Head-to-Head Duel", "App displays both answers side by side.", "swords"),
+                GameRuleStep(3, "Group Vote", "Rest of group votes on funnier answer!", "thumb_up")
             )
         ),
         GameItem(
@@ -447,9 +446,9 @@ object GameCatalogRepository {
             isMvp = false,
             antiCheatNotice = "30-second timer auto-locks fields when countdown ends!",
             rules = listOf(
-                GameRuleStep(1, "Random Letter", "App generates random letter (e.g., 'S').", "🔤"),
-                GameRuleStep(2, "Speed Fill", "Type Name, Place, Animal, Thing starting with letter.", "✍️"),
-                GameRuleStep(3, "Auto Score", "App scores unique answers automatically when countdown ends!", "⭐")
+                GameRuleStep(1, "Random Letter", "App generates random letter (e.g., 'S').", "sort_by_alpha"),
+                GameRuleStep(2, "Speed Fill", "Type Name, Place, Animal, Thing starting with letter.", "edit"),
+                GameRuleStep(3, "Auto Score", "App scores unique answers automatically when countdown ends!", "star")
             )
         ),
         GameItem(
@@ -465,9 +464,9 @@ object GameCatalogRepository {
             isMvp = false,
             antiCheatNotice = "Full black screen appears between turns to protect grid privacy.",
             rules = listOf(
-                GameRuleStep(1, "Deploy Ships", "Place Aircraft Carrier, Battleship, Submarine, Patrol Boat.", "⚓"),
-                GameRuleStep(2, "Fire Salvo", "Tap target grid coordinates to strike opponent.", "💥"),
-                GameRuleStep(3, "Sink Fleet", "First to sink all 4 opponent ships claims victory!", "🏆")
+                GameRuleStep(1, "Deploy Ships", "Place Aircraft Carrier, Battleship, Submarine, Patrol Boat.", "anchor"),
+                GameRuleStep(2, "Fire Salvo", "Tap target grid coordinates to strike opponent.", "bolt"),
+                GameRuleStep(3, "Sink Fleet", "First to sink all 4 opponent ships claims victory!", "emoji_events")
             )
         ),
         GameItem(
@@ -483,9 +482,9 @@ object GameCatalogRepository {
             isMvp = false,
             antiCheatNotice = "Custom word entry is masked before turn passes.",
             rules = listOf(
-                GameRuleStep(1, "Set Secret Word", "Type custom hidden word or generate random prompt.", "🔑"),
-                GameRuleStep(2, "Tap Keyboard", "Guessers tap letters on virtual QWERTY keyboard.", "⌨️"),
-                GameRuleStep(3, "Avoid Execution", "Uncover word before 6 wrong guesses complete hangman!", "😵")
+                GameRuleStep(1, "Set Secret Word", "Type custom hidden word or generate random prompt.", "vpn_key"),
+                GameRuleStep(2, "Tap Keyboard", "Guessers tap letters on virtual QWERTY keyboard.", "keyboard"),
+                GameRuleStep(3, "Avoid Execution", "Uncover word before 6 wrong guesses complete hangman!", "sentiment_very_dissatisfied")
             )
         ),
         GameItem(
@@ -501,10 +500,11 @@ object GameCatalogRepository {
             isMvp = false,
             antiCheatNotice = "Tile racks are hidden behind 'View My Tiles' pop-up overlay for turn privacy.",
             rules = listOf(
-                GameRuleStep(1, "View Tile Rack", "Tap 'View My Tiles' overlay to check your 7 letter tiles.", "🔠"),
-                GameRuleStep(2, "Place Word", "Drag or tap tiles onto board grid.", "🧩"),
-                GameRuleStep(3, "Submit & Score", "Submit turn for dictionary score validation!", "🏆")
+                GameRuleStep(1, "View Tile Rack", "Tap 'View My Tiles' overlay to check your 7 letter tiles.", "grid_on"),
+                GameRuleStep(2, "Place Word", "Drag or tap tiles onto board grid.", "extension"),
+                GameRuleStep(3, "Submit & Score", "Submit turn for dictionary score validation!", "emoji_events")
             )
         )
     )
 }
+

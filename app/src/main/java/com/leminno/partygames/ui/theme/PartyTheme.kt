@@ -37,14 +37,14 @@ fun PartyGamesTheme(
         colorScheme = DarkColorScheme,
         typography = PartyTypography,
         content = {
-            // Obsidian background canvas with subtle low-intensity radial gradient ambient light
+            // Obsidian background canvas with retro ambient arcade radial glow
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
                         brush = Brush.radialGradient(
                             colors = listOf(
-                                Color(0xFF111726),
+                                Color(0xFF14142B),
                                 BackgroundNavySlate,
                                 BackgroundObsidian
                             ),
@@ -58,21 +58,21 @@ fun PartyGamesTheme(
     )
 }
 
-
 /**
- * Modifier helper to apply a translucent physical glass surface with border stroke & rounded corners.
+ * Modifier helper for retro arcade cards featuring blocky corner radiuses and glowing stroke borders.
  */
-fun Modifier.glassCard(
-    cornerRadius: Dp = 20.dp,
+fun Modifier.retroCard(
+    cornerRadius: Dp = 14.dp,
     borderColor: Color = BorderGlassDefault,
-    backgroundColor: Color = SurfaceGlassDark
+    backgroundColor: Color = SurfaceGlassDark,
+    borderWidth: Dp = 2.dp
 ): Modifier = this
     .clip(RoundedCornerShape(cornerRadius))
     .background(backgroundColor)
-    .border(1.dp, borderColor, RoundedCornerShape(cornerRadius))
+    .border(borderWidth, borderColor, RoundedCornerShape(cornerRadius))
 
 /**
- * No-ripple clickable helper for clean custom touch interactions.
+ * No-ripple clickable helper for crisp retro touch interactions.
  */
 fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier = composed {
     clickable(
@@ -81,3 +81,4 @@ fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier = composed {
         onClick = onClick
     )
 }
+

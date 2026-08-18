@@ -2,20 +2,20 @@ package com.leminno.partygames.ui.model
 
 import com.leminno.partygames.data.model.GameCategory
 
-enum class SetupType(val label: String, val badgeIcon: String) {
-    FOREHEAD_SENSOR("Forehead Sensor", "📱"),
-    PASS_AND_PLAY("Pass & Play", "🔄"),
-    MULTI_TOUCH("Multi-Touch Screen", "👇"),
-    PHYSICAL_PASS("Physical Pass", "💥"),
-    SPLIT_SCREEN("Split Screen", "📲"),
-    DUAL_DEVICE("Dual Device", "🔗")
+enum class SetupType(val label: String, val badgeIconKey: String) {
+    FOREHEAD_SENSOR("Forehead Sensor", "phone_android"),
+    PASS_AND_PLAY("Pass & Play", "sync"),
+    MULTI_TOUCH("Multi-Touch Screen", "touch_app"),
+    PHYSICAL_PASS("Physical Pass", "bolt"),
+    SPLIT_SCREEN("Split Screen", "splitscreen"),
+    DUAL_DEVICE("Dual Device", "link")
 }
 
 data class GameRuleStep(
     val stepNumber: Int,
     val title: String,
     val description: String,
-    val iconSymbol: String
+    val iconKey: String
 )
 
 data class GameItem(
@@ -32,3 +32,4 @@ data class GameItem(
     val antiCheatNotice: String? = null,
     val rules: List<GameRuleStep>
 )
+

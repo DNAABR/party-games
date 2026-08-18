@@ -11,30 +11,23 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.leminno.partygames.data.GameCatalogRepository
 import com.leminno.partygames.data.repository.UserPreferencesRepository
 import com.leminno.partygames.ui.theme.*
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.Info
-
 /**
  * Reusable layout scaffold for all in-game screens.
- * Includes standardized top header bar, edge-to-edge padding, system BackHandler exit confirmation,
+ * Includes standardized pixel top header bar, edge-to-edge padding, system BackHandler exit confirmation,
  * Keep Screen Awake window flag management, and mid-game rules peek sheet.
  */
 @Composable
 fun GameScaffold(
     title: String,
-    titleColor: Color = TextPrimary,
+    titleColor: Color = PixelCrtCyan,
     gameId: String? = null,
     onExitGame: () -> Unit,
     showExitConfirmation: Boolean = true,
@@ -78,80 +71,75 @@ fun GameScaffold(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundNavySlate)
+            .background(PixelVioletDark)
             .statusBarsPadding()
             .navigationBarsPadding()
-            .padding(horizontal = 20.dp, vertical = 12.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Header Bar
+            // Header Pixel Arcade Bar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp),
+                    .border(2.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
+                    .background(
+                        brush = pixelBandedVertical(
+                            listOf(PixelVioletElevated, PixelVioletBase)
+                        ),
+                        shape = RoundedCornerShape(2.dp)
+                    )
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(SurfaceGlassDark)
-                        .border(1.dp, BorderGlassDefault, RoundedCornerShape(12.dp))
+                // Exit Button
+                IconButton(
+                    onClick = { handleExitAttempt() },
+                    modifier = Modifier.size(40.dp)
                 ) {
-                    IconButton(
-                        onClick = { handleExitAttempt() },
-                        modifier = Modifier.size(40.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Close,
-                            contentDescription = "Exit",
-                            tint = TextSecondary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
+                    Icon(
+                        imageVector = PixelIcons.Close,
+                        contentDescription = "Exit",
+                        tint = PixelMagentaHot,
+                        modifier = Modifier.size(18.dp)
+                    )
                 }
 
+                // Arcade Marquee Title
                 Text(
                     text = title.uppercase(),
                     color = titleColor,
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.2.sp,
+                    fontFamily = PressStart2PFont,
+                    fontSize = 11.sp,
                     maxLines = 1
                 )
 
                 if (matchedGameItem != null) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.dp, BorderGlassDefault, RoundedCornerShape(12.dp))
+                    IconButton(
+                        onClick = { showRulesSheet = true },
+                        modifier = Modifier.size(40.dp)
                     ) {
-                        IconButton(
-                            onClick = { showRulesSheet = true },
-                            modifier = Modifier.size(40.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Info,
-                                contentDescription = "Rules",
-                                tint = AccentCyan,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
+                        Icon(
+                            imageVector = PixelIcons.Lightbulb,
+                            contentDescription = "Rules",
+                            tint = PixelCrtCyan,
+                            modifier = Modifier.size(18.dp)
+                        )
                     }
                 } else {
                     Spacer(modifier = Modifier.width(40.dp))
                 }
             }
 
+            Spacer(modifier = Modifier.height(10.dp))
+
             // Game Content
             content()
         }
-
 
         // Mid-Game Rules Peek Sheet Modal
         if (showRulesSheet && matchedGameItem != null) {
@@ -161,43 +149,44 @@ fun GameScaffold(
             )
         }
 
-        // Exit Confirmation Dialog Modal
+        // Exit Confirmation Dialog Modal (8-bit Pixel Styled)
         if (showConfirmDialog) {
             AlertDialog(
                 onDismissRequest = { showConfirmDialog = false },
                 title = {
                     Text(
                         text = "EXIT GAME?",
-                        color = TextPrimary,
-                        fontWeight = FontWeight.Black,
-                        fontSize = 20.sp
+                        color = PixelMagentaHot,
+                        fontFamily = PressStart2PFont,
+                        fontSize = 13.sp
                     )
                 },
                 text = {
                     Text(
-                        text = "Active game progress will be lost. Are you sure you want to leave?",
+                        text = "Active game progress will be lost. Return to Arcade Hub?",
                         color = TextSecondary,
-                        fontSize = 14.sp
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 },
                 confirmButton = {
-                    TextButton(
+                    PrimaryPartyButton(
+                        text = "EXIT",
                         onClick = {
                             showConfirmDialog = false
                             onExitGame()
-                        }
-                    ) {
-                        Text("EXIT", color = Color(0xFFFF0055), fontWeight = FontWeight.Bold)
-                    }
+                        },
+                        accentColor = PixelAlertRed
+                    )
                 },
                 dismissButton = {
-                    TextButton(onClick = { showConfirmDialog = false }) {
-                        Text("CANCEL", color = TextSecondary, fontWeight = FontWeight.Bold)
-                    }
+                    SecondaryPartyButton(
+                        text = "CANCEL",
+                        onClick = { showConfirmDialog = false }
+                    )
                 },
-                containerColor = SurfaceGlassDark,
-                shape = RoundedCornerShape(20.dp),
-                modifier = Modifier.border(1.dp, BorderGlassDefault, RoundedCornerShape(20.dp))
+                containerColor = PixelVioletElevated,
+                shape = RoundedCornerShape(2.dp),
+                modifier = Modifier.border(3.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
             )
         }
     }

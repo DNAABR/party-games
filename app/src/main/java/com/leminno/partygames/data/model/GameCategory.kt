@@ -6,10 +6,11 @@ package com.leminno.partygames.data.model
 enum class GameCategory(
     val title: String,
     val description: String,
-    val iconSymbol: String
+    val iconKey: String
 ) {
-    TRIVIA("Trivia & Word", "Cerebral, fast-paced prompts", "🎭"),
-    ACTION("Action & Physical", "Fast, high-velocity motion & quick reactions", "⚡"),
-    MYSTERY("Mystery & Deduction", "Secret roles, quiet reveals & psychological bluffs", "🕵️"),
-    BOARD("Board & Strategy", "Tactical grid choices & physical turn placement", "🎲")
+    TRIVIA("Trivia & Word", "Cerebral, fast-paced prompts", "psychology"),
+    ACTION("Action & Physical", "Fast, high-velocity motion & quick reactions", "bolt"),
+    MYSTERY("Mystery & Deduction", "Secret roles, quiet reveals & psychological bluffs", "visibility_off"),
+    BOARD("Board & Strategy", "Tactical grid choices & physical turn placement", "grid_view")
 }
+

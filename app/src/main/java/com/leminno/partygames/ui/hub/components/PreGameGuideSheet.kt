@@ -6,20 +6,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.leminno.partygames.data.model.GameCategory
 import com.leminno.partygames.ui.components.AiPromptGeneratorSheet
+import com.leminno.partygames.ui.components.PrimaryPartyButton
+import com.leminno.partygames.ui.components.SecondaryPartyButton
 import com.leminno.partygames.ui.model.GameItem
 import com.leminno.partygames.ui.theme.*
 
@@ -30,7 +28,6 @@ fun PreGameGuideSheet(
     onDismissRequest: () -> Unit,
     onStartGame: (playerCount: Int, roundTimerSec: Int, intensityDeck: String) -> Unit
 ) {
-    val categoryToken = CategoryThemeToken.forCategory(game.category)
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     var selectedPlayerCount by remember { mutableIntStateOf(game.minPlayers.coerceAtLeast(2)) }
@@ -39,26 +36,26 @@ fun PreGameGuideSheet(
     var showAiGenerator by remember { mutableStateOf(false) }
     var customPromptsCount by remember { mutableIntStateOf(0) }
 
+    val categoryIcon = when (game.category) {
+        GameCategory.TRIVIA -> PixelIcons.Lightbulb
+        GameCategory.ACTION -> PixelIcons.Zap
+        GameCategory.MYSTERY -> PixelIcons.Eye
+        GameCategory.BOARD -> PixelIcons.Dice
+    }
+
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
-        containerColor = BackgroundNavySlate,
+        containerColor = PixelVioletElevated,
         scrimColor = Color(0xCC000000),
-        dragHandle = {
-            Box(
-                modifier = Modifier
-                    .padding(vertical = 12.dp)
-                    .width(40.dp)
-                    .height(4.dp)
-                    .clip(CircleShape)
-                    .background(Color(0x66FFFFFF))
-            )
-        }
+        shape = RoundedCornerShape(2.dp),
+        dragHandle = null
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 8.dp)
+                .border(3.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
+                .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
             // Game Header Title & Category Badge
             Row(
@@ -68,65 +65,72 @@ fun PreGameGuideSheet(
             ) {
                 Column {
                     Text(
-                        text = game.title,
-                        color = TextPrimary,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Black
+                        text = game.title.uppercase(),
+                        color = PixelCrtCyan,
+                        fontFamily = PressStart2PFont,
+                        fontSize = 13.sp
                     )
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "${game.setupType.badgeIcon} ${game.setupType.label}",
-                        color = categoryToken.primaryAccent,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold
+                        text = game.setupType.label.uppercase(),
+                        color = PixelMagentaHot,
+                        fontFamily = PressStart2PFont,
+                        fontSize = 8.sp
                     )
                 }
 
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(categoryToken.primaryAccent.copy(alpha = 0.2f))
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .size(36.dp)
+                        .border(1.5.dp, PixelOutlineBlack)
+                        .background(PixelMagentaHot),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = game.category.iconSymbol,
-                        fontSize = 20.sp
+                    Icon(
+                        imageVector = categoryIcon,
+                        contentDescription = null,
+                        tint = PixelOutlineBlack,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             // Anti-Cheat / Security Notice (If present)
             if (game.antiCheatNotice != null) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(Color(0x22FFD700))
-                        .border(1.dp, Color(0x80FFD700), RoundedCornerShape(14.dp))
-                        .padding(12.dp)
+                        .border(2.dp, PixelAmberGold, RoundedCornerShape(2.dp))
+                        .background(PixelVioletDark)
+                        .padding(10.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("🛡️ ", fontSize = 16.sp)
+                        Icon(
+                            imageVector = PixelIcons.Shield,
+                            contentDescription = null,
+                            tint = PixelAmberGold,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "ANTI-CHEAT NOTICE: ${game.antiCheatNotice}",
-                            color = Color(0xFFFFD700),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold
+                            text = "ANTI-CHEAT: ${game.antiCheatNotice}",
+                            color = PixelAmberGold,
+                            style = MaterialTheme.typography.bodySmall
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
             }
 
-            // Visual Rule Carousel (3 Slides)
+            // Visual Rule Carousel
             if (game.rules.isNotEmpty()) {
                 Text(
                     text = "HOW TO PLAY",
                     color = TextMuted,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
+                    fontFamily = PressStart2PFont,
+                    fontSize = 8.sp
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -137,37 +141,50 @@ fun PreGameGuideSheet(
                     state = pagerState,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(100.dp)
+                        .height(96.dp)
                 ) { page ->
                     val rule = game.rules[page]
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(horizontal = 4.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.dp, BorderGlassDefault, RoundedCornerShape(16.dp))
-                            .padding(16.dp),
+                            .padding(horizontal = 2.dp)
+                            .border(2.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
+                            .background(
+                                brush = pixelBandedVertical(
+                                    listOf(PixelVioletBase, PixelVioletDark)
+                                )
+                            )
+                            .padding(12.dp),
                         contentAlignment = Alignment.CenterStart
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = rule.iconSymbol,
-                                fontSize = 32.sp,
-                                modifier = Modifier.padding(end = 16.dp)
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(30.dp)
+                                    .border(1.dp, PixelOutlineBlack)
+                                    .background(PixelCrtCyan),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "${rule.stepNumber}",
+                                    color = PixelOutlineBlack,
+                                    fontFamily = PressStart2PFont,
+                                    fontSize = 10.sp
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
                             Column {
                                 Text(
-                                    text = "Step ${rule.stepNumber}: ${rule.title}",
+                                    text = rule.title,
                                     color = TextPrimary,
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Bold
+                                    fontFamily = PressStart2PFont,
+                                    fontSize = 9.sp
                                 )
+                                Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     text = rule.description,
                                     color = TextSecondary,
-                                    fontSize = 12.sp,
-                                    lineHeight = 16.sp
+                                    style = MaterialTheme.typography.bodySmall
                                 )
                             }
                         }
@@ -178,25 +195,25 @@ fun PreGameGuideSheet(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp),
+                        .padding(vertical = 6.dp),
                     horizontalArrangement = Arrangement.Center
                 ) {
                     repeat(game.rules.size) { iteration ->
-                        val color = if (pagerState.currentPage == iteration) categoryToken.primaryAccent else Color(0x33FFFFFF)
+                        val color = if (pagerState.currentPage == iteration) PixelCrtCyan else PixelVioletDark
                         Box(
                             modifier = Modifier
                                 .padding(3.dp)
-                                .clip(CircleShape)
+                                .size(8.dp)
+                                .border(1.dp, PixelOutlineBlack)
                                 .background(color)
-                                .size(6.dp)
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
-            // Player Setup Controls
+            // Player Setup Controls Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -205,22 +222,28 @@ fun PreGameGuideSheet(
                 Text(
                     text = "GAME SETUP",
                     color = TextMuted,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
+                    fontFamily = PressStart2PFont,
+                    fontSize = 8.sp
                 )
 
                 TextButton(onClick = { showAiGenerator = true }) {
-                    Text(
-                        text = if (customPromptsCount > 0) "✨ Custom Pack ($customPromptsCount prompts)" else "✨ AI Custom Pack",
-                        color = Color(0xFF00F2FE),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = PixelIcons.Zap,
+                            contentDescription = null,
+                            tint = PixelCrtCyan,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = if (customPromptsCount > 0) "CUSTOM ($customPromptsCount)" else "AI PACK",
+                            color = PixelCrtCyan,
+                            fontFamily = PressStart2PFont,
+                            fontSize = 8.sp
+                        )
+                    }
                 }
             }
-
-            Spacer(modifier = Modifier.height(4.dp))
 
             // Player Count Selector
             Row(
@@ -228,53 +251,53 @@ fun PreGameGuideSheet(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Players:", color = TextSecondary, fontSize = 13.sp)
+                Text("Players:", color = TextSecondary, style = MaterialTheme.typography.bodyMedium)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(
                         onClick = { if (selectedPlayerCount > game.minPlayers) selectedPlayerCount-- },
                         enabled = selectedPlayerCount > game.minPlayers
                     ) {
-                        Text("-", color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                        Text("-", color = TextPrimary, fontFamily = PressStart2PFont, fontSize = 14.sp)
                     }
                     Text(
                         text = "$selectedPlayerCount",
-                        color = categoryToken.primaryAccent,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Black,
+                        color = PixelCrtCyan,
+                        fontFamily = PressStart2PFont,
+                        fontSize = 12.sp,
                         modifier = Modifier.padding(horizontal = 8.dp)
                     )
                     IconButton(
                         onClick = { if (selectedPlayerCount < game.maxPlayers) selectedPlayerCount++ },
                         enabled = selectedPlayerCount < game.maxPlayers
                     ) {
-                        Text("+", color = TextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                        Text("+", color = TextPrimary, fontFamily = PressStart2PFont, fontSize = 14.sp)
                     }
                 }
             }
 
             // Timer Duration Selector
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Timer:", color = TextSecondary, fontSize = 13.sp)
+                Text("Timer:", color = TextSecondary, style = MaterialTheme.typography.bodyMedium)
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     listOf(30, 60, 90).forEach { timerSec ->
                         val isSel = selectedTimerSec == timerSec
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(if (isSel) categoryToken.primaryAccent else SurfaceGlassDark)
+                                .border(1.5.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
+                                .background(if (isSel) PixelCrtCyan else PixelVioletBase)
                                 .clickable { selectedTimerSec = timerSec }
-                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                                .padding(horizontal = 10.dp, vertical = 6.dp)
                         ) {
                             Text(
                                 text = "${timerSec}s",
-                                color = if (isSel) Color.White else TextMuted,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
+                                color = if (isSel) PixelOutlineBlack else TextMuted,
+                                fontFamily = PressStart2PFont,
+                                fontSize = 8.sp
                             )
                         }
                     }
@@ -282,28 +305,28 @@ fun PreGameGuideSheet(
             }
 
             // Deck Intensity Selector
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Deck:", color = TextSecondary, fontSize = 13.sp)
+                Text("Deck:", color = TextSecondary, style = MaterialTheme.typography.bodyMedium)
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     listOf("Clean", "Party", "Extreme").forEach { intensity ->
                         val isSel = selectedIntensity == intensity
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(if (isSel) categoryToken.primaryAccent else SurfaceGlassDark)
+                                .border(1.5.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
+                                .background(if (isSel) PixelMagentaHot else PixelVioletBase)
                                 .clickable { selectedIntensity = intensity }
-                                .padding(horizontal = 10.dp, vertical = 6.dp)
+                                .padding(horizontal = 8.dp, vertical = 6.dp)
                         ) {
                             Text(
-                                text = intensity,
-                                color = if (isSel) Color.White else TextMuted,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
+                                text = intensity.uppercase(),
+                                color = if (isSel) PixelOutlineBlack else TextMuted,
+                                fontFamily = PressStart2PFont,
+                                fontSize = 8.sp
                             )
                         }
                     }
@@ -313,34 +336,16 @@ fun PreGameGuideSheet(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Start Game CTA Button
-            Button(
+            PrimaryPartyButton(
+                text = "START GAME",
+                accentColor = PixelCrtCyan,
                 onClick = {
                     onStartGame(selectedPlayerCount, selectedTimerSec, selectedIntensity)
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .clip(RoundedCornerShape(18.dp))
-                    .background(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(
-                                categoryToken.primaryAccent,
-                                categoryToken.secondaryAccent
-                            )
-                        )
-                    ),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
-            ) {
-                Text(
-                    text = "START GAME 🎮",
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.sp
-                )
-            }
+                modifier = Modifier.fillMaxWidth()
+            )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
         if (showAiGenerator) {

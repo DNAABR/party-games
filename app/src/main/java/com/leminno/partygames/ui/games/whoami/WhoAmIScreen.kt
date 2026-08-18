@@ -4,26 +4,17 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.Phonelink
-import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,7 +34,7 @@ fun WhoAmIScreen(
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
 
-    var selectedMode by remember { mutableStateOf<String?>(null) } // null, LOCAL, REMOTE
+    var selectedMode by remember { mutableStateOf<String?>(null) }
     var showRemoteSheet by remember { mutableStateOf(false) }
     var roomCode by remember { mutableStateOf("") }
 
@@ -72,19 +63,15 @@ fun WhoAmIScreen(
         }
     }
 
-    val backgroundColor by animateColorAsState(
-        targetValue = when (uiState.cardFeedbackState) {
-            "CORRECT" -> SuccessGreen.copy(alpha = 0.85f)
-            "SKIP" -> AlertRed.copy(alpha = 0.85f)
-            else -> SurfaceGlassDark
-        },
-        animationSpec = tween(300),
-        label = "bgColor"
-    )
+    val cardBgColor = when (uiState.cardFeedbackState) {
+        "CORRECT" -> PixelEmeraldGreen
+        "SKIP" -> PixelAlertRed
+        else -> PixelCrtDarkCanvas
+    }
 
     GameScaffold(
         title = "WHO AM I?",
-        titleColor = AccentViolet,
+        titleColor = PixelMagentaHot,
         gameId = "who_am_i",
         onExitGame = onExitGame
     ) {
@@ -97,93 +84,99 @@ fun WhoAmIScreen(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = "SELECT PLAY MODE",
-                        color = TextPrimary,
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Black
+                        color = PixelCrtCyan,
+                        fontFamily = PressStart2PFont,
+                        fontSize = 12.sp
                     )
                     Spacer(modifier = Modifier.height(20.dp))
 
+                    // Forehead Pass Mode Box
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.5.dp, AccentViolet, RoundedCornerShape(20.dp))
-                            .clickable {
-                                selectedMode = "LOCAL"
-                            }
-                            .padding(20.dp)
+                            .border(3.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
+                            .background(
+                                brush = pixelBandedVertical(listOf(PixelVioletElevated, PixelVioletBase))
+                            )
+                            .clickable { selectedMode = "LOCAL" }
+                            .padding(16.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .background(AccentViolet.copy(alpha = 0.2f))
-                                    .padding(12.dp)
+                                    .size(36.dp)
+                                    .border(1.5.dp, PixelOutlineBlack)
+                                    .background(PixelMagentaHot),
+                                contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    imageVector = Icons.Rounded.Phonelink,
+                                    imageVector = PixelIcons.ArcadeJoystick,
                                     contentDescription = null,
-                                    tint = AccentViolet,
-                                    modifier = Modifier.size(28.dp)
+                                    tint = PixelOutlineBlack,
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
-                            Spacer(modifier = Modifier.width(16.dp))
+                            Spacer(modifier = Modifier.width(14.dp))
                             Column {
                                 Text(
-                                    text = "Forehead Pass (Same Phone)",
-                                    color = AccentViolet,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold
+                                    text = "FOREHEAD PASS",
+                                    color = PixelCrtCyan,
+                                    fontFamily = PressStart2PFont,
+                                    fontSize = 10.sp
                                 )
+                                Spacer(modifier = Modifier.height(4.dp))
                                 Text(
                                     text = "Hold phone on forehead with tilt detection",
-                                    color = TextMuted,
+                                    color = TextSecondary,
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
+                    // Remote Play Mode Box
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.5.dp, AccentCyan, RoundedCornerShape(20.dp))
+                            .border(3.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
+                            .background(
+                                brush = pixelBandedVertical(listOf(PixelVioletElevated, PixelVioletBase))
+                            )
                             .clickable {
                                 selectedMode = "REMOTE"
                                 showRemoteSheet = true
                             }
-                            .padding(20.dp)
+                            .padding(16.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .background(AccentCyan.copy(alpha = 0.2f))
-                                    .padding(12.dp)
+                                    .size(36.dp)
+                                    .border(1.5.dp, PixelOutlineBlack)
+                                    .background(PixelCrtCyan),
+                                contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    imageVector = Icons.Rounded.Public,
+                                    imageVector = PixelIcons.Users,
                                     contentDescription = null,
-                                    tint = AccentCyan,
-                                    modifier = Modifier.size(28.dp)
+                                    tint = PixelOutlineBlack,
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
-                            Spacer(modifier = Modifier.width(16.dp))
+                            Spacer(modifier = Modifier.width(14.dp))
                             Column {
                                 Text(
-                                    text = "Remote Play (Multi-Device)",
-                                    color = AccentCyan,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold
+                                    text = "REMOTE PLAY",
+                                    color = PixelMagentaHot,
+                                    fontFamily = PressStart2PFont,
+                                    fontSize = 10.sp
                                 )
+                                Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = "Card shown on remote screens while guesser asks questions",
-                                    color = TextMuted,
+                                    text = "Multi-device room code sync",
+                                    color = TextSecondary,
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }
@@ -205,76 +198,93 @@ fun WhoAmIScreen(
                 ) {
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.dp, BorderGlassDefault, RoundedCornerShape(12.dp))
-                            .padding(horizontal = 14.dp, vertical = 6.dp)
+                            .border(2.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
+                            .background(PixelVioletElevated)
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
-                        Text(
-                            text = "⏱️ ${uiState.timeRemaining}s",
-                            color = if (uiState.timeRemaining <= 10) AlertRed else TextPrimary,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Black
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = PixelIcons.Clock,
+                                contentDescription = null,
+                                tint = if (uiState.timeRemaining <= 10) PixelAlertRed else PixelCrtCyan,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "${uiState.timeRemaining}S",
+                                color = if (uiState.timeRemaining <= 10) PixelAlertRed else PixelCrtCyan,
+                                fontFamily = PressStart2PFont,
+                                fontSize = 10.sp
+                            )
+                        }
                     }
 
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.dp, AccentViolet.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
-                            .padding(horizontal = 14.dp, vertical = 6.dp)
+                            .border(2.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
+                            .background(PixelVioletElevated)
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
-                        Text(
-                            text = "SCORE: ${uiState.score}",
-                            color = AccentViolet,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Black
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = PixelIcons.Trophy,
+                                contentDescription = null,
+                                tint = PixelAmberGold,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "SCORE:${uiState.score}",
+                                color = PixelAmberGold,
+                                fontFamily = PressStart2PFont,
+                                fontSize = 10.sp
+                            )
+                        }
                     }
                 }
 
-                // Forehead Card Display Box
+                // CRT Forehead Screen Card
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
-                        .padding(vertical = 16.dp)
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(backgroundColor)
-                        .border(1.5.dp, AccentViolet.copy(alpha = 0.5f), RoundedCornerShape(24.dp))
-                        .padding(24.dp),
+                        .padding(vertical = 14.dp)
+                        .border(3.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
+                        .background(cardBgColor)
+                        .crtScanlines()
+                        .padding(20.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         val currentWord = uiState.wordList.getOrNull(uiState.currentIndex)
                         Text(
-                            text = currentWord ?: "CARD",
-                            color = TextPrimary,
-                            style = MaterialTheme.typography.displayLarge,
-                            fontWeight = FontWeight.Black,
+                            text = (currentWord ?: "CARD").uppercase(),
+                            color = if (uiState.cardFeedbackState == "NORMAL") PixelCrtCyan else PixelOutlineBlack,
+                            fontFamily = PressStart2PFont,
+                            fontSize = 20.sp,
+                            lineHeight = 28.sp,
                             textAlign = TextAlign.Center
                         )
                     }
                 }
 
-                // Manual Controls
+                // Manual Pixel Controls
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     PrimaryPartyButton(
                         text = "SKIP",
-                        icon = Icons.Rounded.Close,
-                        accentColor = AlertRed,
+                        icon = PixelIcons.Close,
+                        accentColor = PixelAlertRed,
                         onClick = { viewModel.onManualSkip() },
                         modifier = Modifier.weight(1f)
                     )
 
                     PrimaryPartyButton(
                         text = "CORRECT",
-                        icon = Icons.Rounded.Check,
-                        accentColor = SuccessGreen,
+                        icon = PixelIcons.Zap,
+                        accentColor = PixelEmeraldGreen,
                         onClick = { viewModel.onManualGotIt() },
                         modifier = Modifier.weight(1f)
                     )
@@ -282,7 +292,7 @@ fun WhoAmIScreen(
             }
         } else {
             VictoryCeremonyOverlay(
-                winnerTitle = "FINAL SCORE: ${uiState.score} 🎉",
+                winnerTitle = "FINAL SCORE: ${uiState.score}",
                 subtitle = "Who Am I Champions!",
                 onPlayAgain = {
                     viewModel.initGame(timerSec)
@@ -295,7 +305,7 @@ fun WhoAmIScreen(
         if (showRemoteSheet) {
             RemoteRoomSetupSheet(
                 gameId = "who_am_i",
-                gameName = "Who Am I? 🎭",
+                gameName = "Who Am I?",
                 onDismiss = {
                     showRemoteSheet = false
                     if (roomCode.isBlank()) selectedMode = null

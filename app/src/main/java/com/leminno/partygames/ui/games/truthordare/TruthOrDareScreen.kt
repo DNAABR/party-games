@@ -1,24 +1,17 @@
 package com.leminno.partygames.ui.games.truthordare
 
-import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AutoAwesome
-import androidx.compose.material.icons.rounded.LocalFireDepartment
-import androidx.compose.material.icons.rounded.Psychology
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,7 +38,7 @@ fun TruthOrDareScreen(
 
     GameScaffold(
         title = "TRUTH OR DARE",
-        titleColor = AccentViolet,
+        titleColor = PixelCrtCyan,
         gameId = "truth_or_dare",
         onExitGame = onExitGame
     ) {
@@ -54,7 +47,7 @@ fun TruthOrDareScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Deck Selector Tabs
+            // Deck Selector Tabs (8-Bit Banded Buttons)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -64,114 +57,112 @@ fun TruthOrDareScreen(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(if (isSelected) AccentViolet else SurfaceGlassDark)
-                            .border(1.dp, if (isSelected) AccentViolet else BorderGlassDefault, RoundedCornerShape(12.dp))
+                            .height(44.dp)
+                            .border(2.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
+                            .background(if (isSelected) PixelCrtCyan else PixelVioletElevated)
                             .clickable {
                                 haptics.performTick(composeHaptics)
                                 viewModel.selectDeck(deck)
-                            }
-                            .padding(vertical = 10.dp),
+                            },
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = deck.uppercase(),
-                            color = if (isSelected) Color.White else TextMuted,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold
+                            color = if (isSelected) PixelOutlineBlack else TextMuted,
+                            fontFamily = PressStart2PFont,
+                            fontSize = 8.sp
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-            // Center Card Container
+            // Center CRT Screen Display
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(SurfaceGlassDark)
-                    .border(1.5.dp, AccentViolet.copy(alpha = 0.6f), RoundedCornerShape(24.dp))
-                    .padding(24.dp),
+                    .border(3.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
+                    .background(
+                        brush = pixelBandedVertical(listOf(PixelVioletElevated, PixelVioletBase))
+                    )
+                    .crtScanlines()
+                    .padding(20.dp),
                 contentAlignment = Alignment.Center
             ) {
                 if (uiState.activePrompt == null) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(AccentViolet.copy(alpha = 0.2f))
-                                .padding(16.dp)
+                                .border(1.5.dp, PixelOutlineBlack)
+                                .background(PixelMagentaHot)
+                                .padding(12.dp)
                         ) {
                             Icon(
-                                imageVector = Icons.Rounded.AutoAwesome,
+                                imageVector = PixelIcons.Zap,
                                 contentDescription = null,
-                                tint = AccentViolet,
-                                modifier = Modifier.size(36.dp)
+                                tint = PixelOutlineBlack,
+                                modifier = Modifier.size(24.dp)
                             )
                         }
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = "CHOOSE YOUR FATE",
-                            color = AccentViolet,
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 1.sp
+                            color = PixelCrtCyan,
+                            fontFamily = PressStart2PFont,
+                            fontSize = 12.sp
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Select Truth or Dare below to generate a prompt!",
+                            text = "SELECT TRUTH OR DARE BELOW",
                             color = TextMuted,
-                            style = MaterialTheme.typography.bodyMedium,
+                            fontFamily = PressStart2PFont,
+                            fontSize = 8.sp,
                             textAlign = TextAlign.Center
                         )
                     }
                 } else {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        val promptColor = if (uiState.activePromptType == "TRUTH") AccentViolet else AccentMagenta
+                        val promptColor = if (uiState.activePromptType == "TRUTH") PixelCrtCyan else PixelMagentaHot
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(promptColor.copy(alpha = 0.2f))
-                                .border(1.dp, promptColor.copy(alpha = 0.5f), RoundedCornerShape(10.dp))
-                                .padding(horizontal = 14.dp, vertical = 6.dp)
+                                .border(1.5.dp, PixelOutlineBlack)
+                                .background(promptColor)
+                                .padding(horizontal = 10.dp, vertical = 4.dp)
                         ) {
                             Text(
                                 text = uiState.activePromptType ?: "",
-                                color = promptColor,
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Black,
-                                letterSpacing = 2.sp
+                                color = PixelOutlineBlack,
+                                fontFamily = PressStart2PFont,
+                                fontSize = 9.sp
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(20.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
                         Text(
                             text = uiState.activePrompt ?: "",
                             color = TextPrimary,
-                            style = MaterialTheme.typography.headlineLarge,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodyLarge,
                             textAlign = TextAlign.Center,
-                            lineHeight = 32.sp
+                            lineHeight = 24.sp
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-            // Action Buttons
+            // Stepped Action Push Buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 PrimaryPartyButton(
                     text = "TRUTH",
-                    icon = Icons.Rounded.Psychology,
-                    accentColor = AccentViolet,
+                    icon = PixelIcons.Lightbulb,
+                    accentColor = PixelCrtCyan,
                     onClick = {
                         haptics.performPop()
                         viewModel.drawTruth()
@@ -181,8 +172,8 @@ fun TruthOrDareScreen(
 
                 PrimaryPartyButton(
                     text = "DARE",
-                    icon = Icons.Rounded.LocalFireDepartment,
-                    accentColor = AccentMagenta,
+                    icon = PixelIcons.Zap,
+                    accentColor = PixelMagentaHot,
                     onClick = {
                         haptics.performPop()
                         viewModel.drawDare()
