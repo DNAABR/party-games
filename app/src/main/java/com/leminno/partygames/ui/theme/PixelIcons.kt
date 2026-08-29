@@ -327,5 +327,25 @@ object PixelIcons {
             }
         }.build()
     }
+
+    val Search: ImageVector by lazy {
+        ImageVector.Builder(
+            name = "PixelSearch",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 24f,
+            viewportHeight = 24f
+        ).apply {
+            path(fill = SolidColor(Color.White)) {
+                // Magnifying glass lens rim
+                moveTo(5f, 3f); lineTo(15f, 3f); lineTo(15f, 5f); lineTo(17f, 5f); lineTo(17f, 13f); lineTo(15f, 13f); lineTo(15f, 15f); lineTo(13f, 15f); lineTo(13f, 17f); lineTo(5f, 17f); lineTo(5f, 15f); lineTo(3f, 15f); lineTo(3f, 5f); lineTo(5f, 5f); close()
+                // Inner cutout
+                moveTo(7f, 6f); lineTo(13f, 6f); lineTo(13f, 12f); lineTo(7f, 12f); close()
+                // Handle
+                moveTo(14f, 14f); lineTo(17f, 14f); lineTo(21f, 18f); lineTo(21f, 21f); lineTo(18f, 21f); lineTo(14f, 17f); close()
+            }
+        }.build()
+    }
 }
+
 

@@ -6,18 +6,20 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.leminno.partygames.data.model.GameCategory
 import com.leminno.partygames.ui.components.AiPromptGeneratorSheet
 import com.leminno.partygames.ui.components.PrimaryPartyButton
-import com.leminno.partygames.ui.components.SecondaryPartyButton
 import com.leminno.partygames.ui.model.GameItem
 import com.leminno.partygames.ui.theme.*
 
@@ -36,6 +38,8 @@ fun PreGameGuideSheet(
     var showAiGenerator by remember { mutableStateOf(false) }
     var customPromptsCount by remember { mutableIntStateOf(0) }
 
+    val categoryToken = CategoryThemeToken.forCategory(game.category)
+
     val categoryIcon = when (game.category) {
         GameCategory.TRIVIA -> PixelIcons.Lightbulb
         GameCategory.ACTION -> PixelIcons.Zap
@@ -46,16 +50,23 @@ fun PreGameGuideSheet(
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
-        containerColor = PixelVioletElevated,
-        scrimColor = Color(0xCC000000),
-        shape = RoundedCornerShape(2.dp),
-        dragHandle = null
+        containerColor = SurfaceLight,
+        scrimColor = Color(0x660F172A),
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(vertical = 10.dp)
+                    .size(width = 36.dp, height = 4.dp)
+                    .clip(CircleShape)
+                    .background(BorderSubtle)
+            )
+        }
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(3.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
-                .padding(horizontal = 20.dp, vertical = 16.dp)
+                .padding(horizontal = 24.dp, vertical = 6.dp)
         ) {
             // Game Header Title & Category Badge
             Row(
@@ -65,32 +76,34 @@ fun PreGameGuideSheet(
             ) {
                 Column {
                     Text(
-                        text = game.title.uppercase(),
-                        color = PixelCrtCyan,
-                        fontFamily = PressStart2PFont,
-                        fontSize = 13.sp
+                        text = game.title,
+                        color = TextPrimary,
+                        fontFamily = ModernSansFont,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 22.sp
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = game.setupType.label.uppercase(),
-                        color = PixelMagentaHot,
-                        fontFamily = PressStart2PFont,
-                        fontSize = 8.sp
+                        text = game.setupType.label,
+                        color = BrandPrimary,
+                        fontFamily = ModernSansFont,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 13.sp
                     )
                 }
 
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
-                        .border(1.5.dp, PixelOutlineBlack)
-                        .background(PixelMagentaHot),
+                        .size(44.dp)
+                        .clip(CircleShape)
+                        .background(categoryToken.containerColor),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = categoryIcon,
                         contentDescription = null,
-                        tint = PixelOutlineBlack,
-                        modifier = Modifier.size(18.dp)
+                        tint = categoryToken.textColor,
+                        modifier = Modifier.size(22.dp)
                     )
                 }
             }
@@ -102,22 +115,25 @@ fun PreGameGuideSheet(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(2.dp, PixelAmberGold, RoundedCornerShape(2.dp))
-                        .background(PixelVioletDark)
-                        .padding(10.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(WarningContainer)
+                        .border(1.dp, Color(0xFFFDE68A), RoundedCornerShape(16.dp))
+                        .padding(12.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = PixelIcons.Shield,
                             contentDescription = null,
-                            tint = PixelAmberGold,
+                            tint = WarningAmber,
                             modifier = Modifier.size(18.dp)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            text = "ANTI-CHEAT: ${game.antiCheatNotice}",
-                            color = PixelAmberGold,
-                            style = MaterialTheme.typography.bodySmall
+                            text = game.antiCheatNotice,
+                            color = Color(0xFF92400E),
+                            fontFamily = ModernSansFont,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium
                         )
                     }
                 }
@@ -128,9 +144,11 @@ fun PreGameGuideSheet(
             if (game.rules.isNotEmpty()) {
                 Text(
                     text = "HOW TO PLAY",
-                    color = TextMuted,
-                    fontFamily = PressStart2PFont,
-                    fontSize = 8.sp
+                    color = TextSecondary,
+                    fontFamily = ModernSansFont,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 12.sp,
+                    letterSpacing = 0.5.sp
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -141,19 +159,16 @@ fun PreGameGuideSheet(
                     state = pagerState,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(96.dp)
+                        .height(84.dp)
                 ) { page ->
                     val rule = game.rules[page]
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(horizontal = 2.dp)
-                            .border(2.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
-                            .background(
-                                brush = pixelBandedVertical(
-                                    listOf(PixelVioletBase, PixelVioletDark)
-                                )
-                            )
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(SurfaceSubtle)
+                            .border(1.dp, BorderSubtle, RoundedCornerShape(16.dp))
                             .padding(12.dp),
                         contentAlignment = Alignment.CenterStart
                     ) {
@@ -161,30 +176,34 @@ fun PreGameGuideSheet(
                             Box(
                                 modifier = Modifier
                                     .size(30.dp)
-                                    .border(1.dp, PixelOutlineBlack)
-                                    .background(PixelCrtCyan),
+                                    .clip(CircleShape)
+                                    .background(BrandPrimary),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     text = "${rule.stepNumber}",
-                                    color = PixelOutlineBlack,
-                                    fontFamily = PressStart2PFont,
-                                    fontSize = 10.sp
+                                    color = TextOnPrimary,
+                                    fontFamily = ModernSansFont,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 13.sp
                                 )
                             }
-                            Spacer(modifier = Modifier.width(10.dp))
+                            Spacer(modifier = Modifier.width(12.dp))
                             Column {
                                 Text(
                                     text = rule.title,
                                     color = TextPrimary,
-                                    fontFamily = PressStart2PFont,
-                                    fontSize = 9.sp
+                                    fontFamily = ModernSansFont,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 14.sp
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     text = rule.description,
                                     color = TextSecondary,
-                                    style = MaterialTheme.typography.bodySmall
+                                    fontFamily = ModernSansFont,
+                                    fontSize = 12.sp,
+                                    lineHeight = 16.sp
                                 )
                             }
                         }
@@ -199,13 +218,13 @@ fun PreGameGuideSheet(
                     horizontalArrangement = Arrangement.Center
                 ) {
                     repeat(game.rules.size) { iteration ->
-                        val color = if (pagerState.currentPage == iteration) PixelCrtCyan else PixelVioletDark
+                        val isSelected = pagerState.currentPage == iteration
                         Box(
                             modifier = Modifier
                                 .padding(3.dp)
-                                .size(8.dp)
-                                .border(1.dp, PixelOutlineBlack)
-                                .background(color)
+                                .size(if (isSelected) 16.dp else 6.dp, 6.dp)
+                                .clip(CircleShape)
+                                .background(if (isSelected) BrandPrimary else BorderSubtle)
                         )
                     }
                 }
@@ -221,25 +240,23 @@ fun PreGameGuideSheet(
             ) {
                 Text(
                     text = "GAME SETUP",
-                    color = TextMuted,
-                    fontFamily = PressStart2PFont,
-                    fontSize = 8.sp
+                    color = TextSecondary,
+                    fontFamily = ModernSansFont,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 12.sp,
+                    letterSpacing = 0.5.sp
                 )
 
                 TextButton(onClick = { showAiGenerator = true }) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = PixelIcons.Zap,
-                            contentDescription = null,
-                            tint = PixelCrtCyan,
-                            modifier = Modifier.size(14.dp)
-                        )
+                        Text(text = "✨", fontSize = 14.sp)
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = if (customPromptsCount > 0) "CUSTOM ($customPromptsCount)" else "AI PACK",
-                            color = PixelCrtCyan,
-                            fontFamily = PressStart2PFont,
-                            fontSize = 8.sp
+                            text = if (customPromptsCount > 0) "Custom ($customPromptsCount)" else "AI Prompt Pack",
+                            color = BrandPrimary,
+                            fontFamily = ModernSansFont,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 13.sp
                         )
                     }
                 }
@@ -251,53 +268,64 @@ fun PreGameGuideSheet(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Players:", color = TextSecondary, style = MaterialTheme.typography.bodyMedium)
+                Text("Players", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 14.sp, fontWeight = FontWeight.Medium)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(
                         onClick = { if (selectedPlayerCount > game.minPlayers) selectedPlayerCount-- },
-                        enabled = selectedPlayerCount > game.minPlayers
+                        enabled = selectedPlayerCount > game.minPlayers,
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(CircleShape)
+                            .background(SurfaceSubtle)
                     ) {
-                        Text("-", color = TextPrimary, fontFamily = PressStart2PFont, fontSize = 14.sp)
+                        Text("-", color = TextPrimary, fontFamily = ModernSansFont, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
                     Text(
                         text = "$selectedPlayerCount",
-                        color = PixelCrtCyan,
-                        fontFamily = PressStart2PFont,
-                        fontSize = 12.sp,
-                        modifier = Modifier.padding(horizontal = 8.dp)
+                        color = TextPrimary,
+                        fontFamily = ModernSansFont,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp,
+                        modifier = Modifier.padding(horizontal = 14.dp)
                     )
                     IconButton(
                         onClick = { if (selectedPlayerCount < game.maxPlayers) selectedPlayerCount++ },
-                        enabled = selectedPlayerCount < game.maxPlayers
+                        enabled = selectedPlayerCount < game.maxPlayers,
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(CircleShape)
+                            .background(SurfaceSubtle)
                     ) {
-                        Text("+", color = TextPrimary, fontFamily = PressStart2PFont, fontSize = 14.sp)
+                        Text("+", color = TextPrimary, fontFamily = ModernSansFont, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
                 }
             }
 
             // Timer Duration Selector
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Timer:", color = TextSecondary, style = MaterialTheme.typography.bodyMedium)
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text("Round Timer", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf(30, 60, 90).forEach { timerSec ->
                         val isSel = selectedTimerSec == timerSec
                         Box(
                             modifier = Modifier
-                                .border(1.5.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
-                                .background(if (isSel) PixelCrtCyan else PixelVioletBase)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (isSel) BrandPrimary else SurfaceSubtle)
+                                .border(1.dp, if (isSel) BrandPrimary else BorderSubtle, RoundedCornerShape(12.dp))
                                 .clickable { selectedTimerSec = timerSec }
-                                .padding(horizontal = 10.dp, vertical = 6.dp)
+                                .padding(horizontal = 12.dp, vertical = 6.dp)
                         ) {
                             Text(
                                 text = "${timerSec}s",
-                                color = if (isSel) PixelOutlineBlack else TextMuted,
-                                fontFamily = PressStart2PFont,
-                                fontSize = 8.sp
+                                color = if (isSel) TextOnPrimary else TextSecondary,
+                                fontFamily = ModernSansFont,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 13.sp
                             )
                         }
                     }
@@ -305,40 +333,42 @@ fun PreGameGuideSheet(
             }
 
             // Deck Intensity Selector
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Deck:", color = TextSecondary, style = MaterialTheme.typography.bodyMedium)
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text("Deck Intensity", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf("Clean", "Party", "Extreme").forEach { intensity ->
                         val isSel = selectedIntensity == intensity
                         Box(
                             modifier = Modifier
-                                .border(1.5.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
-                                .background(if (isSel) PixelMagentaHot else PixelVioletBase)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (isSel) BrandPrimary else SurfaceSubtle)
+                                .border(1.dp, if (isSel) BrandPrimary else BorderSubtle, RoundedCornerShape(12.dp))
                                 .clickable { selectedIntensity = intensity }
-                                .padding(horizontal = 8.dp, vertical = 6.dp)
+                                .padding(horizontal = 10.dp, vertical = 6.dp)
                         ) {
                             Text(
-                                text = intensity.uppercase(),
-                                color = if (isSel) PixelOutlineBlack else TextMuted,
-                                fontFamily = PressStart2PFont,
-                                fontSize = 8.sp
+                                text = intensity,
+                                color = if (isSel) TextOnPrimary else TextSecondary,
+                                fontFamily = ModernSansFont,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 12.sp
                             )
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             // Start Game CTA Button
             PrimaryPartyButton(
-                text = "START GAME",
-                accentColor = PixelCrtCyan,
+                text = "Start Game",
+                accentColor = BrandPrimary,
                 onClick = {
                     onStartGame(selectedPlayerCount, selectedTimerSec, selectedIntensity)
                 },
@@ -359,3 +389,4 @@ fun PreGameGuideSheet(
         }
     }
 }
+

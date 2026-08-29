@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,6 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.leminno.partygames.data.model.PartySessionManager
 import com.leminno.partygames.data.repository.UserPreferencesRepository
+import com.leminno.partygames.ui.components.PrimaryPartyButton
+import com.leminno.partygames.ui.components.SecondaryPartyButton
 import com.leminno.partygames.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,18 +32,27 @@ fun PartyCompanionSheet(
     val savedRoster by UserPreferencesRepository.savedRoster.collectAsState()
 
     var newPlayerName by remember { mutableStateOf("") }
-    var selectedTab by remember { mutableStateOf(0) } // 0 = Leaderboard, 1 = Rosters
+    var selectedTab by remember { mutableIntStateOf(0) } // 0 = Leaderboard, 1 = Rosters
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
-        containerColor = SurfaceGlassDark,
-        scrimColor = Color.Black.copy(alpha = 0.6f),
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+        containerColor = SurfaceLight,
+        scrimColor = Color(0x660F172A),
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(vertical = 10.dp)
+                    .size(width = 36.dp, height = 4.dp)
+                    .clip(CircleShape)
+                    .background(BorderSubtle)
+            )
+        }
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .padding(horizontal = 24.dp, vertical = 8.dp)
         ) {
             // Header Bar
             Row(
@@ -49,49 +61,94 @@ fun PartyCompanionSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "🏆", fontSize = 24.sp)
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(WarningContainer),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "🏆", fontSize = 20.sp)
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
                     Column {
                         Text(
-                            text = "PARTY COMPANION",
+                            text = "Party Companion",
                             color = TextPrimary,
+                            fontFamily = ModernSansFont,
                             fontSize = 18.sp,
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 1.sp
+                            fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "GLOBAL SESSION SCOREKEEPER",
-                            color = Color(0xFF00F2FE),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.sp
+                            text = "Scorekeeper & Rosters",
+                            color = TextSecondary,
+                            fontFamily = ModernSansFont,
+                            fontSize = 13.sp
                         )
                     }
                 }
 
-                IconButton(onClick = onDismissRequest) {
-                    Text("✕", color = TextSecondary, fontSize = 20.sp)
+                IconButton(
+                    onClick = onDismissRequest,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(SurfaceSubtle)
+                ) {
+                    Icon(
+                        imageVector = PixelIcons.Close,
+                        contentDescription = "Close",
+                        tint = TextSecondary,
+                        modifier = Modifier.size(16.dp)
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Tab Buttons: Scoreboard vs Rosters
-            TabRow(
-                selectedTabIndex = selectedTab,
-                containerColor = Color.Transparent,
-                contentColor = Color(0xFF00F2FE)
+            // Tab Buttons: Scoreboard vs Rosters (Segmented Control Pill)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(SurfaceSubtle)
+                    .padding(4.dp)
             ) {
-                Tab(
-                    selected = selectedTab == 0,
-                    onClick = { selectedTab = 0 },
-                    text = { Text("SCOREBOARD", fontWeight = FontWeight.Bold) }
-                )
-                Tab(
-                    selected = selectedTab == 1,
-                    onClick = { selectedTab = 1 },
-                    text = { Text("SAVED ROSTERS", fontWeight = FontWeight.Bold) }
-                )
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(if (selectedTab == 0) BrandPrimary else Color.Transparent)
+                        .clickable { selectedTab = 0 }
+                        .padding(vertical = 10.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Scoreboard",
+                        color = if (selectedTab == 0) TextOnPrimary else TextSecondary,
+                        fontFamily = ModernSansFont,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(if (selectedTab == 1) BrandPrimary else Color.Transparent)
+                        .clickable { selectedTab = 1 }
+                        .padding(vertical = 10.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Saved Rosters",
+                        color = if (selectedTab == 1) TextOnPrimary else TextSecondary,
+                        fontFamily = ModernSansFont,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -106,20 +163,21 @@ fun PartyCompanionSheet(
                         value = newPlayerName,
                         onValueChange = { newPlayerName = it },
                         placeholder = { Text("Enter player name...", color = TextMuted, fontSize = 13.sp) },
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(SurfaceGlassDark),
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(16.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFF00F2FE),
-                            unfocusedBorderColor = BorderGlassDefault,
+                            focusedBorderColor = BrandPrimary,
+                            unfocusedBorderColor = BorderSubtle,
                             focusedTextColor = TextPrimary,
-                            unfocusedTextColor = TextPrimary
+                            unfocusedTextColor = TextPrimary,
+                            focusedContainerColor = SurfaceLight,
+                            unfocusedContainerColor = SurfaceLight
                         ),
                         singleLine = true
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(
+                    Spacer(modifier = Modifier.width(10.dp))
+                    PrimaryPartyButton(
+                        text = "+ Add",
                         onClick = {
                             if (newPlayerName.isNotBlank()) {
                                 val currentNames = players.map { it.name }.toMutableList()
@@ -128,12 +186,9 @@ fun PartyCompanionSheet(
                                 newPlayerName = ""
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00F2FE)),
-                        shape = RoundedCornerShape(12.dp),
+                        accentColor = BrandPrimary,
                         modifier = Modifier.height(52.dp)
-                    ) {
-                        Text("+ ADD", color = Color.Black, fontWeight = FontWeight.Bold)
-                    }
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(14.dp))
@@ -143,16 +198,16 @@ fun PartyCompanionSheet(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 280.dp)
+                        .heightIn(max = 260.dp)
                 ) {
                     items(players) { player ->
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(14.dp))
-                                .background(SurfaceGlassDark)
-                                .border(1.dp, BorderGlassDefault, RoundedCornerShape(14.dp))
-                                .padding(horizontal = 14.dp, vertical = 10.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(SurfaceSubtle)
+                                .border(1.dp, BorderSubtle, RoundedCornerShape(16.dp))
+                                .padding(horizontal = 16.dp, vertical = 12.dp)
                         ) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -162,31 +217,39 @@ fun PartyCompanionSheet(
                                 Text(
                                     text = player.name,
                                     color = TextPrimary,
+                                    fontFamily = ModernSansFont,
                                     fontSize = 15.sp,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.SemiBold
                                 )
 
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     IconButton(
                                         onClick = { PartySessionManager.decrementScore(player.name) },
-                                        modifier = Modifier.size(32.dp)
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .clip(CircleShape)
+                                            .background(SurfaceLight)
                                     ) {
-                                        Text("-", color = Color(0xFFFF0055), fontSize = 20.sp, fontWeight = FontWeight.Black)
+                                        Text("-", color = AlertRed, fontFamily = ModernSansFont, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                                     }
 
                                     Text(
                                         text = "${player.score} pts",
-                                        color = Color(0xFF00F2FE),
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Black,
-                                        modifier = Modifier.padding(horizontal = 8.dp)
+                                        color = BrandPrimary,
+                                        fontFamily = ModernSansFont,
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(horizontal = 12.dp)
                                     )
 
                                     IconButton(
                                         onClick = { PartySessionManager.incrementScore(player.name) },
-                                        modifier = Modifier.size(32.dp)
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .clip(CircleShape)
+                                            .background(SurfaceLight)
                                     ) {
-                                        Text("+", color = Color(0xFF00E676), fontSize = 20.sp, fontWeight = FontWeight.Black)
+                                        Text("+", color = SuccessGreen, fontFamily = ModernSansFont, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
@@ -201,13 +264,13 @@ fun PartyCompanionSheet(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     TextButton(onClick = { PartySessionManager.resetScores() }) {
-                        Text("Reset Scores 🔄", color = TextSecondary)
+                        Text("Reset Scores 🔄", color = TextSecondary, fontFamily = ModernSansFont, fontWeight = FontWeight.Medium)
                     }
 
                     TextButton(onClick = {
                         UserPreferencesRepository.saveRoster(players.map { it.name })
                     }) {
-                        Text("Save Roster 💾", color = Color(0xFF00F2FE))
+                        Text("Save Roster 💾", color = BrandPrimary, fontFamily = ModernSansFont, fontWeight = FontWeight.SemiBold)
                     }
                 }
             } else {
@@ -215,46 +278,47 @@ fun PartyCompanionSheet(
                 if (savedRoster.isEmpty()) {
                     Text(
                         text = "No saved rosters yet. Save current active player names from the Scoreboard tab!",
-                        color = TextMuted,
+                        color = TextSecondary,
+                        fontFamily = ModernSansFont,
                         fontSize = 13.sp,
                         modifier = Modifier.padding(vertical = 20.dp)
                     )
                 } else {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Text(
-                            text = "SAVED PLAYER ROSTER",
+                            text = "Saved Player Roster",
                             color = TextSecondary,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
+                            fontFamily = ModernSansFont,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(14.dp))
-                                .background(SurfaceGlassDark)
-                                .border(1.dp, BorderGlassDefault, RoundedCornerShape(14.dp))
-                                .padding(14.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(SurfaceSubtle)
+                                .border(1.dp, BorderSubtle, RoundedCornerShape(16.dp))
+                                .padding(16.dp)
                         ) {
                             Column {
                                 Text(
                                     text = savedRoster.joinToString(", "),
                                     color = TextPrimary,
+                                    fontFamily = ModernSansFont,
                                     fontSize = 14.sp,
-                                    fontWeight = FontWeight.SemiBold
+                                    fontWeight = FontWeight.Medium
                                 )
-                                Spacer(modifier = Modifier.height(10.dp))
-                                Button(
+                                Spacer(modifier = Modifier.height(14.dp))
+                                PrimaryPartyButton(
+                                    text = "Load Roster to Scoreboard",
                                     onClick = {
                                         PartySessionManager.updatePlayers(savedRoster)
                                         selectedTab = 0
                                     },
-                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00F2FE)),
-                                    shape = RoundedCornerShape(10.dp),
+                                    accentColor = BrandPrimary,
                                     modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Text("LOAD ROSTER TO SCOREBOARD", color = Color.Black, fontWeight = FontWeight.Bold)
-                                }
+                                )
                             }
                         }
                     }
@@ -265,3 +329,4 @@ fun PartyCompanionSheet(
         }
     }
 }
+

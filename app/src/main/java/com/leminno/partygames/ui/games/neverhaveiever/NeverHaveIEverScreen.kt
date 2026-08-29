@@ -4,18 +4,22 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.leminno.partygames.ui.components.GameScaffold
 import com.leminno.partygames.ui.components.PrimaryPartyButton
+import com.leminno.partygames.ui.components.SecondaryPartyButton
 import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
 
@@ -46,78 +50,85 @@ fun NeverHaveIEverScreen(
     var livesRemaining by remember { mutableIntStateOf(10) }
 
     GameScaffold(
-        title = "NEVER HAVE I EVER",
-        titleColor = PixelMagentaHot,
+        title = "Never Have I Ever",
+        titleColor = TextPrimary,
         gameId = "never_have_i_ever",
         onExitGame = onExitGame
     ) {
         if (livesRemaining > 0) {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 // Header Lives Badge
                 Box(
                     modifier = Modifier
-                        .border(2.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
-                        .background(PixelVioletElevated)
-                        .padding(horizontal = 14.dp, vertical = 6.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(AlertContainer)
+                        .border(1.dp, AlertRed.copy(alpha = 0.25f), RoundedCornerShape(14.dp))
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = PixelIcons.Heart,
                             contentDescription = null,
-                            tint = PixelAlertRed,
+                            tint = AlertRed,
                             modifier = Modifier.size(16.dp)
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "$livesRemaining LIVES LEFT",
-                            color = PixelAlertRed,
-                            fontFamily = PressStart2PFont,
-                            fontSize = 10.sp
+                            text = "$livesRemaining Lives Left",
+                            color = AlertRed,
+                            fontFamily = ModernSansFont,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
                         )
                     }
                 }
 
-                // CRT Prompt Display Box
+                // Prompt Display Box
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
-                        .padding(vertical = 14.dp)
-                        .border(3.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
-                        .background(
-                            brush = pixelBandedVertical(listOf(PixelVioletElevated, PixelVioletBase))
-                        )
-                        .crtScanlines()
-                        .padding(20.dp),
+                        .padding(vertical = 16.dp)
+                        .subtleCardShadow(elevation = 4.dp, shape = RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(24.dp))
+                        .padding(24.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Box(
                             modifier = Modifier
-                                .border(1.5.dp, PixelOutlineBlack)
-                                .background(PixelMagentaHot)
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(BrandPrimaryContainer)
+                                .padding(horizontal = 14.dp, vertical = 6.dp)
                         ) {
                             Text(
                                 text = "NEVER HAVE I EVER...",
-                                color = PixelOutlineBlack,
-                                fontFamily = PressStart2PFont,
-                                fontSize = 8.sp
+                                color = BrandPrimary,
+                                fontFamily = ModernSansFont,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp,
+                                letterSpacing = 0.5.sp
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(18.dp))
+                        Spacer(modifier = Modifier.height(24.dp))
 
                         Text(
                             text = prompts[currentPromptIndex % prompts.size],
-                            color = PixelCrtCyan,
-                            style = MaterialTheme.typography.bodyLarge,
+                            color = TextPrimary,
+                            fontFamily = ModernSansFont,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 22.sp,
                             textAlign = TextAlign.Center,
-                            lineHeight = 24.sp
+                            lineHeight = 30.sp
                         )
                     }
                 }
@@ -125,24 +136,24 @@ fun NeverHaveIEverScreen(
                 // Lives Tracker Hearts Display
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "TAP HEART IF DONE:",
-                        color = TextMuted,
-                        fontFamily = PressStart2PFont,
-                        fontSize = 8.sp
+                        text = "Tap a heart if you've done this:",
+                        color = TextSecondary,
+                        fontFamily = ModernSansFont,
+                        fontSize = 13.sp
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         repeat(10) { index ->
                             val isAlive = index < livesRemaining
                             Box(
                                 modifier = Modifier
-                                    .size(28.dp)
-                                    .border(1.5.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
-                                    .background(if (isAlive) PixelVioletElevated else PixelVioletDark)
+                                    .size(30.dp)
+                                    .clip(CircleShape)
+                                    .background(if (isAlive) AlertContainer else SurfaceSubtle)
                                     .clickable {
                                         if (livesRemaining > 0) {
                                             livesRemaining--
@@ -154,32 +165,49 @@ fun NeverHaveIEverScreen(
                                 Icon(
                                     imageVector = if (isAlive) PixelIcons.Heart else PixelIcons.HeartBorder,
                                     contentDescription = null,
-                                    tint = if (isAlive) PixelAlertRed else TextMuted,
-                                    modifier = Modifier.size(14.dp)
+                                    tint = if (isAlive) AlertRed else TextMuted,
+                                    modifier = Modifier.size(16.dp)
                                 )
                             }
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(18.dp))
 
-                // Next Prompt Push Button
-                PrimaryPartyButton(
-                    text = "NEXT PROMPT",
-                    icon = PixelIcons.Zap,
-                    accentColor = PixelCrtCyan,
-                    onClick = {
-                        currentPromptIndex++
-                        haptics.performPop()
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                // Action Buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    SecondaryPartyButton(
+                        text = "I've Done This (-1)",
+                        onClick = {
+                            if (livesRemaining > 0) {
+                                livesRemaining--
+                                haptics.performWarningThud()
+                            }
+                            currentPromptIndex++
+                        },
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    PrimaryPartyButton(
+                        text = "Next Prompt",
+                        icon = PixelIcons.Zap,
+                        accentColor = BrandPrimary,
+                        onClick = {
+                            currentPromptIndex++
+                            haptics.performPop()
+                        },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
         } else {
             VictoryCeremonyOverlay(
-                winnerTitle = "ALL LIVES LOST!",
-                subtitle = "You survived ${currentPromptIndex + 1} rounds!",
+                winnerTitle = "All Lives Lost!",
+                subtitle = "You survived $currentPromptIndex rounds!",
                 onPlayAgain = {
                     livesRemaining = 10
                     currentPromptIndex = 0
@@ -189,3 +217,4 @@ fun NeverHaveIEverScreen(
         }
     }
 }
+

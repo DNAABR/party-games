@@ -6,13 +6,16 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.leminno.partygames.data.GameCatalogRepository
@@ -21,13 +24,13 @@ import com.leminno.partygames.ui.theme.*
 
 /**
  * Reusable layout scaffold for all in-game screens.
- * Includes standardized pixel top header bar, edge-to-edge padding, system BackHandler exit confirmation,
- * Keep Screen Awake window flag management, and mid-game rules peek sheet.
+ * Clean, chill light-mode navigation bar, edge-to-edge layout, Keep Screen Awake management,
+ * and mid-game rules peek sheet.
  */
 @Composable
 fun GameScaffold(
     title: String,
-    titleColor: Color = PixelCrtCyan,
+    titleColor: Color = TextPrimary,
     gameId: String? = null,
     onExitGame: () -> Unit,
     showExitConfirmation: Boolean = true,
@@ -71,7 +74,7 @@ fun GameScaffold(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(PixelVioletDark)
+            .background(CanvasLight)
             .statusBarsPadding()
             .navigationBarsPadding()
             .padding(horizontal = 16.dp, vertical = 10.dp)
@@ -81,57 +84,60 @@ fun GameScaffold(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Header Pixel Arcade Bar
+            // Modern Clean Header Bar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(2.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
-                    .background(
-                        brush = pixelBandedVertical(
-                            listOf(PixelVioletElevated, PixelVioletBase)
-                        ),
-                        shape = RoundedCornerShape(2.dp)
-                    )
-                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(SurfaceLight)
+                    .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Exit Button
+                // Exit / Back Button
                 IconButton(
                     onClick = { handleExitAttempt() },
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clip(CircleShape)
+                        .background(SurfaceSubtle)
                 ) {
                     Icon(
                         imageVector = PixelIcons.Close,
                         contentDescription = "Exit",
-                        tint = PixelMagentaHot,
+                        tint = TextPrimary,
                         modifier = Modifier.size(18.dp)
                     )
                 }
 
-                // Arcade Marquee Title
+                // Centered Clean Title
                 Text(
-                    text = title.uppercase(),
-                    color = titleColor,
-                    fontFamily = PressStart2PFont,
-                    fontSize = 11.sp,
+                    text = title,
+                    color = TextPrimary,
+                    fontFamily = ModernSansFont,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
                     maxLines = 1
                 )
 
                 if (matchedGameItem != null) {
                     IconButton(
                         onClick = { showRulesSheet = true },
-                        modifier = Modifier.size(40.dp)
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .background(SurfaceSubtle)
                     ) {
                         Icon(
                             imageVector = PixelIcons.Lightbulb,
                             contentDescription = "Rules",
-                            tint = PixelCrtCyan,
+                            tint = BrandPrimary,
                             modifier = Modifier.size(18.dp)
                         )
                     }
                 } else {
-                    Spacer(modifier = Modifier.width(40.dp))
+                    Spacer(modifier = Modifier.width(38.dp))
                 }
             }
 
@@ -149,45 +155,50 @@ fun GameScaffold(
             )
         }
 
-        // Exit Confirmation Dialog Modal (8-bit Pixel Styled)
+        // Exit Confirmation Dialog Modal (Modern Clean Dialog)
         if (showConfirmDialog) {
             AlertDialog(
                 onDismissRequest = { showConfirmDialog = false },
                 title = {
                     Text(
-                        text = "EXIT GAME?",
-                        color = PixelMagentaHot,
-                        fontFamily = PressStart2PFont,
-                        fontSize = 13.sp
+                        text = "Exit Game?",
+                        color = TextPrimary,
+                        fontFamily = ModernSansFont,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
                     )
                 },
                 text = {
                     Text(
-                        text = "Active game progress will be lost. Return to Arcade Hub?",
+                        text = "Active game progress will be lost. Return to the games hub?",
                         color = TextSecondary,
-                        style = MaterialTheme.typography.bodyMedium
+                        fontFamily = ModernSansFont,
+                        fontSize = 14.sp
                     )
                 },
                 confirmButton = {
                     PrimaryPartyButton(
-                        text = "EXIT",
+                        text = "Exit",
                         onClick = {
                             showConfirmDialog = false
                             onExitGame()
                         },
-                        accentColor = PixelAlertRed
+                        accentColor = AlertRed,
+                        modifier = Modifier.height(44.dp)
                     )
                 },
                 dismissButton = {
                     SecondaryPartyButton(
-                        text = "CANCEL",
-                        onClick = { showConfirmDialog = false }
+                        text = "Stay",
+                        onClick = { showConfirmDialog = false },
+                        modifier = Modifier.height(44.dp)
                     )
                 },
-                containerColor = PixelVioletElevated,
-                shape = RoundedCornerShape(2.dp),
-                modifier = Modifier.border(3.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
+                containerColor = SurfaceLight,
+                shape = RoundedCornerShape(24.dp),
+                modifier = Modifier.border(1.dp, BorderSubtle, RoundedCornerShape(24.dp))
             )
         }
     }
 }
+

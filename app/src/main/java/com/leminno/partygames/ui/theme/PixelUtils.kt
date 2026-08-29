@@ -1,86 +1,96 @@
 package com.leminno.partygames.ui.theme
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.composed
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Paint
-import androidx.compose.ui.graphics.PaintingStyle
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
+// ============================================================================
+// LEMINNO AIR - MODERN DESIGN UTILITIES & MODIFIERS
+// ============================================================================
+
 /**
- * Creates discrete stepped flat color bands for background panels and screen surfaces,
- * completely avoiding soft/blurred linear gradient transitions.
+ * Creates smooth modern vertical gradients for subtle surface card fills.
+ */
+fun smoothGradientVertical(colors: List<Color>): Brush {
+    return if (colors.size <= 1) Brush.verticalGradient(colors) else Brush.verticalGradient(colors)
+}
+
+/**
+ * Backward compatibility alias for pixelBandedVertical, rendering smooth gradients.
  */
 fun pixelBandedVertical(colors: List<Color>): Brush {
-    if (colors.size <= 1) return Brush.verticalGradient(colors)
-    val stops = mutableListOf<Pair<Float, Color>>()
-    val stepSize = 1.0f / colors.size
-    colors.forEachIndexed { index, color ->
-        stops.add(index * stepSize to color)
-        stops.add((index + 1) * stepSize to color)
-    }
-    return Brush.verticalGradient(colorStops = stops.toTypedArray())
+    return Brush.verticalGradient(colors)
 }
 
 /**
- * Creates discrete stepped horizontal color bands.
+ * Backward compatibility alias for pixelBandedHorizontal.
  */
 fun pixelBandedHorizontal(colors: List<Color>): Brush {
-    if (colors.size <= 1) return Brush.horizontalGradient(colors)
-    val stops = mutableListOf<Pair<Float, Color>>()
-    val stepSize = 1.0f / colors.size
-    colors.forEachIndexed { index, color ->
-        stops.add(index * stepSize to color)
-        stops.add((index + 1) * stepSize to color)
-    }
-    return Brush.horizontalGradient(colorStops = stops.toTypedArray())
+    return Brush.horizontalGradient(colors)
 }
 
 /**
- * Layered pixel halo outline modifier that replaces gaussian blur / alpha glow
- * with crisp, hard-edged pixel borders.
+ * Modern tactile scale bounce animation on press.
+ */
+fun Modifier.springPressScale(
+    interactionSource: MutableInteractionSource,
+    pressedScale: Float = 0.97f
+): Modifier = composed {
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) pressedScale else 1.0f,
+        animationSpec = spring(dampingRatio = 0.75f, stiffness = 400f),
+        label = "pressScale"
+    )
+    this.scale(scale)
+}
+
+/**
+ * Subtle ambient elevation shadow helper with clean modern corner radius.
+ */
+fun Modifier.subtleCardShadow(
+    elevation: Dp = 2.dp,
+    shape: Shape = RoundedCornerShape(20.dp),
+    ambientColor: Color = Color(0x0F0F172A),
+    spotColor: Color = Color(0x0A0F172A)
+): Modifier = this.shadow(
+    elevation = elevation,
+    shape = shape,
+    ambientColor = ambientColor,
+    spotColor = spotColor
+)
+
+/**
+ * Backward-compatible helper for legacy pixelHaloBorder, rendering clean hairline outline.
  */
 fun Modifier.pixelHaloBorder(
-    haloColor: Color = PixelMagentaHot,
-    borderColor: Color = PixelOutlineBlack,
-    borderWidth: Dp = 3.dp,
-    shape: Shape = RectangleShape
+    haloColor: Color = BorderSubtle,
+    borderColor: Color = BorderSubtle,
+    borderWidth: Dp = 1.dp,
+    shape: Shape = RoundedCornerShape(16.dp)
 ): Modifier = this
-    .border(width = borderWidth + 2.dp, color = haloColor, shape = shape)
     .border(width = borderWidth, color = borderColor, shape = shape)
 
 /**
- * Draws discrete horizontal CRT scanline pixel bands across a surface.
- * Ensures anti-aliasing is disabled so lines stay pixel-crisp.
+ * Backward-compatible helper for legacy crtScanlines (now a clean subtle container with no scanlines).
  */
 fun Modifier.crtScanlines(
-    scanlineColor: Color = PixelCrtScanlineBand.copy(alpha = 0.4f),
-    lineHeightPx: Float = 4f
-): Modifier = this.drawWithContent {
-    drawContent()
-    val paint = Paint().apply {
-        color = scanlineColor
-        style = PaintingStyle.Fill
-        isAntiAlias = false
-    }
-    var y = 0f
-    val canvasHeight = size.height
-    val canvasWidth = size.width
-    while (y < canvasHeight) {
-        drawContext.canvas.drawRect(
-            left = 0f,
-            top = y,
-            right = canvasWidth,
-            bottom = (y + lineHeightPx / 2f).coerceAtMost(canvasHeight),
-            paint = paint
-        )
-        y += lineHeightPx
-    }
-}
+    scanlineColor: Color = Color.Transparent,
+    lineHeightPx: Float = 0f
+): Modifier = this
+

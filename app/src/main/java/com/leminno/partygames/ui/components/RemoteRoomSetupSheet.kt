@@ -4,7 +4,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
-import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,7 +17,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -30,10 +28,6 @@ import com.leminno.partygames.data.remote.RemoteRoom
 import com.leminno.partygames.data.remote.RemoteRoomRepository
 import com.leminno.partygames.ui.theme.*
 import kotlinx.coroutines.launch
-
-val AccentCyanColor = Color(0xFF00F2FE)
-val AccentPurpleColor = Color(0xFF9D4EDD)
-val GradientPurpleCyanBrush = Brush.horizontalGradient(listOf(AccentPurpleColor, AccentCyanColor))
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,9 +66,18 @@ fun RemoteRoomSetupSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = BackgroundObsidian,
-        scrimColor = Color.Black.copy(alpha = 0.75f),
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+        containerColor = SurfaceLight,
+        scrimColor = Color(0x660F172A),
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(vertical = 10.dp)
+                    .size(width = 36.dp, height = 4.dp)
+                    .clip(CircleShape)
+                    .background(BorderSubtle)
+            )
+        }
     ) {
         Column(
             modifier = Modifier
@@ -85,18 +88,20 @@ fun RemoteRoomSetupSheet(
         ) {
             // Header
             Text(
-                text = "🌐 REMOTE MULTIPLAYER",
-                color = AccentCyanColor,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 2.sp
+                text = "Remote Multiplayer",
+                color = BrandPrimary,
+                fontFamily = ModernSansFont,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 0.5.sp
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = gameName,
                 color = TextPrimary,
+                fontFamily = ModernSansFont,
                 fontSize = 22.sp,
-                fontWeight = FontWeight.Black
+                fontWeight = FontWeight.Bold
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -105,15 +110,17 @@ fun RemoteRoomSetupSheet(
             OutlinedTextField(
                 value = playerName,
                 onValueChange = { playerName = it },
-                label = { Text("Your Display Name", color = TextMuted) },
+                label = { Text("Your Display Name", color = TextSecondary) },
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = AccentCyanColor,
-                    unfocusedBorderColor = BorderGlassDefault,
+                    focusedBorderColor = BrandPrimary,
+                    unfocusedBorderColor = BorderSubtle,
                     focusedTextColor = TextPrimary,
-                    unfocusedTextColor = TextPrimary
+                    unfocusedTextColor = TextPrimary,
+                    focusedContainerColor = SurfaceLight,
+                    unfocusedContainerColor = SurfaceLight
                 ),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -123,41 +130,43 @@ fun RemoteRoomSetupSheet(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(SurfaceGlassDark)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(SurfaceSubtle)
                     .padding(4.dp)
             ) {
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(if (selectedTab == 0) GradientPurpleCyanBrush else Brush.linearGradient(listOf(Color.Transparent, Color.Transparent)))
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(if (selectedTab == 0) BrandPrimary else Color.Transparent)
                         .clickable { selectedTab = 0 }
                         .padding(vertical = 10.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "👑 Host Room",
-                        color = if (selectedTab == 0) Color.White else TextSecondary,
+                        color = if (selectedTab == 0) TextOnPrimary else TextSecondary,
+                        fontFamily = ModernSansFont,
                         fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
 
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(if (selectedTab == 1) GradientPurpleCyanBrush else Brush.linearGradient(listOf(Color.Transparent, Color.Transparent)))
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(if (selectedTab == 1) BrandPrimary else Color.Transparent)
                         .clickable { selectedTab = 1 }
                         .padding(vertical = 10.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "🔑 Join with Code",
-                        color = if (selectedTab == 1) Color.White else TextSecondary,
+                        color = if (selectedTab == 1) TextOnPrimary else TextSecondary,
+                        fontFamily = ModernSansFont,
                         fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
             }
@@ -167,7 +176,8 @@ fun RemoteRoomSetupSheet(
             // TAB 0: HOST ROOM
             if (selectedTab == 0) {
                 if (createdRoomCode.isEmpty()) {
-                    Button(
+                    PrimaryPartyButton(
+                        text = if (isCreatingRoom) "Creating Room..." else "Create Online Room",
                         onClick = {
                             isCreatingRoom = true
                             errorMessage = null
@@ -186,40 +196,38 @@ fun RemoteRoomSetupSheet(
                             }
                         },
                         enabled = !isCreatingRoom,
-                        colors = ButtonDefaults.buttonColors(containerColor = AccentCyanColor),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp)
-                    ) {
-                        if (isCreatingRoom) {
-                            CircularProgressIndicator(color = Color.Black, modifier = Modifier.size(24.dp))
-                        } else {
-                            Text("CREATE ONLINE ROOM", color = Color.Black, fontWeight = FontWeight.Black)
-                        }
-                    }
+                        accentColor = BrandPrimary,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 } else {
                     // Room Created View
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(20.dp))
-                            .background(SurfaceGlassDark)
-                            .border(2.dp, AccentCyanColor, RoundedCornerShape(20.dp))
+                            .background(SurfaceSubtle)
+                            .border(1.dp, BrandPrimaryContainer, RoundedCornerShape(20.dp))
                             .padding(20.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = "ROOM CODE", color = TextMuted, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            Text(
+                                text = "ROOM CODE",
+                                color = TextSecondary,
+                                fontFamily = ModernSansFont,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = createdRoomCode,
-                                color = AccentCyanColor,
-                                fontSize = 38.sp,
-                                fontWeight = FontWeight.Black,
+                                color = BrandPrimary,
+                                fontFamily = ModernSansFont,
+                                fontSize = 36.sp,
+                                fontWeight = FontWeight.Bold,
                                 letterSpacing = 4.sp
                             )
-                            Spacer(modifier = Modifier.height(12.dp))
+                            Spacer(modifier = Modifier.height(14.dp))
 
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 OutlinedButton(
@@ -229,19 +237,22 @@ fun RemoteRoomSetupSheet(
                                         clipboard.setPrimaryClip(clip)
                                         Toast.makeText(context, "Code copied!", Toast.LENGTH_SHORT).show()
                                     },
-                                    shape = RoundedCornerShape(12.dp)
+                                    shape = RoundedCornerShape(14.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(
+                                        contentColor = TextPrimary
+                                    )
                                 ) {
-                                    Text("📋 Copy Code", color = TextPrimary)
+                                    Text("📋 Copy Code", fontFamily = ModernSansFont, fontWeight = FontWeight.Medium)
                                 }
 
                                 Button(
                                     onClick = {
                                         RemoteRoomRepository.shareRoomInvite(context, gameName, createdRoomCode)
                                     },
-                                    colors = ButtonDefaults.buttonColors(containerColor = AccentPurpleColor),
-                                    shape = RoundedCornerShape(12.dp)
+                                    colors = ButtonDefaults.buttonColors(containerColor = BrandPrimary),
+                                    shape = RoundedCornerShape(14.dp)
                                 ) {
-                                    Text("🔗 Share Link", color = Color.White, fontWeight = FontWeight.Bold)
+                                    Text("🔗 Share Link", color = TextOnPrimary, fontFamily = ModernSansFont, fontWeight = FontWeight.SemiBold)
                                 }
                             }
                         }
@@ -253,9 +264,10 @@ fun RemoteRoomSetupSheet(
                     val playersList = activeRoom?.players?.values?.toList() ?: emptyList()
                     Text(
                         text = "PLAYERS JOINED (${playersList.size})",
-                        color = TextMuted,
+                        color = TextSecondary,
+                        fontFamily = ModernSansFont,
                         fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.SemiBold
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -270,8 +282,8 @@ fun RemoteRoomSetupSheet(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(SurfaceGlassDark)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(SurfaceSubtle)
                                     .padding(horizontal = 14.dp, vertical = 8.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
@@ -279,14 +291,15 @@ fun RemoteRoomSetupSheet(
                                 Text(
                                     text = player.name + if (player.isHost) " 👑 (Host)" else "",
                                     color = TextPrimary,
+                                    fontFamily = ModernSansFont,
                                     fontSize = 14.sp,
-                                    fontWeight = FontWeight.SemiBold
+                                    fontWeight = FontWeight.Medium
                                 )
                                 Box(
                                     modifier = Modifier
                                         .size(8.dp)
                                         .clip(CircleShape)
-                                        .background(if (player.connected) Color(0xFF00FF87) else Color.Gray)
+                                        .background(if (player.connected) SuccessGreen else Color.Gray)
                                 )
                             }
                         }
@@ -294,43 +307,42 @@ fun RemoteRoomSetupSheet(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    Button(
+                    PrimaryPartyButton(
+                        text = "Start Game for All 🚀",
                         onClick = {
                             onRoomJoined(createdRoomCode, true, localPlayerId)
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = AccentCyanColor),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp)
-                    ) {
-                        Text("START GAME FOR ALL 🚀", color = Color.Black, fontWeight = FontWeight.Black)
-                    }
+                        accentColor = BrandPrimary,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             } else {
                 // TAB 1: JOIN ROOM
                 OutlinedTextField(
                     value = inputCode,
                     onValueChange = { if (it.length <= 6) inputCode = it.uppercase() },
-                    label = { Text("Enter 6-Character Code", color = TextMuted) },
+                    label = { Text("Enter 6-Character Code", color = TextSecondary) },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = AccentCyanColor,
-                        unfocusedBorderColor = BorderGlassDefault,
+                        focusedBorderColor = BrandPrimary,
+                        unfocusedBorderColor = BorderSubtle,
                         focusedTextColor = TextPrimary,
-                        unfocusedTextColor = TextPrimary
+                        unfocusedTextColor = TextPrimary,
+                        focusedContainerColor = SurfaceLight,
+                        unfocusedContainerColor = SurfaceLight
                     ),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(16.dp),
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Button(
+                PrimaryPartyButton(
+                    text = if (isJoiningRoom) "Joining..." else "Join Room Now 🔑",
                     onClick = {
                         if (inputCode.length < 4) {
                             errorMessage = "Please enter a valid room code"
-                            return@Button
+                            return@PrimaryPartyButton
                         }
                         isJoiningRoom = true
                         errorMessage = null
@@ -349,18 +361,9 @@ fun RemoteRoomSetupSheet(
                         }
                     },
                     enabled = inputCode.isNotBlank() && !isJoiningRoom,
-                    colors = ButtonDefaults.buttonColors(containerColor = AccentCyanColor),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp)
-                ) {
-                    if (isJoiningRoom) {
-                        CircularProgressIndicator(color = Color.Black, modifier = Modifier.size(24.dp))
-                    } else {
-                        Text("JOIN ROOM NOW 🔑", color = Color.Black, fontWeight = FontWeight.Black)
-                    }
-                }
+                    accentColor = BrandPrimary,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
 
             // Error Display
@@ -368,11 +371,13 @@ fun RemoteRoomSetupSheet(
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = err,
-                    color = MaterialTheme.colorScheme.error,
-                    fontSize = 12.sp,
+                    color = AlertRed,
+                    fontFamily = ModernSansFont,
+                    fontSize = 13.sp,
                     textAlign = TextAlign.Center
                 )
             }
         }
     }
 }
+

@@ -4,14 +4,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,132 +40,143 @@ fun TruthOrDareScreen(
     }
 
     GameScaffold(
-        title = "TRUTH OR DARE",
-        titleColor = PixelCrtCyan,
+        title = "Truth or Dare",
+        titleColor = TextPrimary,
         gameId = "truth_or_dare",
         onExitGame = onExitGame
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Deck Selector Tabs (8-Bit Banded Buttons)
+            // Deck Selector Segmented Control
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(SurfaceSubtle)
+                    .padding(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 listOf("Clean", "Party", "Extreme").forEach { deck ->
                     val isSelected = uiState.selectedDeck == deck
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(44.dp)
-                            .border(2.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
-                            .background(if (isSelected) PixelCrtCyan else PixelVioletElevated)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(if (isSelected) BrandPrimary else Color.Transparent)
                             .clickable {
                                 haptics.performTick(composeHaptics)
                                 viewModel.selectDeck(deck)
-                            },
+                            }
+                            .padding(vertical = 10.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = deck.uppercase(),
-                            color = if (isSelected) PixelOutlineBlack else TextMuted,
-                            fontFamily = PressStart2PFont,
-                            fontSize = 8.sp
+                            text = deck,
+                            color = if (isSelected) TextOnPrimary else TextSecondary,
+                            fontFamily = ModernSansFont,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 13.sp
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // Center CRT Screen Display
+            // Center Screen Display Card
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .border(3.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
-                    .background(
-                        brush = pixelBandedVertical(listOf(PixelVioletElevated, PixelVioletBase))
-                    )
-                    .crtScanlines()
-                    .padding(20.dp),
+                    .subtleCardShadow(elevation = 4.dp, shape = RoundedCornerShape(24.dp))
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(SurfaceLight)
+                    .border(1.dp, BorderSubtle, RoundedCornerShape(24.dp))
+                    .padding(24.dp),
                 contentAlignment = Alignment.Center
             ) {
                 if (uiState.activePrompt == null) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Box(
                             modifier = Modifier
-                                .border(1.5.dp, PixelOutlineBlack)
-                                .background(PixelMagentaHot)
-                                .padding(12.dp)
+                                .size(56.dp)
+                                .clip(CircleShape)
+                                .background(BrandPrimaryContainer),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = PixelIcons.Zap,
-                                contentDescription = null,
-                                tint = PixelOutlineBlack,
-                                modifier = Modifier.size(24.dp)
-                            )
+                            Text(text = "✨", fontSize = 28.sp)
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(18.dp))
                         Text(
-                            text = "CHOOSE YOUR FATE",
-                            color = PixelCrtCyan,
-                            fontFamily = PressStart2PFont,
-                            fontSize = 12.sp
+                            text = "Choose Your Fate",
+                            color = TextPrimary,
+                            fontFamily = ModernSansFont,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 22.sp
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = "SELECT TRUTH OR DARE BELOW",
-                            color = TextMuted,
-                            fontFamily = PressStart2PFont,
-                            fontSize = 8.sp,
+                            text = "Pick Truth or Dare below to reveal your challenge",
+                            color = TextSecondary,
+                            fontFamily = ModernSansFont,
+                            fontSize = 13.sp,
                             textAlign = TextAlign.Center
                         )
                     }
                 } else {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        val promptColor = if (uiState.activePromptType == "TRUTH") PixelCrtCyan else PixelMagentaHot
+                        val isTruth = uiState.activePromptType == "TRUTH"
+                        val badgeBg = if (isTruth) TriviaContainer else ActionContainer
+                        val badgeText = if (isTruth) TriviaText else ActionText
+                        val badgeBorder = if (isTruth) TriviaBorder else ActionBorder
+
                         Box(
                             modifier = Modifier
-                                .border(1.5.dp, PixelOutlineBlack)
-                                .background(promptColor)
-                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(badgeBg)
+                                .border(1.dp, badgeBorder, RoundedCornerShape(12.dp))
+                                .padding(horizontal = 14.dp, vertical = 6.dp)
                         ) {
                             Text(
                                 text = uiState.activePromptType ?: "",
-                                color = PixelOutlineBlack,
-                                fontFamily = PressStart2PFont,
-                                fontSize = 9.sp
+                                color = badgeText,
+                                fontFamily = ModernSansFont,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
 
                         Text(
                             text = uiState.activePrompt ?: "",
                             color = TextPrimary,
-                            style = MaterialTheme.typography.bodyLarge,
+                            fontFamily = ModernSansFont,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 20.sp,
                             textAlign = TextAlign.Center,
-                            lineHeight = 24.sp
+                            lineHeight = 28.sp
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // Stepped Action Push Buttons
+            // Action Buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 PrimaryPartyButton(
-                    text = "TRUTH",
+                    text = "Truth",
                     icon = PixelIcons.Lightbulb,
-                    accentColor = PixelCrtCyan,
+                    accentColor = BrandPrimary,
                     onClick = {
                         haptics.performPop()
                         viewModel.drawTruth()
@@ -171,9 +185,9 @@ fun TruthOrDareScreen(
                 )
 
                 PrimaryPartyButton(
-                    text = "DARE",
+                    text = "Dare",
                     icon = PixelIcons.Zap,
-                    accentColor = PixelMagentaHot,
+                    accentColor = BoardPrimary,
                     onClick = {
                         haptics.performPop()
                         viewModel.drawDare()
@@ -184,3 +198,4 @@ fun TruthOrDareScreen(
         }
     }
 }
+

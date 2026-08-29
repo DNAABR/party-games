@@ -4,17 +4,22 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -63,130 +68,145 @@ fun WhoAmIScreen(
         }
     }
 
-    val cardBgColor = when (uiState.cardFeedbackState) {
-        "CORRECT" -> PixelEmeraldGreen
-        "SKIP" -> PixelAlertRed
-        else -> PixelCrtDarkCanvas
+    val cardBgColor by animateColorAsState(
+        targetValue = when (uiState.cardFeedbackState) {
+            "CORRECT" -> SuccessContainer
+            "SKIP" -> AlertContainer
+            else -> SurfaceLight
+        },
+        animationSpec = tween(150),
+        label = "cardBgColor"
+    )
+
+    val cardTextColor = when (uiState.cardFeedbackState) {
+        "CORRECT" -> SuccessGreen
+        "SKIP" -> AlertRed
+        else -> TextPrimary
     }
 
     GameScaffold(
-        title = "WHO AM I?",
-        titleColor = PixelMagentaHot,
+        title = "Who Am I?",
+        titleColor = TextPrimary,
         gameId = "who_am_i",
         onExitGame = onExitGame
     ) {
         if (selectedMode == null) {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+                verticalArrangement = Arrangement.Center
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "SELECT PLAY MODE",
-                        color = PixelCrtCyan,
-                        fontFamily = PressStart2PFont,
-                        fontSize = 12.sp
-                    )
-                    Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    text = "Select Play Mode",
+                    color = TextPrimary,
+                    fontFamily = ModernSansFont,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "Choose how your group will play this round",
+                    color = TextSecondary,
+                    fontFamily = ModernSansFont,
+                    fontSize = 13.sp
+                )
 
-                    // Forehead Pass Mode Box
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(3.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
-                            .background(
-                                brush = pixelBandedVertical(listOf(PixelVioletElevated, PixelVioletBase))
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Forehead Pass Mode Box
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
+                        .clickable { selectedMode = "LOCAL" }
+                        .padding(18.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(TriviaContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "📱", fontSize = 22.sp)
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text(
+                                text = "Forehead Pass",
+                                color = TextPrimary,
+                                fontFamily = ModernSansFont,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
                             )
-                            .clickable { selectedMode = "LOCAL" }
-                            .padding(16.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .border(1.5.dp, PixelOutlineBlack)
-                                    .background(PixelMagentaHot),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = PixelIcons.ArcadeJoystick,
-                                    contentDescription = null,
-                                    tint = PixelOutlineBlack,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(14.dp))
-                            Column {
-                                Text(
-                                    text = "FOREHEAD PASS",
-                                    color = PixelCrtCyan,
-                                    fontFamily = PressStart2PFont,
-                                    fontSize = 10.sp
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = "Hold phone on forehead with tilt detection",
-                                    color = TextSecondary,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text(
+                                text = "Hold phone on forehead with tilt detection",
+                                color = TextSecondary,
+                                fontFamily = ModernSansFont,
+                                fontSize = 13.sp
+                            )
                         }
                     }
+                }
 
-                    Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
-                    // Remote Play Mode Box
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(3.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
-                            .background(
-                                brush = pixelBandedVertical(listOf(PixelVioletElevated, PixelVioletBase))
+                // Remote Play Mode Box
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
+                        .clickable {
+                            selectedMode = "REMOTE"
+                            showRemoteSheet = true
+                        }
+                        .padding(18.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(ActionContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "🌐", fontSize = 22.sp)
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text(
+                                text = "Remote Multiplayer",
+                                color = TextPrimary,
+                                fontFamily = ModernSansFont,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
                             )
-                            .clickable {
-                                selectedMode = "REMOTE"
-                                showRemoteSheet = true
-                            }
-                            .padding(16.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .border(1.5.dp, PixelOutlineBlack)
-                                    .background(PixelCrtCyan),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = PixelIcons.Users,
-                                    contentDescription = null,
-                                    tint = PixelOutlineBlack,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(14.dp))
-                            Column {
-                                Text(
-                                    text = "REMOTE PLAY",
-                                    color = PixelMagentaHot,
-                                    fontFamily = PressStart2PFont,
-                                    fontSize = 10.sp
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = "Multi-device room code sync",
-                                    color = TextSecondary,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text(
+                                text = "Sync across multiple devices with room code",
+                                color = TextSecondary,
+                                fontFamily = ModernSansFont,
+                                fontSize = 13.sp
+                            )
                         }
                     }
                 }
             }
         } else if (!uiState.isGameOver) {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
@@ -198,93 +218,114 @@ fun WhoAmIScreen(
                 ) {
                     Box(
                         modifier = Modifier
-                            .border(2.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
-                            .background(PixelVioletElevated)
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(if (uiState.timeRemaining <= 10) AlertContainer else SurfaceLight)
+                            .border(1.dp, if (uiState.timeRemaining <= 10) AlertRed.copy(alpha = 0.3f) else BorderSubtle, RoundedCornerShape(14.dp))
+                            .padding(horizontal = 14.dp, vertical = 8.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = PixelIcons.Clock,
                                 contentDescription = null,
-                                tint = if (uiState.timeRemaining <= 10) PixelAlertRed else PixelCrtCyan,
+                                tint = if (uiState.timeRemaining <= 10) AlertRed else BrandPrimary,
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = "${uiState.timeRemaining}S",
-                                color = if (uiState.timeRemaining <= 10) PixelAlertRed else PixelCrtCyan,
-                                fontFamily = PressStart2PFont,
-                                fontSize = 10.sp
+                                text = "${uiState.timeRemaining}s",
+                                color = if (uiState.timeRemaining <= 10) AlertRed else TextPrimary,
+                                fontFamily = ModernSansFont,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
                             )
                         }
                     }
 
                     Box(
                         modifier = Modifier
-                            .border(2.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
-                            .background(PixelVioletElevated)
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(WarningContainer)
+                            .border(1.dp, Color(0xFFFDE68A), RoundedCornerShape(14.dp))
+                            .padding(horizontal = 14.dp, vertical = 8.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = PixelIcons.Trophy,
                                 contentDescription = null,
-                                tint = PixelAmberGold,
+                                tint = WarningAmber,
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = "SCORE:${uiState.score}",
-                                color = PixelAmberGold,
-                                fontFamily = PressStart2PFont,
-                                fontSize = 10.sp
+                                text = "Score: ${uiState.score}",
+                                color = Color(0xFF92400E),
+                                fontFamily = ModernSansFont,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
                             )
                         }
                     }
                 }
 
-                // CRT Forehead Screen Card
+                // Forehead Screen Card
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
-                        .padding(vertical = 14.dp)
-                        .border(3.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
+                        .padding(vertical = 16.dp)
+                        .subtleCardShadow(elevation = 4.dp, shape = RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(24.dp))
                         .background(cardBgColor)
-                        .crtScanlines()
-                        .padding(20.dp),
+                        .border(
+                            1.dp,
+                            when (uiState.cardFeedbackState) {
+                                "CORRECT" -> SuccessGreen.copy(alpha = 0.4f)
+                                "SKIP" -> AlertRed.copy(alpha = 0.4f)
+                                else -> BorderSubtle
+                            },
+                            RoundedCornerShape(24.dp)
+                        )
+                        .padding(24.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         val currentWord = uiState.wordList.getOrNull(uiState.currentIndex)
                         Text(
-                            text = (currentWord ?: "CARD").uppercase(),
-                            color = if (uiState.cardFeedbackState == "NORMAL") PixelCrtCyan else PixelOutlineBlack,
-                            fontFamily = PressStart2PFont,
-                            fontSize = 20.sp,
-                            lineHeight = 28.sp,
+                            text = currentWord ?: "Ready?",
+                            color = cardTextColor,
+                            fontFamily = ModernSansFont,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 32.sp,
+                            lineHeight = 40.sp,
                             textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(14.dp))
+                        Text(
+                            text = "Tilt down for Correct • Tilt up for Skip",
+                            color = TextSecondary,
+                            fontFamily = ModernSansFont,
+                            fontSize = 12.sp
                         )
                     }
                 }
 
-                // Manual Pixel Controls
+                // Manual Action Buttons
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     PrimaryPartyButton(
-                        text = "SKIP",
+                        text = "Skip",
                         icon = PixelIcons.Close,
-                        accentColor = PixelAlertRed,
+                        accentColor = AlertRed,
                         onClick = { viewModel.onManualSkip() },
                         modifier = Modifier.weight(1f)
                     )
 
                     PrimaryPartyButton(
-                        text = "CORRECT",
+                        text = "Correct!",
                         icon = PixelIcons.Zap,
-                        accentColor = PixelEmeraldGreen,
+                        accentColor = SuccessGreen,
                         onClick = { viewModel.onManualGotIt() },
                         modifier = Modifier.weight(1f)
                     )
@@ -292,7 +333,7 @@ fun WhoAmIScreen(
             }
         } else {
             VictoryCeremonyOverlay(
-                winnerTitle = "FINAL SCORE: ${uiState.score}",
+                winnerTitle = "Final Score: ${uiState.score}",
                 subtitle = "Who Am I Champions!",
                 onPlayAgain = {
                     viewModel.initGame(timerSec)
@@ -319,3 +360,4 @@ fun WhoAmIScreen(
         }
     }
 }
+
