@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.leminno.partygames.data.remote.RemoteRoomRepository
 import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.PrimaryPartyButton
 import com.leminno.partygames.ui.components.RemoteRoomSetupSheet
 import com.leminno.partygames.ui.theme.*
 import kotlinx.coroutines.launch
@@ -47,7 +49,7 @@ fun TwoTruthsAndALieScreen(
     val haptics = remember { HapticFeedbackManager(context) }
     val composeHaptics = LocalHapticFeedback.current
 
-    var gamePhase by remember { mutableStateOf("MODE_SELECT") } // MODE_SELECT, INPUT, VOTING, REVEAL
+    var gamePhase by remember { mutableStateOf("MODE_SELECT") }
     var isRemoteMode by remember { mutableStateOf(false) }
     var showRemoteSheet by remember { mutableStateOf(false) }
     var roomCode by remember { mutableStateOf("") }
@@ -96,90 +98,126 @@ fun TwoTruthsAndALieScreen(
     }
 
     GameScaffold(
-        title = "Two Truths & A Lie 🎭",
-        titleColor = Color(0xFFFF007F),
+        title = "Two Truths & A Lie",
+        titleColor = TextPrimary,
         gameId = "two_truths_and_a_lie",
         onExitGame = onExitGame
     ) {
         if (gamePhase == "MODE_SELECT") {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+                verticalArrangement = Arrangement.Center
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("SELECT PLAY MODE", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Black)
-                    Spacer(modifier = Modifier.height(20.dp))
+                Text("Select Play Mode", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(6.dp))
+                Text("Choose single phone pass or live multi-device voting", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 13.sp)
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.5.dp, Color(0xFFFF007F), RoundedCornerShape(20.dp))
-                            .clickable {
-                                isRemoteMode = false
-                                gamePhase = "INPUT"
-                            }
-                            .padding(20.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("📱", fontSize = 36.sp)
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column {
-                                Text("Pass & Play (Same Phone)", color = Color(0xFFFF007F), fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                                Text("Type statements & pass device for voting", color = TextMuted, fontSize = 12.sp)
-                            }
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
+                        .clickable {
+                            isRemoteMode = false
+                            gamePhase = "INPUT"
+                        }
+                        .padding(18.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(MysteryContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("📱", fontSize = 22.sp)
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text("Pass & Play (Same Phone)", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text("Type statements & pass device for voting", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 13.sp)
                         }
                     }
+                }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.5.dp, Color(0xFF00F2FE), RoundedCornerShape(20.dp))
-                            .clickable {
-                                isRemoteMode = true
-                                showRemoteSheet = true
-                            }
-                            .padding(20.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("🌐", fontSize = 36.sp)
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column {
-                                Text("Remote Play (Multi-Device)", color = Color(0xFF00F2FE), fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                                Text("Type 2 truths & 1 lie on your phone, group votes remotely", color = TextMuted, fontSize = 12.sp)
-                            }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
+                        .clickable {
+                            isRemoteMode = true
+                            showRemoteSheet = true
+                        }
+                        .padding(18.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(ActionContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("🌐", fontSize = 22.sp)
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text("Remote Play (Multi-Device)", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text("Type on your phone, group votes remotely", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 13.sp)
                         }
                     }
                 }
             }
         } else {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 if (gamePhase == "INPUT") {
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(
-                            text = "ACTIVE PLAYER ENTRY",
-                            color = Color(0xFFFF007F),
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Black
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(MysteryContainer)
+                                .padding(horizontal = 14.dp, vertical = 6.dp)
+                        ) {
+                            Text(
+                                text = "Active Player Entry",
+                                color = MysteryText,
+                                fontFamily = ModernSansFont,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = "Enter 2 genuine truths and 1 believable lie below:",
-                            color = TextMuted,
-                            fontSize = 12.sp,
+                            color = TextSecondary,
+                            fontFamily = ModernSansFont,
+                            fontSize = 13.sp,
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(16.dp))
@@ -187,27 +225,45 @@ fun TwoTruthsAndALieScreen(
                         OutlinedTextField(
                             value = truth1,
                             onValueChange = { truth1 = it },
-                            label = { Text("Truth #1") },
+                            placeholder = { Text("Truth #1", color = TextSecondary, fontFamily = ModernSansFont) },
                             modifier = Modifier.fillMaxWidth(),
-                            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFFFF007F), unfocusedBorderColor = BorderGlassDefault)
+                            shape = RoundedCornerShape(16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = SurfaceLight,
+                                unfocusedContainerColor = SurfaceLight,
+                                focusedBorderColor = BrandPrimary,
+                                unfocusedBorderColor = BorderSubtle
+                            )
                         )
                         Spacer(modifier = Modifier.height(10.dp))
 
                         OutlinedTextField(
                             value = truth2,
                             onValueChange = { truth2 = it },
-                            label = { Text("Truth #2") },
+                            placeholder = { Text("Truth #2", color = TextSecondary, fontFamily = ModernSansFont) },
                             modifier = Modifier.fillMaxWidth(),
-                            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFFFF007F), unfocusedBorderColor = BorderGlassDefault)
+                            shape = RoundedCornerShape(16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = SurfaceLight,
+                                unfocusedContainerColor = SurfaceLight,
+                                focusedBorderColor = BrandPrimary,
+                                unfocusedBorderColor = BorderSubtle
+                            )
                         )
                         Spacer(modifier = Modifier.height(10.dp))
 
                         OutlinedTextField(
                             value = lieInput,
                             onValueChange = { lieInput = it },
-                            label = { Text("The Lie 🤥") },
+                            placeholder = { Text("The Lie 🤥", color = TextSecondary, fontFamily = ModernSansFont) },
                             modifier = Modifier.fillMaxWidth(),
-                            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFFFF0055), unfocusedBorderColor = BorderGlassDefault)
+                            shape = RoundedCornerShape(16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = SurfaceLight,
+                                unfocusedContainerColor = SurfaceLight,
+                                focusedBorderColor = AlertRed,
+                                unfocusedBorderColor = BorderSubtle
+                            )
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
@@ -216,11 +272,13 @@ fun TwoTruthsAndALieScreen(
                             haptics.performTick(composeHaptics)
                             loadPreset()
                         }) {
-                            Text("🎲 Quick Load Sample Preset", color = Color(0xFF00F2FE), fontSize = 13.sp)
+                            Text("🎲 Quick Load Sample Preset", color = BrandPrimary, fontFamily = ModernSansFont, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                         }
                     }
 
-                    Button(
+                    PrimaryPartyButton(
+                        text = "Shuffle & Submit For Voting ▶",
+                        accentColor = BrandPrimary,
                         onClick = {
                             if (truth1.isNotBlank() && truth2.isNotBlank() && lieInput.isNotBlank()) {
                                 haptics.performPop()
@@ -233,53 +291,49 @@ fun TwoTruthsAndALieScreen(
                                 syncRemote("VOTING")
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF007F)),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp)
-                    ) {
-                        Text("SHUFFLE & SUBMIT FOR VOTING ▶", color = Color.White, fontWeight = FontWeight.Black)
-                    }
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 } else if (gamePhase == "VOTING" || gamePhase == "REVEAL") {
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = if (gamePhase == "VOTING") "GUESS THE LIE! 🎭" else "THE LIE WAS REVEALED!",
-                            color = Color(0xFFFF007F),
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Black
+                            text = if (gamePhase == "VOTING") "Guess The Lie! 🎭" else "The Lie Was Revealed!",
+                            color = TextPrimary,
+                            fontFamily = ModernSansFont,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
                         )
 
-                        Spacer(modifier = Modifier.height(20.dp))
+                        Spacer(modifier = Modifier.height(18.dp))
 
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             shuffledStatements.forEachIndexed { idx, item ->
                                 val isSelected = selectedVoteIndex == idx
                                 val cardBg = when {
-                                    gamePhase == "REVEAL" && item.isLie -> Color(0xFFFF0055).copy(alpha = 0.35f)
-                                    gamePhase == "REVEAL" && !item.isLie -> Color(0xFF00E676).copy(alpha = 0.2f)
-                                    isSelected -> Color(0xFFFF007F).copy(alpha = 0.3f)
-                                    else -> SurfaceGlassDark
+                                    gamePhase == "REVEAL" && item.isLie -> AlertContainer
+                                    gamePhase == "REVEAL" && !item.isLie -> SuccessContainer
+                                    isSelected -> BrandPrimaryContainer
+                                    else -> SurfaceLight
+                                }
+
+                                val cardBorder = when {
+                                    gamePhase == "REVEAL" && item.isLie -> AlertRed
+                                    gamePhase == "REVEAL" && !item.isLie -> SuccessGreen
+                                    isSelected -> BrandPrimary
+                                    else -> BorderSubtle
                                 }
 
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .clip(RoundedCornerShape(16.dp))
+                                        .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(18.dp))
+                                        .clip(RoundedCornerShape(18.dp))
                                         .background(cardBg)
-                                        .border(
-                                            1.5.dp,
-                                            when {
-                                                gamePhase == "REVEAL" && item.isLie -> Color(0xFFFF0055)
-                                                gamePhase == "REVEAL" && !item.isLie -> Color(0xFF00E676)
-                                                isSelected -> Color(0xFFFF007F)
-                                                else -> BorderGlassDefault
-                                            },
-                                            RoundedCornerShape(16.dp)
-                                        )
+                                        .border(1.dp, cardBorder, RoundedCornerShape(18.dp))
                                         .clickable(enabled = gamePhase == "VOTING") {
                                             haptics.performTick(composeHaptics)
                                             selectedVoteIndex = idx
@@ -296,17 +350,26 @@ fun TwoTruthsAndALieScreen(
                                         Text(
                                             text = item.text,
                                             color = TextPrimary,
+                                            fontFamily = ModernSansFont,
                                             fontSize = 15.sp,
                                             fontWeight = FontWeight.SemiBold,
                                             modifier = Modifier.weight(1f)
                                         )
                                         if (gamePhase == "REVEAL") {
-                                            Text(
-                                                text = if (item.isLie) "LIE! 🤥" else "TRUTH 🟢",
-                                                color = if (item.isLie) Color(0xFFFF0055) else Color(0xFF00E676),
-                                                fontSize = 12.sp,
-                                                fontWeight = FontWeight.Black
-                                            )
+                                            Box(
+                                                modifier = Modifier
+                                                    .clip(RoundedCornerShape(8.dp))
+                                                    .background(if (item.isLie) AlertRed else SuccessGreen)
+                                                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                                            ) {
+                                                Text(
+                                                    text = if (item.isLie) "Lie 🤥" else "Truth 🟢",
+                                                    color = Color.White,
+                                                    fontFamily = ModernSansFont,
+                                                    fontSize = 12.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -315,7 +378,9 @@ fun TwoTruthsAndALieScreen(
                     }
 
                     if (gamePhase == "VOTING") {
-                        Button(
+                        PrimaryPartyButton(
+                            text = "Lock Final Vote & Reveal 🔒",
+                            accentColor = BrandPrimary,
                             onClick = {
                                 if (selectedVoteIndex != null) {
                                     haptics.performHeavyBurst()
@@ -324,16 +389,12 @@ fun TwoTruthsAndALieScreen(
                                 }
                             },
                             enabled = selectedVoteIndex != null,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF007F)),
-                            shape = RoundedCornerShape(16.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(56.dp)
-                        ) {
-                            Text("LOCK FINAL VOTE & REVEAL 🔒", color = Color.White, fontWeight = FontWeight.Black)
-                        }
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     } else {
-                        Button(
+                        PrimaryPartyButton(
+                            text = "Play Next Player Round 🔄",
+                            accentColor = BrandPrimary,
                             onClick = {
                                 truth1 = ""
                                 truth2 = ""
@@ -342,14 +403,8 @@ fun TwoTruthsAndALieScreen(
                                 shuffledStatements = emptyList()
                                 gamePhase = "MODE_SELECT"
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF007F)),
-                            shape = RoundedCornerShape(16.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(56.dp)
-                        ) {
-                            Text("PLAY NEXT PLAYER ROUND 🔄", color = Color.White, fontWeight = FontWeight.Black)
-                        }
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
             }
@@ -358,7 +413,7 @@ fun TwoTruthsAndALieScreen(
         if (showRemoteSheet) {
             RemoteRoomSetupSheet(
                 gameId = "two_truths_and_a_lie",
-                gameName = "Two Truths & A Lie 🎭",
+                gameName = "Two Truths & A Lie",
                 onDismiss = {
                     showRemoteSheet = false
                     if (roomCode.isBlank()) gamePhase = "MODE_SELECT"
@@ -374,3 +429,4 @@ fun TwoTruthsAndALieScreen(
         }
     }
 }
+

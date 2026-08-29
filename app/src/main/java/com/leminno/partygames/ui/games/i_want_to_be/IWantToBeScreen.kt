@@ -3,8 +3,10 @@ package com.leminno.partygames.ui.games.i_want_to_be
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,6 +22,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.PrimaryPartyButton
+import com.leminno.partygames.ui.components.SecondaryPartyButton
 import com.leminno.partygames.ui.theme.*
 import kotlinx.coroutines.delay
 
@@ -84,13 +88,15 @@ fun IWantToBeScreen(
     }
 
     GameScaffold(
-        title = "I Want To Be... 💼",
-        titleColor = Color(0xFF00F2FE),
+        title = "I Want To Be...",
+        titleColor = TextPrimary,
         gameId = "i_want_to_be",
         onExitGame = onExitGame
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
@@ -98,13 +104,15 @@ fun IWantToBeScreen(
                 // Anti-Cheat Hold-To-Reveal Card
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = "SECRET ROLE CARD",
+                        text = "Secret Role Card",
                         color = TextSecondary,
+                        fontFamily = ModernSansFont,
                         fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.SemiBold
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -113,9 +121,10 @@ fun IWantToBeScreen(
                         modifier = Modifier
                             .fillMaxWidth(0.9f)
                             .height(260.dp)
+                            .subtleCardShadow(elevation = 3.dp, shape = RoundedCornerShape(24.dp))
                             .clip(RoundedCornerShape(24.dp))
-                            .background(SurfaceGlassDark)
-                            .border(2.dp, Color(0xFF00F2FE), RoundedCornerShape(24.dp))
+                            .background(SurfaceLight)
+                            .border(1.dp, BorderSubtle, RoundedCornerShape(24.dp))
                             .pointerInput(Unit) {
                                 detectTapGestures(
                                     onPress = {
@@ -131,19 +140,29 @@ fun IWantToBeScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.padding(24.dp)
                         ) {
-                            Text(text = "🔒", fontSize = 48.sp)
-                            Spacer(modifier = Modifier.height(12.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(56.dp)
+                                    .clip(CircleShape)
+                                    .background(BrandPrimaryContainer),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = "🔒", fontSize = 28.sp)
+                            }
+                            Spacer(modifier = Modifier.height(14.dp))
                             Text(
-                                text = "HOLD SCREEN TO REVEAL",
-                                color = Color(0xFF00F2FE),
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Black,
+                                text = "Hold Screen To Reveal",
+                                color = TextPrimary,
+                                fontFamily = ModernSansFont,
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Center
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "Anti-cheat protection: Prevents nearby players from peeking while passing phone.",
-                                color = TextMuted,
+                                text = "Anti-cheat: Prevents nearby players from peeking while passing phone.",
+                                color = TextSecondary,
+                                fontFamily = ModernSansFont,
                                 fontSize = 12.sp,
                                 textAlign = TextAlign.Center
                             )
@@ -155,8 +174,8 @@ fun IWantToBeScreen(
                                     modifier = Modifier
                                         .fillMaxWidth(0.7f)
                                         .clip(RoundedCornerShape(8.dp)),
-                                    color = Color(0xFF00F2FE),
-                                    trackColor = Color.White.copy(alpha = 0.1f)
+                                    color = BrandPrimary,
+                                    trackColor = SurfaceSubtle
                                 )
                             }
                         }
@@ -172,57 +191,72 @@ fun IWantToBeScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
                             .clip(RoundedCornerShape(20.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.5.dp, Color(0xFF00F2FE), RoundedCornerShape(20.dp))
+                            .background(SurfaceLight)
+                            .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
                             .padding(20.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = "YOUR SECRET PROFESSION", color = TextMuted, fontSize = 12.sp)
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(MysteryContainer)
+                                    .border(1.dp, MysteryBorder, RoundedCornerShape(10.dp))
+                                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = currentCareer.category.uppercase(),
+                                    color = MysteryText,
+                                    fontFamily = ModernSansFont,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = currentCareer.title,
-                                color = Color(0xFF00F2FE),
-                                fontSize = 28.sp,
-                                fontWeight = FontWeight.Black
-                            )
-                            Text(
-                                text = "Category: ${currentCareer.category}",
-                                color = TextSecondary,
-                                fontSize = 13.sp
+                                color = TextPrimary,
+                                fontFamily = ModernSansFont,
+                                fontSize = 26.sp,
+                                fontWeight = FontWeight.Bold
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     // Timer & Clues Card
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
                             .clip(RoundedCornerShape(20.dp))
-                            .background(SurfaceGlassDark)
-                            .padding(20.dp)
+                            .background(SurfaceLight)
+                            .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
+                            .padding(18.dp)
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
                                 text = "⏱️ ${timerSeconds}s",
-                                color = if (timerSeconds <= 5) Color(0xFFFF0055) else Color.White,
-                                fontSize = 32.sp,
-                                fontWeight = FontWeight.Black
+                                color = if (timerSeconds <= 5) AlertRed else TextPrimary,
+                                fontFamily = ModernSansFont,
+                                fontSize = 30.sp,
+                                fontWeight = FontWeight.Bold
                             )
 
-                            Spacer(modifier = Modifier.height(12.dp))
+                            Spacer(modifier = Modifier.height(6.dp))
 
                             Text(
                                 text = "Give 3 subtle clues to your friends out loud!",
                                 color = TextSecondary,
+                                fontFamily = ModernSansFont,
                                 fontSize = 13.sp,
                                 textAlign = TextAlign.Center
                             )
 
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(14.dp))
 
                             // Sample Hints Helper
                             Column(
@@ -235,15 +269,16 @@ fun IWantToBeScreen(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .clip(RoundedCornerShape(12.dp))
-                                            .background(if (isUnlocked) Color(0x2200F2FE) else Color.White.copy(alpha = 0.05f))
-                                            .padding(12.dp),
+                                            .background(if (isUnlocked) BrandPrimaryContainer else SurfaceSubtle)
+                                            .padding(horizontal = 14.dp, vertical = 10.dp),
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
                                             text = "Clue #${idx + 1}: ${if (isUnlocked) clue else "••••••••••••"}",
-                                            color = if (isUnlocked) TextPrimary else TextMuted,
-                                            fontSize = 14.sp,
+                                            color = if (isUnlocked) BrandPrimary else TextSecondary,
+                                            fontFamily = ModernSansFont,
+                                            fontSize = 13.sp,
                                             fontWeight = if (isUnlocked) FontWeight.Bold else FontWeight.Normal
                                         )
 
@@ -252,7 +287,8 @@ fun IWantToBeScreen(
                                                 onClick = {
                                                     haptics.performTick(composeHaptics)
                                                     clueStep = idx + 1
-                                                }
+                                                },
+                                                modifier = Modifier.size(24.dp)
                                             ) {
                                                 Text("🔓", fontSize = 14.sp)
                                             }
@@ -266,89 +302,80 @@ fun IWantToBeScreen(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Button(
-                        onClick = {
-                            if (!timerRunning) timerRunning = true else timerRunning = false
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (timerRunning) Color(0xFFFFB300) else Color(0xFF00F2FE)
-                        ),
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(52.dp)
-                    ) {
-                        Text(
-                            text = if (timerRunning) "PAUSE TIMER ⏱️" else "START TIMER ▶",
-                            color = Color.Black,
-                            fontWeight = FontWeight.Black
-                        )
-                    }
+                    SecondaryPartyButton(
+                        text = if (timerRunning) "Pause ⏱️" else "Start ⏱️",
+                        onClick = { timerRunning = !timerRunning },
+                        modifier = Modifier.weight(1f)
+                    )
 
-                    Button(
-                        onClick = {
-                            gameFinished = true
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF9D4EDD)),
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(52.dp)
-                    ) {
-                        Text("SUBMIT GUESS 🎯", color = Color.White, fontWeight = FontWeight.Black)
-                    }
+                    PrimaryPartyButton(
+                        text = "Submit Guess 🎯",
+                        accentColor = BrandPrimary,
+                        onClick = { gameFinished = true },
+                        modifier = Modifier.weight(1f)
+                    )
                 }
             } else {
                 // Game Finished & Scoring Result
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
                 ) {
                     Text(
-                        text = "DID FRIENDS GUESS CORRECTLY?",
+                        text = "Did Friends Guess Correctly?",
                         color = TextPrimary,
+                        fontFamily = ModernSansFont,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
                     Text(
                         text = "Secret Profession: ${currentCareer.title}",
-                        color = Color(0xFF00F2FE),
+                        color = BrandPrimary,
+                        fontFamily = ModernSansFont,
                         fontSize = 20.sp,
-                        fontWeight = FontWeight.Black
+                        fontWeight = FontWeight.Bold
                     )
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        Button(
-                            onClick = {
-                                haptics.performPop()
-                                groupGuessedRight = true
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E676)),
-                            shape = RoundedCornerShape(16.dp),
-                            modifier = Modifier.size(130.dp, 60.dp)
+                    Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                        Box(
+                            modifier = Modifier
+                                .size(130.dp, 56.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(SuccessContainer)
+                                .border(1.dp, SuccessGreen.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+                                .clickable {
+                                    haptics.performPop()
+                                    groupGuessedRight = true
+                                },
+                            contentAlignment = Alignment.Center
                         ) {
-                            Text("YES! 🎉", color = Color.Black, fontWeight = FontWeight.Black)
+                            Text("Yes! 🎉", color = SuccessGreen, fontFamily = ModernSansFont, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                         }
 
-                        Button(
-                            onClick = {
-                                haptics.performHeavyBurst()
-                                groupGuessedRight = false
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF0055)),
-                            shape = RoundedCornerShape(16.dp),
-                            modifier = Modifier.size(130.dp, 60.dp)
+                        Box(
+                            modifier = Modifier
+                                .size(130.dp, 56.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(AlertContainer)
+                                .border(1.dp, AlertRed.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+                                .clickable {
+                                    haptics.performHeavyBurst()
+                                    groupGuessedRight = false
+                                },
+                            contentAlignment = Alignment.Center
                         ) {
-                            Text("NO 😅", color = Color.White, fontWeight = FontWeight.Black)
+                            Text("No 😅", color = AlertRed, fontFamily = ModernSansFont, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                         }
                     }
 
@@ -357,16 +384,19 @@ fun IWantToBeScreen(
                         Text(
                             text = if (right) "Awesome! 1 Point awarded to Guessers!" else "Tricky! 1 Point awarded to Active Player!",
                             color = TextSecondary,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.SemiBold
+                            fontFamily = ModernSansFont,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium
                         )
                     }
                 }
             }
 
-            // Footer Button
             if (isRevealed) {
-                Button(
+                Spacer(modifier = Modifier.height(8.dp))
+                PrimaryPartyButton(
+                    text = "Next Player Turn ▶",
+                    accentColor = BrandPrimary,
                     onClick = {
                         currentCareer = sampleCareers.random()
                         isRevealed = false
@@ -377,15 +407,10 @@ fun IWantToBeScreen(
                         gameFinished = false
                         groupGuessedRight = null
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00F2FE)),
-                    shape = RoundedCornerShape(14.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp)
-                ) {
-                    Text("NEXT PLAYER TURN ▶", color = Color.Black, fontWeight = FontWeight.Black)
-                }
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }
 }
+

@@ -10,8 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -26,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.PrimaryPartyButton
 import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
 import kotlinx.coroutines.delay
@@ -57,7 +57,7 @@ fun CharadesScreen(
     var currentWordIndex by remember { mutableIntStateOf(0) }
     var scoredWords by remember { mutableStateOf<List<ScoredWord>>(emptyList()) }
 
-    var flashState by remember { mutableStateOf<Color?>(null) } // Green for correct, Amber for skip
+    var flashState by remember { mutableStateOf<Color?>(null) }
 
     // Tilt sensor logic
     DisposableEffect(gameStarted, gameOver) {
@@ -76,14 +76,14 @@ fun CharadesScreen(
             override fun onSensorChanged(event: SensorEvent?) {
                 if (event == null || System.currentTimeMillis() - lastTriggerTime < 1000) return
 
-                val y = event.values[1] // Y-axis tilt
-                val z = event.values[2] // Z-axis tilt
+                val y = event.values[1]
+                val z = event.values[2]
 
-                // Tilt down (screen facing ground) = Correct
+                // Tilt down = Correct
                 if (z < -6.5f || y > 7.5f) {
                     lastTriggerTime = System.currentTimeMillis()
                     haptics.performPop()
-                    flashState = Color(0xFF00E676)
+                    flashState = SuccessContainer
                     val word = wordList.getOrNull(currentWordIndex) ?: ""
                     if (word.isNotEmpty()) {
                         scoredWords = scoredWords + ScoredWord(word, true)
@@ -94,11 +94,11 @@ fun CharadesScreen(
                         gameOver = true
                     }
                 }
-                // Tilt up (screen facing ceiling) = Skip
+                // Tilt up = Skip
                 else if (z > 6.5f || y < -7.5f) {
                     lastTriggerTime = System.currentTimeMillis()
                     haptics.performPop()
-                    flashState = Color(0xFFFFB300)
+                    flashState = AlertContainer
                     val word = wordList.getOrNull(currentWordIndex) ?: ""
                     if (word.isNotEmpty()) {
                         scoredWords = scoredWords + ScoredWord(word, false)
@@ -124,7 +124,7 @@ fun CharadesScreen(
     // Flash reset effect
     LaunchedEffect(flashState) {
         if (flashState != null) {
-            delay(400)
+            delay(350)
             flashState = null
         }
     }
@@ -145,44 +145,52 @@ fun CharadesScreen(
     }
 
     GameScaffold(
-        title = "CHARADES 🎭",
-        titleColor = Color(0xFFFFD166),
+        title = "Charades",
+        titleColor = TextPrimary,
         gameId = "charades",
         onExitGame = onExitGame
     ) {
         if (!gameStarted) {
-            // Category Selection Pre-Game View
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "CHOOSE YOUR DECK",
+                        text = "Choose Your Deck",
                         color = TextPrimary,
-                        fontSize = 22.sp,
+                        fontFamily = ModernSansFont,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Place phone on forehead facing your friends!",
-                        color = TextMuted,
+                        color = TextSecondary,
+                        fontFamily = ModernSansFont,
                         fontSize = 13.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(top = 4.dp)
+                        textAlign = TextAlign.Center
                     )
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         CharadesCategory.entries.forEach { category ->
                             val isSel = selectedCategory == category
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(if (isSel) Color(0x33FFD166) else SurfaceGlassDark)
-                                    .border(1.5.dp, if (isSel) Color(0xFFFFD166) else BorderGlassDefault, RoundedCornerShape(16.dp))
+                                    .subtleCardShadow(elevation = if (isSel) 3.dp else 1.dp, shape = RoundedCornerShape(18.dp))
+                                    .clip(RoundedCornerShape(18.dp))
+                                    .background(if (isSel) BrandPrimaryContainer else SurfaceLight)
+                                    .border(
+                                        1.5.dp,
+                                        if (isSel) BrandPrimary.copy(alpha = 0.5f) else BorderSubtle,
+                                        RoundedCornerShape(18.dp)
+                                    )
                                     .clickable {
                                         haptics.performTick(composeHaptics)
                                         selectedCategory = category
@@ -190,18 +198,29 @@ fun CharadesScreen(
                                     .padding(16.dp)
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(text = category.icon, fontSize = 28.sp)
-                                    Spacer(modifier = Modifier.width(16.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .size(44.dp)
+                                            .clip(CircleShape)
+                                            .background(if (isSel) SurfaceLight else SurfaceSubtle),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(text = category.icon, fontSize = 22.sp)
+                                    }
+                                    Spacer(modifier = Modifier.width(14.dp))
                                     Column {
                                         Text(
                                             text = category.displayName,
-                                            color = if (isSel) Color(0xFFFFD166) else TextPrimary,
+                                            color = TextPrimary,
+                                            fontFamily = ModernSansFont,
                                             fontSize = 16.sp,
                                             fontWeight = FontWeight.Bold
                                         )
+                                        Spacer(modifier = Modifier.height(2.dp))
                                         Text(
                                             text = "${category.words.size} Words",
-                                            color = TextMuted,
+                                            color = TextSecondary,
+                                            fontFamily = ModernSansFont,
                                             fontSize = 12.sp
                                         )
                                     }
@@ -211,7 +230,9 @@ fun CharadesScreen(
                     }
                 }
 
-                Button(
+                PrimaryPartyButton(
+                    text = "Start Game",
+                    accentColor = BrandPrimary,
                     onClick = {
                         haptics.performHeavyBurst()
                         wordList = selectedCategory.words.shuffled()
@@ -219,25 +240,14 @@ fun CharadesScreen(
                         scoredWords = emptyList()
                         gameStarted = true
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD166)),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                ) {
-                    Text(
-                        text = "START GAME ▶",
-                        color = Color.Black,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 1.sp
-                    )
-                }
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         } else if (!gameOver) {
-            // Live Forehead Gameplay Screen
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
@@ -247,94 +257,134 @@ fun CharadesScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "⏱️ ${remainingSeconds}s",
-                        color = if (remainingSeconds <= 10) Color(0xFFFF0055) else TextPrimary,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Black
-                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(if (remainingSeconds <= 10) AlertContainer else SurfaceSubtle)
+                            .border(1.dp, if (remainingSeconds <= 10) AlertRed.copy(alpha = 0.3f) else BorderSubtle, RoundedCornerShape(14.dp))
+                            .padding(horizontal = 14.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = "⏱️ ${remainingSeconds}s",
+                            color = if (remainingSeconds <= 10) AlertRed else TextPrimary,
+                            fontFamily = ModernSansFont,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
 
-                    Text(
-                        text = "SCORE: ${scoredWords.count { it.isCorrect }}",
-                        color = Color(0xFF00E676),
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(SuccessContainer)
+                            .border(1.dp, SuccessGreen.copy(alpha = 0.3f), RoundedCornerShape(14.dp))
+                            .padding(horizontal = 14.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = "Score: ${scoredWords.count { it.isCorrect }}",
+                            color = SuccessGreen,
+                            fontFamily = ModernSansFont,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
 
                     TextButton(onClick = { gameOver = true }) {
-                        Text("END", color = Color(0xFFFF0055), fontWeight = FontWeight.Bold)
+                        Text("End", color = TextSecondary, fontFamily = ModernSansFont, fontWeight = FontWeight.Bold)
                     }
                 }
 
-                // Main Secret Word Prompt
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                // Main Secret Word Prompt Card
+                val cardBg = flashState ?: SurfaceLight
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(vertical = 16.dp)
+                        .subtleCardShadow(elevation = 4.dp, shape = RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(cardBg)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(24.dp))
+                        .padding(24.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = wordList.getOrNull(currentWordIndex) ?: "Finished!",
-                        color = Color.White,
-                        fontSize = 42.sp,
-                        fontWeight = FontWeight.Black,
-                        textAlign = TextAlign.Center,
-                        lineHeight = 48.sp
-                    )
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = wordList.getOrNull(currentWordIndex) ?: "Finished!",
+                            color = TextPrimary,
+                            fontFamily = ModernSansFont,
+                            fontSize = 36.sp,
+                            fontWeight = FontWeight.Black,
+                            textAlign = TextAlign.Center,
+                            lineHeight = 42.sp
+                        )
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
 
-                    Text(
-                        text = "TILT DOWN = CORRECT 🟢  |  TILT UP = SKIP 🟡",
-                        color = Color.White.copy(alpha = 0.7f),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
-                    )
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(SurfaceSubtle)
+                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
+                            Text(
+                                text = "Tilt down = Correct 🟢 | Tilt up = Skip 🟡",
+                                color = TextSecondary,
+                                fontFamily = ModernSansFont,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
                 }
 
-                // Manual Touch Action Buttons Fallback
+                // Action Buttons Fallback
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
                     Button(
                         onClick = {
                             haptics.performPop()
-                            flashState = Color(0xFFFFB300)
+                            flashState = AlertContainer
                             val word = wordList.getOrNull(currentWordIndex) ?: ""
                             if (word.isNotEmpty()) scoredWords = scoredWords + ScoredWord(word, false)
                             if (currentWordIndex + 1 < wordList.size) currentWordIndex++ else gameOver = true
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFB300)),
+                        colors = ButtonDefaults.buttonColors(containerColor = AlertContainer),
                         modifier = Modifier
                             .weight(1f)
                             .height(52.dp),
-                        shape = RoundedCornerShape(14.dp)
+                        shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("SKIP 🟡", color = Color.Black, fontWeight = FontWeight.Black)
+                        Text("Skip ⏩", color = AlertRed, fontFamily = ModernSansFont, fontWeight = FontWeight.Bold, fontSize = 15.sp)
                     }
 
                     Button(
                         onClick = {
                             haptics.performPop()
-                            flashState = Color(0xFF00E676)
+                            flashState = SuccessContainer
                             val word = wordList.getOrNull(currentWordIndex) ?: ""
                             if (word.isNotEmpty()) scoredWords = scoredWords + ScoredWord(word, true)
                             if (currentWordIndex + 1 < wordList.size) currentWordIndex++ else gameOver = true
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E676)),
+                        colors = ButtonDefaults.buttonColors(containerColor = SuccessContainer),
                         modifier = Modifier
                             .weight(1f)
                             .height(52.dp),
-                        shape = RoundedCornerShape(14.dp)
+                        shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("CORRECT 🟢", color = Color.Black, fontWeight = FontWeight.Black)
+                        Text("Correct ✓", color = SuccessGreen, fontFamily = ModernSansFont, fontWeight = FontWeight.Bold, fontSize = 15.sp)
                     }
                 }
             }
         } else {
             VictoryCeremonyOverlay(
-                winnerTitle = "SCORE: ${scoredWords.count { it.isCorrect }} / ${scoredWords.size}",
+                winnerTitle = "Score: ${scoredWords.count { it.isCorrect }} / ${scoredWords.size}",
                 subtitle = "Great Charades Acting!",
                 onPlayAgain = {
                     gameStarted = false
@@ -345,3 +395,4 @@ fun CharadesScreen(
         }
     }
 }
+

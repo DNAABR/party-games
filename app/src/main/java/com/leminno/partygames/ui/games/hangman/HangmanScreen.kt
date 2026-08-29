@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -23,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.leminno.partygames.data.remote.RemoteRoomRepository
 import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.PrimaryPartyButton
 import com.leminno.partygames.ui.components.RemoteRoomSetupSheet
 import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
@@ -38,7 +40,7 @@ fun HangmanScreen(
     val scope = rememberCoroutineScope()
     val haptics = remember { HapticFeedbackManager(context) }
 
-    var gamePhase by remember { mutableStateOf("MODE_SELECT") } // MODE_SELECT, WORD_SETUP, GUESSING, GAME_OVER
+    var gamePhase by remember { mutableStateOf("MODE_SELECT") }
     var isRemoteMode by remember { mutableStateOf(false) }
     var showRemoteSheet by remember { mutableStateOf(false) }
 
@@ -124,94 +126,135 @@ fun HangmanScreen(
     }
 
     GameScaffold(
-        title = "HANGMAN 😵",
-        titleColor = Color(0xFFFFD166),
+        title = "Hangman",
+        titleColor = TextPrimary,
         gameId = "hangman",
         onExitGame = onExitGame
     ) {
         if (gamePhase == "MODE_SELECT") {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+                verticalArrangement = Arrangement.Center
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("SELECT PLAY MODE", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Black)
-                    Spacer(modifier = Modifier.height(20.dp))
+                Text("Select Play Mode", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(6.dp))
+                Text("Choose single phone pass or remote room guessing", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 13.sp)
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.5.dp, Color(0xFFFFD166), RoundedCornerShape(20.dp))
-                            .clickable {
-                                isRemoteMode = false
-                                gamePhase = "WORD_SETUP"
-                            }
-                            .padding(20.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("📱", fontSize = 36.sp)
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column {
-                                Text("Pass & Play (Same Phone)", color = Color(0xFFFFD166), fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                                Text("Hide word setup before passing phone", color = TextMuted, fontSize = 12.sp)
-                            }
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
+                        .clickable {
+                            isRemoteMode = false
+                            gamePhase = "WORD_SETUP"
+                        }
+                        .padding(18.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(BoardContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("📱", fontSize = 22.sp)
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text("Pass & Play (Same Phone)", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text("Hide word setup before passing phone", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 13.sp)
                         }
                     }
+                }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.5.dp, Color(0xFF00F2FE), RoundedCornerShape(20.dp))
-                            .clickable {
-                                isRemoteMode = true
-                                showRemoteSheet = true
-                            }
-                            .padding(20.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("🌐", fontSize = 36.sp)
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column {
-                                Text("Remote Play (Multi-Device)", color = Color(0xFF00F2FE), fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                                Text("Host sets word, remote friends guess on their screens", color = TextMuted, fontSize = 12.sp)
-                            }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
+                        .clickable {
+                            isRemoteMode = true
+                            showRemoteSheet = true
+                        }
+                        .padding(18.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(ActionContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("🌐", fontSize = 22.sp)
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text("Remote Play (Multi-Device)", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text("Host sets word, friends guess from devices", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 13.sp)
                         }
                     }
                 }
             }
         } else if (gamePhase != "GAME_OVER") {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 if (gamePhase == "WORD_SETUP") {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 12.dp)
                     ) {
                         Text(
-                            text = "SET SECRET HANGMAN WORD",
-                            color = Color(0xFFFFD166),
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Black
+                            text = "Set Secret Hangman Word",
+                            color = TextPrimary,
+                            fontFamily = ModernSansFont,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Choose a word for other players to guess letter by letter",
+                            color = TextSecondary,
+                            fontFamily = ModernSansFont,
+                            fontSize = 13.sp
                         )
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
 
                         OutlinedTextField(
                             value = inputCustomWord,
                             onValueChange = { inputCustomWord = it.uppercase() },
-                            label = { Text("Type secret word for friends to guess") },
+                            placeholder = { Text("Type secret word...", color = TextSecondary, fontFamily = ModernSansFont) },
                             modifier = Modifier.fillMaxWidth(),
-                            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFFFFD166), unfocusedBorderColor = BorderGlassDefault)
+                            shape = RoundedCornerShape(16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = SurfaceLight,
+                                unfocusedContainerColor = SurfaceLight,
+                                focusedBorderColor = BrandPrimary,
+                                unfocusedBorderColor = BorderSubtle
+                            )
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
@@ -220,11 +263,13 @@ fun HangmanScreen(
                             haptics.performTick()
                             inputCustomWord = presetHangmanWords.random()
                         }) {
-                            Text("🎲 Random Prompt Suggestion", color = Color(0xFF00F2FE), fontSize = 13.sp)
+                            Text("🎲 Suggest Random Word", color = BrandPrimary, fontFamily = ModernSansFont, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                         }
                     }
 
-                    Button(
+                    PrimaryPartyButton(
+                        text = if (isRemoteMode) "Start Remote Guessing 🚀" else "Hide Word & Pass to Guessers ▶",
+                        accentColor = BrandPrimary,
                         onClick = {
                             val word = inputCustomWord.ifBlank { presetHangmanWords.random() }.trim().uppercase()
                             haptics.performPop()
@@ -234,41 +279,41 @@ fun HangmanScreen(
                             gamePhase = "GUESSING"
                             syncRemoteState(word, emptySet(), "GUESSING")
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD166)),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp)
-                    ) {
-                        Text(if (isRemoteMode) "START REMOTE GUESSING 🚀" else "HIDE WORD & PASS TO GUESSERS ▶", color = Color.Black, fontWeight = FontWeight.Black)
-                    }
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 } else if (gamePhase == "GUESSING") {
+                    // Hangman Drawing Canvas
                     Box(
                         modifier = Modifier
-                            .size(180.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(SurfaceGlassDark)
-                            .padding(12.dp),
+                            .size(170.dp)
+                            .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(SurfaceLight)
+                            .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
+                            .padding(14.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Canvas(modifier = Modifier.fillMaxSize()) {
                             val w = size.width
                             val h = size.height
+                            val gallowsCol = Color(0xFF94A3B8)
+                            val bodyCol = AlertRed
 
-                            drawLine(Color(0xFF8D99AE), Offset(20f, h - 20f), Offset(w - 20f, h - 20f), strokeWidth = 4.dp.toPx())
-                            drawLine(Color(0xFF8D99AE), Offset(50f, h - 20f), Offset(50f, 20f), strokeWidth = 4.dp.toPx())
-                            drawLine(Color(0xFF8D99AE), Offset(50f, 20f), Offset(w / 2f, 20f), strokeWidth = 4.dp.toPx())
-                            drawLine(Color(0xFF8D99AE), Offset(w / 2f, 20f), Offset(w / 2f, 50f), strokeWidth = 2.dp.toPx())
+                            drawLine(gallowsCol, Offset(20f, h - 14f), Offset(w - 20f, h - 14f), strokeWidth = 3.dp.toPx(), cap = StrokeCap.Round)
+                            drawLine(gallowsCol, Offset(45f, h - 14f), Offset(45f, 16f), strokeWidth = 3.dp.toPx(), cap = StrokeCap.Round)
+                            drawLine(gallowsCol, Offset(45f, 16f), Offset(w / 2f, 16f), strokeWidth = 3.dp.toPx(), cap = StrokeCap.Round)
+                            drawLine(gallowsCol, Offset(w / 2f, 16f), Offset(w / 2f, 40f), strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
 
-                            if (wrongGuessCount >= 1) drawCircle(Color(0xFFFF0055), radius = 18.dp.toPx(), center = Offset(w / 2f, 50f + 18.dp.toPx()), style = Stroke(width = 3.dp.toPx()))
-                            if (wrongGuessCount >= 2) drawLine(Color(0xFFFF0055), Offset(w / 2f, 50f + 36.dp.toPx()), Offset(w / 2f, 50f + 80.dp.toPx()), strokeWidth = 4.dp.toPx())
-                            if (wrongGuessCount >= 3) drawLine(Color(0xFFFF0055), Offset(w / 2f, 50f + 45.dp.toPx()), Offset(w / 2f - 25.dp.toPx(), 50f + 65.dp.toPx()), strokeWidth = 3.dp.toPx())
-                            if (wrongGuessCount >= 4) drawLine(Color(0xFFFF0055), Offset(w / 2f, 50f + 45.dp.toPx()), Offset(w / 2f + 25.dp.toPx(), 50f + 65.dp.toPx()), strokeWidth = 3.dp.toPx())
-                            if (wrongGuessCount >= 5) drawLine(Color(0xFFFF0055), Offset(w / 2f, 50f + 80.dp.toPx()), Offset(w / 2f - 25.dp.toPx(), 50f + 110.dp.toPx()), strokeWidth = 3.dp.toPx())
-                            if (wrongGuessCount >= 6) drawLine(Color(0xFFFF0055), Offset(w / 2f, 50f + 80.dp.toPx()), Offset(w / 2f + 25.dp.toPx(), 50f + 110.dp.toPx()), strokeWidth = 3.dp.toPx())
+                            if (wrongGuessCount >= 1) drawCircle(bodyCol, radius = 16.dp.toPx(), center = Offset(w / 2f, 40f + 16.dp.toPx()), style = Stroke(width = 3.dp.toPx()))
+                            if (wrongGuessCount >= 2) drawLine(bodyCol, Offset(w / 2f, 40f + 32.dp.toPx()), Offset(w / 2f, 40f + 72.dp.toPx()), strokeWidth = 3.dp.toPx(), cap = StrokeCap.Round)
+                            if (wrongGuessCount >= 3) drawLine(bodyCol, Offset(w / 2f, 40f + 42.dp.toPx()), Offset(w / 2f - 22.dp.toPx(), 40f + 58.dp.toPx()), strokeWidth = 3.dp.toPx(), cap = StrokeCap.Round)
+                            if (wrongGuessCount >= 4) drawLine(bodyCol, Offset(w / 2f, 40f + 42.dp.toPx()), Offset(w / 2f + 22.dp.toPx(), 40f + 58.dp.toPx()), strokeWidth = 3.dp.toPx(), cap = StrokeCap.Round)
+                            if (wrongGuessCount >= 5) drawLine(bodyCol, Offset(w / 2f, 40f + 72.dp.toPx()), Offset(w / 2f - 22.dp.toPx(), 40f + 100.dp.toPx()), strokeWidth = 3.dp.toPx(), cap = StrokeCap.Round)
+                            if (wrongGuessCount >= 6) drawLine(bodyCol, Offset(w / 2f, 40f + 72.dp.toPx()), Offset(w / 2f + 22.dp.toPx(), 40f + 100.dp.toPx()), strokeWidth = 3.dp.toPx(), cap = StrokeCap.Round)
                         }
                     }
 
+                    // Word blanks
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -279,21 +324,24 @@ fun HangmanScreen(
                                 modifier = Modifier
                                     .width(36.dp)
                                     .height(44.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(SurfaceGlassDark)
-                                    .border(1.5.dp, if (isRevealed) Color(0xFFFFD166) else BorderGlassDefault, RoundedCornerShape(8.dp)),
+                                    .subtleCardShadow(elevation = 1.dp, shape = RoundedCornerShape(10.dp))
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(if (isRevealed) BrandPrimaryContainer else SurfaceLight)
+                                    .border(1.dp, if (isRevealed) BrandPrimary.copy(alpha = 0.4f) else BorderSubtle, RoundedCornerShape(10.dp)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     text = if (isRevealed) "$char" else "_",
-                                    color = Color.White,
+                                    color = if (isRevealed) BrandPrimary else TextSecondary,
+                                    fontFamily = ModernSansFont,
                                     fontSize = 20.sp,
-                                    fontWeight = FontWeight.Black
+                                    fontWeight = FontWeight.Bold
                                 )
                             }
                         }
                     }
 
+                    // Keyboard
                     Column(
                         verticalArrangement = Arrangement.spacedBy(6.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -306,16 +354,18 @@ fun HangmanScreen(
                                     Box(
                                         modifier = Modifier
                                             .size(32.dp)
-                                            .clip(RoundedCornerShape(6.dp))
-                                            .background(if (isUsed) Color.White.copy(alpha = 0.1f) else Color(0xFFFFD166))
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(if (isUsed) SurfaceSubtle else SurfaceLight)
+                                            .border(1.dp, if (isUsed) Color.Transparent else BorderSubtle, RoundedCornerShape(8.dp))
                                             .clickable(enabled = !isUsed) { handleLetterGuess(char) },
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Text(
                                             text = "$char",
-                                            color = if (isUsed) TextMuted else Color.Black,
+                                            color = if (isUsed) TextMuted else TextPrimary,
+                                            fontFamily = ModernSansFont,
                                             fontSize = 13.sp,
-                                            fontWeight = FontWeight.Black
+                                            fontWeight = FontWeight.Bold
                                         )
                                     }
                                 }
@@ -326,8 +376,8 @@ fun HangmanScreen(
             }
         } else {
             VictoryCeremonyOverlay(
-                winnerTitle = if (isVictory) "WORD UNCOVERED! VICTORY! 🎉" else "EXECUTION COMPLETE! ☠️",
-                subtitle = "Secret Word Was: $secretWord",
+                winnerTitle = if (isVictory) "Word Uncovered! 🎉" else "Execution Complete! ☠️",
+                subtitle = "Secret Word: $secretWord",
                 onPlayAgain = {
                     inputCustomWord = ""
                     gamePhase = "MODE_SELECT"
@@ -339,7 +389,7 @@ fun HangmanScreen(
         if (showRemoteSheet) {
             RemoteRoomSetupSheet(
                 gameId = "hangman",
-                gameName = "Hangman 😵",
+                gameName = "Hangman",
                 onDismiss = {
                     showRemoteSheet = false
                     if (roomCode.isBlank()) gamePhase = "MODE_SELECT"
@@ -355,3 +405,4 @@ fun HangmanScreen(
         }
     }
 }
+

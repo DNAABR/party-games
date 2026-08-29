@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -26,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.leminno.partygames.data.remote.RemoteRoomRepository
 import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.PrimaryPartyButton
 import com.leminno.partygames.ui.components.RemoteRoomSetupSheet
 import com.leminno.partygames.ui.theme.*
 import kotlinx.coroutines.launch
@@ -49,7 +51,7 @@ fun WavelengthScreen(
     val scope = rememberCoroutineScope()
     val haptics = remember { HapticFeedbackManager(context) }
 
-    var gamePhase by remember { mutableStateOf("MODE_SELECT") } // MODE_SELECT, PSYCHIC_PEEK, TEAM_DIAL, REVEAL
+    var gamePhase by remember { mutableStateOf("MODE_SELECT") }
     var isRemoteMode by remember { mutableStateOf(false) }
     var showRemoteSheet by remember { mutableStateOf(false) }
     var roomCode by remember { mutableStateOf("") }
@@ -104,71 +106,96 @@ fun WavelengthScreen(
     }
 
     GameScaffold(
-        title = "Wavelength 🔮",
-        titleColor = Color(0xFFFFD166),
+        title = "Wavelength",
+        titleColor = TextPrimary,
         gameId = "wavelength",
         onExitGame = onExitGame
     ) {
         if (gamePhase == "MODE_SELECT") {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+                verticalArrangement = Arrangement.Center
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("SELECT PLAY MODE", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Black)
-                    Spacer(modifier = Modifier.height(20.dp))
+                Text("Select Play Mode", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(6.dp))
+                Text("Choose single phone pass or remote dial sync", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 13.sp)
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.5.dp, Color(0xFFFFD166), RoundedCornerShape(20.dp))
-                            .clickable {
-                                isRemoteMode = false
-                                gamePhase = "PSYCHIC_PEEK"
-                            }
-                            .padding(20.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("📱", fontSize = 36.sp)
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column {
-                                Text("Pass & Play (Same Phone)", color = Color(0xFFFFD166), fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                                Text("Psychic peeks target angle on single phone", color = TextMuted, fontSize = 12.sp)
-                            }
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
+                        .clickable {
+                            isRemoteMode = false
+                            gamePhase = "PSYCHIC_PEEK"
+                        }
+                        .padding(18.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(MysteryContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("📱", fontSize = 22.sp)
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text("Pass & Play (Same Phone)", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text("Psychic peeks target angle on single phone", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 13.sp)
                         }
                     }
+                }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.5.dp, Color(0xFF00F2FE), RoundedCornerShape(20.dp))
-                            .clickable {
-                                isRemoteMode = true
-                                showRemoteSheet = true
-                            }
-                            .padding(20.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("🌐", fontSize = 36.sp)
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column {
-                                Text("Remote Play (Multi-Device)", color = Color(0xFF00F2FE), fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                                Text("Psychic sees secret target angle; team turns dial remotely", color = TextMuted, fontSize = 12.sp)
-                            }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
+                        .clickable {
+                            isRemoteMode = true
+                            showRemoteSheet = true
+                        }
+                        .padding(18.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(ActionContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("🌐", fontSize = 22.sp)
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text("Remote Play (Multi-Device)", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text("Psychic sees secret target; team turns dial remotely", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 13.sp)
                         }
                     }
                 }
             }
         } else {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
@@ -176,9 +203,10 @@ fun WavelengthScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(SurfaceGlassDark)
-                        .border(1.dp, BorderGlassDefault, RoundedCornerShape(16.dp))
+                        .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(18.dp))
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(18.dp))
                         .padding(14.dp)
                 ) {
                     Row(
@@ -186,16 +214,20 @@ fun WavelengthScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(currentSpectrum.first, color = Color(0xFF00F2FE), fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                        Text("◄ ── Spectrum ── ►", color = TextMuted, fontSize = 11.sp)
-                        Text(currentSpectrum.second, color = Color(0xFFFF007F), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        Text(currentSpectrum.first, color = BrandPrimary, fontFamily = ModernSansFont, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                        Text("◄ ── Spectrum ── ►", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                        Text(currentSpectrum.second, color = AlertRed, fontFamily = ModernSansFont, fontSize = 15.sp, fontWeight = FontWeight.Bold)
                     }
                 }
 
                 // Dial Arc Wheel Canvas Widget
                 Box(
                     modifier = Modifier
-                        .size(280.dp)
+                        .size(270.dp)
+                        .subtleCardShadow(elevation = 3.dp, shape = RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(24.dp))
                         .pointerInput(gamePhase) {
                             if (gamePhase == "TEAM_DIAL") {
                                 detectDragGestures { change, _ ->
@@ -212,45 +244,45 @@ fun WavelengthScreen(
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    Canvas(modifier = Modifier.fillMaxSize()) {
+                    Canvas(modifier = Modifier.fillMaxSize().padding(16.dp)) {
                         val w = size.width
                         val h = size.height
 
                         // Outer Arc Track
                         drawArc(
-                            color = SurfaceGlassDark,
+                            color = SurfaceSubtle,
                             startAngle = 180f,
                             sweepAngle = 180f,
                             useCenter = false,
                             topLeft = Offset(20f, 20f),
                             size = Size(w - 40f, h - 40f),
-                            style = Stroke(width = 30.dp.toPx(), cap = StrokeCap.Round)
+                            style = Stroke(width = 24.dp.toPx(), cap = StrokeCap.Round)
                         )
 
                         // Target Zone Arc (Visible during PSYCHIC_PEEK or REVEAL)
                         if (gamePhase == "PSYCHIC_PEEK" || gamePhase == "REVEAL") {
                             drawArc(
-                                color = Color(0xFFFFD166),
+                                color = BrandPrimary,
                                 startAngle = 180f + (180f - targetAngle - 10f),
                                 sweepAngle = 20f,
                                 useCenter = false,
                                 topLeft = Offset(20f, 20f),
                                 size = Size(w - 40f, h - 40f),
-                                style = Stroke(width = 30.dp.toPx(), cap = StrokeCap.Round)
+                                style = Stroke(width = 24.dp.toPx(), cap = StrokeCap.Round)
                             )
                         }
 
                         // Team Needle Dial Pointer Line
                         val needleRad = Math.toRadians((180.0 - dialAngle)).toFloat()
-                        val needleLen = (w / 2f) - 30.dp.toPx()
+                        val needleLen = (w / 2f) - 24.dp.toPx()
                         val endX = (w / 2f) + needleLen * kotlin.math.cos(needleRad)
                         val endY = (h / 2f) - needleLen * kotlin.math.sin(needleRad)
 
                         drawLine(
-                            color = Color(0xFFFF007F),
+                            color = AlertRed,
                             start = Offset(w / 2f, h / 2f),
                             end = Offset(endX, endY),
-                            strokeWidth = 6.dp.toPx(),
+                            strokeWidth = 5.dp.toPx(),
                             cap = StrokeCap.Round
                         )
                     }
@@ -259,21 +291,31 @@ fun WavelengthScreen(
                 if (gamePhase == "PSYCHIC_PEEK") {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
                     ) {
-                        Text("PSYCHIC ROLE: GIVE A CLUE", color = Color(0xFFFFD166), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        Text("Psychic Role: Give A Clue", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.height(12.dp))
 
                         OutlinedTextField(
                             value = psychicClue,
                             onValueChange = { psychicClue = it },
-                            label = { Text("Enter your verbal spectrum clue") },
+                            placeholder = { Text("Enter your verbal spectrum clue...", color = TextSecondary, fontFamily = ModernSansFont) },
                             modifier = Modifier.fillMaxWidth(),
-                            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFFFFD166), unfocusedBorderColor = BorderGlassDefault)
+                            shape = RoundedCornerShape(16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = SurfaceLight,
+                                unfocusedContainerColor = SurfaceLight,
+                                focusedBorderColor = BrandPrimary,
+                                unfocusedBorderColor = BorderSubtle
+                            )
                         )
                     }
 
-                    Button(
+                    PrimaryPartyButton(
+                        text = "Lock Clue & Hand Dial to Team ▶",
+                        accentColor = BrandPrimary,
                         onClick = {
                             if (psychicClue.isNotBlank()) {
                                 haptics.performPop()
@@ -281,47 +323,64 @@ fun WavelengthScreen(
                                 syncRemote(targetAngle, dialAngle, psychicClue, "TEAM_DIAL")
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD166)),
-                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                } else if (gamePhase == "TEAM_DIAL") {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(56.dp)
+                            .weight(1f)
                     ) {
-                        Text("LOCK CLUE & HAND DIAL TO TEAM ▶", color = Color.Black, fontWeight = FontWeight.Black)
-                    }
-                } else if (gamePhase == "TEAM_DIAL") {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("PSYCHIC CLUE: \"$psychicClue\"", color = Color(0xFF00F2FE), fontSize = 18.sp, fontWeight = FontWeight.Black)
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(BrandPrimaryContainer)
+                                .padding(horizontal = 14.dp, vertical = 6.dp)
+                        ) {
+                            Text("Psychic Clue: \"$psychicClue\"", color = BrandPrimary, fontFamily = ModernSansFont, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                        }
                         Spacer(modifier = Modifier.height(6.dp))
-                        Text("Drag needle along spectrum arc to target spot!", color = TextMuted, fontSize = 12.sp)
+                        Text("Drag needle along spectrum arc to target spot!", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 12.sp)
                     }
 
-                    Button(
+                    PrimaryPartyButton(
+                        text = "Open Shutter & Reveal Score 🎯",
+                        accentColor = BrandPrimary,
                         onClick = {
                             haptics.performHeavyBurst()
                             scoreEarned = calculateScore()
                             gamePhase = "REVEAL"
                             syncRemote(targetAngle, dialAngle, psychicClue, "REVEAL")
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF007F)),
-                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                } else if (gamePhase == "REVEAL") {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(56.dp)
+                            .weight(1f)
                     ) {
-                        Text("OPEN SHUTTER & REVEAL SCORE 🎯", color = Color.White, fontWeight = FontWeight.Black)
-                    }
-                } else if (gamePhase == "REVEAL") {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = if (scoreEarned > 0) "+$scoreEarned POINTS! 🎯" else "MISSED TARGET! 0 PTS",
-                            color = if (scoreEarned > 0) Color(0xFF00E676) else Color(0xFFFF0055),
-                            fontSize = 26.sp,
-                            fontWeight = FontWeight.Black
-                        )
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (scoreEarned > 0) SuccessContainer else AlertContainer)
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        ) {
+                            Text(
+                                text = if (scoreEarned > 0) "+$scoreEarned Points! 🎯" else "Missed Target! 0 Pts",
+                                color = if (scoreEarned > 0) SuccessGreen else AlertRed,
+                                fontFamily = ModernSansFont,
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
 
-                    Button(
+                    PrimaryPartyButton(
+                        text = "Next Spectrum Round 🔮",
+                        accentColor = BrandPrimary,
                         onClick = {
                             currentSpectrum = spectrumPairs.random()
                             psychicClue = ""
@@ -329,14 +388,8 @@ fun WavelengthScreen(
                             dialAngle = 90f
                             gamePhase = "MODE_SELECT"
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD166)),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp)
-                    ) {
-                        Text("NEXT SPECTRUM ROUND 🔮", color = Color.Black, fontWeight = FontWeight.Black)
-                    }
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         }
@@ -344,7 +397,7 @@ fun WavelengthScreen(
         if (showRemoteSheet) {
             RemoteRoomSetupSheet(
                 gameId = "wavelength",
-                gameName = "Wavelength 🔮",
+                gameName = "Wavelength",
                 onDismiss = {
                     showRemoteSheet = false
                     if (roomCode.isBlank()) gamePhase = "MODE_SELECT"
@@ -363,3 +416,4 @@ fun WavelengthScreen(
         }
     }
 }
+

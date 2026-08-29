@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -19,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.leminno.partygames.data.remote.RemoteRoomRepository
 import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.PrimaryPartyButton
 import com.leminno.partygames.ui.components.RemoteRoomSetupSheet
 import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
@@ -40,7 +42,7 @@ fun WriteFunnyScreen(
     val scope = rememberCoroutineScope()
     val haptics = remember { HapticFeedbackManager(context) }
 
-    var gamePhase by remember { mutableStateOf("MODE_SELECT") } // MODE_SELECT, PLAYER1_INPUT, PLAYER2_INPUT, GROUP_VOTE, REVEAL
+    var gamePhase by remember { mutableStateOf("MODE_SELECT") }
     var isRemoteMode by remember { mutableStateOf(false) }
     var showRemoteSheet by remember { mutableStateOf(false) }
     var roomCode by remember { mutableStateOf("") }
@@ -92,71 +94,96 @@ fun WriteFunnyScreen(
     }
 
     GameScaffold(
-        title = "WRITE FUNNY (QUIPLASH) ⚡",
-        titleColor = Color(0xFFFFD166),
+        title = "Write Funny",
+        titleColor = TextPrimary,
         gameId = "write_funny",
         onExitGame = onExitGame
     ) {
         if (gamePhase == "MODE_SELECT") {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+                verticalArrangement = Arrangement.Center
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("SELECT PLAY MODE", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Black)
-                    Spacer(modifier = Modifier.height(20.dp))
+                Text("Select Play Mode", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(6.dp))
+                Text("Choose single phone pass or party room voting", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 13.sp)
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.5.dp, Color(0xFFFFD166), RoundedCornerShape(20.dp))
-                            .clickable {
-                                isRemoteMode = false
-                                gamePhase = "PLAYER1_INPUT"
-                            }
-                            .padding(20.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("📱", fontSize = 36.sp)
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column {
-                                Text("Pass & Play (Same Phone)", color = Color(0xFFFFD166), fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                                Text("Type response secretly & pass device", color = TextMuted, fontSize = 12.sp)
-                            }
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
+                        .clickable {
+                            isRemoteMode = false
+                            gamePhase = "PLAYER1_INPUT"
+                        }
+                        .padding(18.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(ActionContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("📱", fontSize = 22.sp)
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text("Pass & Play (Same Phone)", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text("Type response secretly & pass device", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 13.sp)
                         }
                     }
+                }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.5.dp, Color(0xFF00F2FE), RoundedCornerShape(20.dp))
-                            .clickable {
-                                isRemoteMode = true
-                                showRemoteSheet = true
-                            }
-                            .padding(20.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("🌐", fontSize = 36.sp)
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column {
-                                Text("Remote Play (Multi-Device)", color = Color(0xFF00F2FE), fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                                Text("Jackbox style! Answer on your phone, group votes remotely", color = TextMuted, fontSize = 12.sp)
-                            }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
+                        .clickable {
+                            isRemoteMode = true
+                            showRemoteSheet = true
+                        }
+                        .padding(18.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(MysteryContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("🌐", fontSize = 22.sp)
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text("Remote Play (Multi-Device)", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text("Answer on your phone, group votes remotely", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 13.sp)
                         }
                     }
                 }
             }
         } else if (gamePhase != "REVEAL") {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
@@ -164,20 +191,30 @@ fun WriteFunnyScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(SurfaceGlassDark)
-                        .border(1.5.dp, Color(0xFFFFD166), RoundedCornerShape(20.dp))
-                        .padding(20.dp),
+                        .subtleCardShadow(elevation = 3.dp, shape = RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(24.dp))
+                        .padding(22.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("ABSURD PROMPT", color = Color(0xFFFFD166), fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(TriviaContainer)
+                                .border(1.dp, TriviaBorder, RoundedCornerShape(10.dp))
+                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                        ) {
+                            Text("PROMPT", color = TriviaText, fontFamily = ModernSansFont, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
                         Text(
                             text = currentPrompt,
-                            color = Color.White,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Black,
+                            color = TextPrimary,
+                            fontFamily = ModernSansFont,
+                            fontSize = 19.sp,
+                            fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center
                         )
                     }
@@ -185,37 +222,51 @@ fun WriteFunnyScreen(
 
                 if (gamePhase == "PLAYER1_INPUT" || gamePhase == "PLAYER2_INPUT") {
                     val isPlayer1 = gamePhase == "PLAYER1_INPUT"
-                    val activeTitle = if (isPlayer1) "PLAYER 1 RESPONSE" else "PLAYER 2 RESPONSE"
+                    val activeTitle = if (isPlayer1) "Player 1 Response" else "Player 2 Response"
                     val activeValue = if (isPlayer1) answer1 else answer2
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .padding(vertical = 8.dp)
                     ) {
-                        Text(
-                            text = activeTitle,
-                            color = Color(0xFF00F2FE),
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(BrandPrimaryContainer)
+                                .padding(horizontal = 14.dp, vertical = 6.dp)
+                        ) {
+                            Text(
+                                text = activeTitle,
+                                color = BrandPrimary,
+                                fontFamily = ModernSansFont,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
 
                         Spacer(modifier = Modifier.height(16.dp))
 
                         OutlinedTextField(
                             value = activeValue,
                             onValueChange = { if (isPlayer1) answer1 = it else answer2 = it },
-                            label = { Text("Write your funny answer...") },
+                            placeholder = { Text("Write your funniest punchline...", color = TextSecondary, fontFamily = ModernSansFont) },
                             modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Color(0xFF00F2FE),
-                                unfocusedBorderColor = BorderGlassDefault,
-                                focusedTextColor = TextPrimary,
-                                unfocusedTextColor = TextPrimary
+                                focusedContainerColor = SurfaceLight,
+                                unfocusedContainerColor = SurfaceLight,
+                                focusedBorderColor = BrandPrimary,
+                                unfocusedBorderColor = BorderSubtle
                             )
                         )
                     }
 
-                    Button(
+                    PrimaryPartyButton(
+                        text = if (isPlayer1) "Lock Answer 1 ▶" else "Submit & Vote ▶",
+                        accentColor = BrandPrimary,
                         onClick = {
                             if (activeValue.isNotBlank()) {
                                 haptics.performPop()
@@ -228,28 +279,26 @@ fun WriteFunnyScreen(
                                 }
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD166)),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp)
-                    ) {
-                        Text(if (isPlayer1) "LOCK ANSWER 1 ▶" else "SUBMIT & VOTE ▶", color = Color.Black, fontWeight = FontWeight.Black)
-                    }
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 } else if (gamePhase == "GROUP_VOTE") {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .padding(vertical = 8.dp)
                     ) {
-                        Text("VOTE FOR THE FUNNIEST ANSWER!", color = Color(0xFFFF007F), fontSize = 18.sp, fontWeight = FontWeight.Black)
-                        Spacer(modifier = Modifier.height(20.dp))
+                        Text("Vote for the funniest answer!", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.height(18.dp))
 
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
                                 .clip(RoundedCornerShape(20.dp))
-                                .background(SurfaceGlassDark)
-                                .border(2.dp, Color(0xFF00F2FE), RoundedCornerShape(20.dp))
+                                .background(ActionContainer)
+                                .border(1.dp, ActionBorder, RoundedCornerShape(20.dp))
                                 .clickable {
                                     haptics.performHeavyBurst()
                                     selectedWinner = 1
@@ -259,17 +308,18 @@ fun WriteFunnyScreen(
                                 .padding(20.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("Option A: \"$answer1\"", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                            Text("Option A: \"$answer1\"", color = ActionText, fontFamily = ModernSansFont, fontSize = 16.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(14.dp))
 
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
                                 .clip(RoundedCornerShape(20.dp))
-                                .background(SurfaceGlassDark)
-                                .border(2.dp, Color(0xFFFF007F), RoundedCornerShape(20.dp))
+                                .background(MysteryContainer)
+                                .border(1.dp, MysteryBorder, RoundedCornerShape(20.dp))
                                 .clickable {
                                     haptics.performHeavyBurst()
                                     selectedWinner = 2
@@ -279,15 +329,15 @@ fun WriteFunnyScreen(
                                 .padding(20.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("Option B: \"$answer2\"", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                            Text("Option B: \"$answer2\"", color = MysteryText, fontFamily = ModernSansFont, fontSize = 16.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                         }
                     }
                 }
             }
         } else {
-            val winText = if (selectedWinner == 1) "Option A: \"$answer1\" WINS!" else "Option B: \"$answer2\" WINS!"
+            val winText = if (selectedWinner == 1) "Option A: \"$answer1\" wins!" else "Option B: \"$answer2\" wins!"
             VictoryCeremonyOverlay(
-                winnerTitle = "QUIPLASH CHAMPION! 🏆",
+                winnerTitle = "Punchline Winner! 🏆",
                 subtitle = winText,
                 onPlayAgain = {
                     answer1 = ""
@@ -303,7 +353,7 @@ fun WriteFunnyScreen(
         if (showRemoteSheet) {
             RemoteRoomSetupSheet(
                 gameId = "write_funny",
-                gameName = "Write Funny (Quiplash) ⚡",
+                gameName = "Write Funny",
                 onDismiss = {
                     showRemoteSheet = false
                     if (roomCode.isBlank()) gamePhase = "MODE_SELECT"
@@ -319,3 +369,4 @@ fun WriteFunnyScreen(
         }
     }
 }
+

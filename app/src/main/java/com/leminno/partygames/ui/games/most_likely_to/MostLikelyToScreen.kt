@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.leminno.partygames.data.remote.RemoteRoomRepository
 import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.PrimaryPartyButton
+import com.leminno.partygames.ui.components.RemoteRoomSetupSheet
 import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
 import kotlinx.coroutines.delay
@@ -50,7 +53,7 @@ fun MostLikelyToScreen(
     val haptics = remember { HapticFeedbackManager(context) }
     val composeHaptics = LocalHapticFeedback.current
 
-    var gamePhase by remember { mutableStateOf("MODE_SELECT") } // MODE_SELECT, PLAYING
+    var gamePhase by remember { mutableStateOf("MODE_SELECT") }
     var isRemoteMode by remember { mutableStateOf(false) }
     var showRemoteSheet by remember { mutableStateOf(false) }
     var roomCode by remember { mutableStateOf("") }
@@ -94,71 +97,96 @@ fun MostLikelyToScreen(
     }
 
     GameScaffold(
-        title = "Most Likely To 🗳️",
-        titleColor = Color(0xFFE0AFA0),
+        title = "Most Likely To",
+        titleColor = TextPrimary,
         gameId = "most_likely_to",
         onExitGame = onExitGame
     ) {
         if (gamePhase == "MODE_SELECT") {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+                verticalArrangement = Arrangement.Center
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("SELECT PLAY MODE", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Black)
-                    Spacer(modifier = Modifier.height(20.dp))
+                Text("Select Play Mode", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(6.dp))
+                Text("Choose single phone finger pointing or remote voting", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 13.sp)
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.5.dp, Color(0xFFE0AFA0), RoundedCornerShape(20.dp))
-                            .clickable {
-                                isRemoteMode = false
-                                gamePhase = "PLAYING"
-                            }
-                            .padding(20.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("📱", fontSize = 36.sp)
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column {
-                                Text("Pass & Play (Same Phone)", color = Color(0xFFE0AFA0), fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                                Text("3-second countdown then point fingers together!", color = TextMuted, fontSize = 12.sp)
-                            }
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
+                        .clickable {
+                            isRemoteMode = false
+                            gamePhase = "PLAYING"
+                        }
+                        .padding(18.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(TriviaContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("📱", fontSize = 22.sp)
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text("Pass & Play (Same Phone)", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text("3-second countdown then point fingers together!", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 13.sp)
                         }
                     }
+                }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.5.dp, Color(0xFF00F2FE), RoundedCornerShape(20.dp))
-                            .clickable {
-                                isRemoteMode = true
-                                showRemoteSheet = true
-                            }
-                            .padding(20.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("🌐", fontSize = 36.sp)
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column {
-                                Text("Remote Play (Multi-Device)", color = Color(0xFF00F2FE), fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                                Text("Cast votes on separate screens & reveal winner stats", color = TextMuted, fontSize = 12.sp)
-                            }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
+                        .clickable {
+                            isRemoteMode = true
+                            showRemoteSheet = true
+                        }
+                        .padding(18.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(ActionContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("🌐", fontSize = 22.sp)
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text("Remote Play (Multi-Device)", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text("Cast votes on separate screens & reveal winner", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 13.sp)
                         }
                     }
                 }
             }
         } else if (!revealResults) {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
@@ -166,20 +194,30 @@ fun MostLikelyToScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .subtleCardShadow(elevation = 3.dp, shape = RoundedCornerShape(24.dp))
                         .clip(RoundedCornerShape(24.dp))
-                        .background(SurfaceGlassDark)
-                        .border(2.dp, Color(0xFFE0AFA0), RoundedCornerShape(24.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(24.dp))
                         .padding(24.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("QUESTION CARD", color = Color(0xFFE0AFA0), fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.5.sp)
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(TriviaContainer)
+                                .border(1.dp, TriviaBorder, RoundedCornerShape(10.dp))
+                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                        ) {
+                            Text("QUESTION CARD", color = TriviaText, fontFamily = ModernSansFont, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = currentPrompt,
-                            color = Color.White,
+                            color = TextPrimary,
+                            fontFamily = ModernSansFont,
                             fontSize = 20.sp,
-                            fontWeight = FontWeight.Black,
+                            fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center
                         )
                     }
@@ -188,28 +226,28 @@ fun MostLikelyToScreen(
                 if (countdownValue != null) {
                     Text(
                         text = "$countdownValue",
-                        color = Color(0xFFE0AFA0),
+                        color = BrandPrimary,
+                        fontFamily = ModernSansFont,
                         fontSize = 72.sp,
                         fontWeight = FontWeight.Black
                     )
                 } else if (!votingPhase) {
-                    Button(
+                    PrimaryPartyButton(
+                        text = "Start 3-Sec Countdown ⏳",
+                        accentColor = BrandPrimary,
                         onClick = { countdownValue = 3 },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE0AFA0)),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp)
-                    ) {
-                        Text("START 3-SEC COUNTDOWN ⏳", color = Color.Black, fontWeight = FontWeight.Black)
-                    }
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 } else {
                     // Voting list
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .padding(vertical = 8.dp)
                     ) {
-                        Text("TAP PLAYER TO VOTE!", color = Color(0xFFE0AFA0), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        Text("Tap Player To Vote", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.height(12.dp))
 
                         LazyColumn(
@@ -221,9 +259,10 @@ fun MostLikelyToScreen(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
+                                        .subtleCardShadow(elevation = 1.dp, shape = RoundedCornerShape(14.dp))
                                         .clip(RoundedCornerShape(14.dp))
-                                        .background(SurfaceGlassDark)
-                                        .border(1.dp, BorderGlassDefault, RoundedCornerShape(14.dp))
+                                        .background(SurfaceLight)
+                                        .border(1.dp, BorderSubtle, RoundedCornerShape(14.dp))
                                         .clickable {
                                             haptics.performPop()
                                             val mutable = votesMap.toMutableMap()
@@ -238,33 +277,36 @@ fun MostLikelyToScreen(
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Text(name, color = TextPrimary, fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                                        Text("$count Votes", color = Color(0xFFE0AFA0), fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                                        Text(name, color = TextPrimary, fontFamily = ModernSansFont, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                                        Box(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .background(BrandPrimaryContainer)
+                                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                                        ) {
+                                            Text("$count Votes", color = BrandPrimary, fontFamily = ModernSansFont, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                        }
                                     }
                                 }
                             }
                         }
                     }
 
-                    Button(
+                    PrimaryPartyButton(
+                        text = "Reveal Winner 🏆",
+                        accentColor = BrandPrimary,
                         onClick = {
                             haptics.performHeavyBurst()
                             revealResults = true
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE0AFA0)),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp)
-                    ) {
-                        Text("REVEAL WINNER 🏆", color = Color.Black, fontWeight = FontWeight.Black)
-                    }
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         } else {
             val topVoted = votesMap.maxByOrNull { it.value }?.key ?: "Everyone"
             VictoryCeremonyOverlay(
-                winnerTitle = "MOST LIKELY: $topVoted! 👑",
+                winnerTitle = "Most Likely: $topVoted! 👑",
                 subtitle = currentPrompt,
                 onPlayAgain = {
                     currentPrompt = samplePrompts.random()
@@ -278,9 +320,9 @@ fun MostLikelyToScreen(
         }
 
         if (showRemoteSheet) {
-            com.leminno.partygames.ui.components.RemoteRoomSetupSheet(
+            RemoteRoomSetupSheet(
                 gameId = "most_likely_to",
-                gameName = "Most Likely To 🗳️",
+                gameName = "Most Likely To",
                 onDismiss = {
                     showRemoteSheet = false
                     if (roomCode.isBlank()) gamePhase = "MODE_SELECT"
@@ -304,3 +346,4 @@ fun MostLikelyToScreen(
         }
     }
 }
+

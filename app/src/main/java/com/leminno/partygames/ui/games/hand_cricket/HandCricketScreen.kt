@@ -29,7 +29,7 @@ import kotlinx.coroutines.launch
 
 enum class HandCricketGameMode(val title: String, val subtitle: String, val icon: String) {
     SPLIT_SCREEN("1v1 Split Screen", "Same device facing opposite directions", "📲"),
-    TEAM_ROOM("Team Match / Online Room", "Multi-Device & Remote Players via Code/Link", "🌐")
+    TEAM_ROOM("Online Multi-Device", "Multiplayer room via code or link", "🌐")
 }
 
 @Composable
@@ -79,7 +79,6 @@ fun HandCricketScreen(
                     if (remoteP2 != null) p2Choice = remoteP2
 
                     if (remoteP1 != null && remoteP2 != null) {
-                        // Both made choice in remote game
                         val bat = remoteP1
                         val bowl = remoteP2
 
@@ -93,7 +92,7 @@ fun HandCricketScreen(
                                     batterScore = 0
                                     wicketsLost = 0
                                     isInnings1 = false
-                                    roundResultText = "INNINGS 1 OVER! Target: $innings1Target Runs!"
+                                    roundResultText = "Innings 1 Over! Target: $innings1Target Runs!"
                                 } else {
                                     matchGameOver = true
                                     winnerName = if (batterScore >= innings1Target) team2Name else team1Name
@@ -109,7 +108,6 @@ fun HandCricketScreen(
                             }
                         }
 
-                        // Host resets round choice after delay
                         if (isHost) {
                             scope.launch {
                                 kotlinx.coroutines.delay(1800)
@@ -141,7 +139,7 @@ fun HandCricketScreen(
                         batterScore = 0
                         wicketsLost = 0
                         isInnings1 = false
-                        roundResultText = "INNINGS 1 OVER! Target: $innings1Target Runs!"
+                        roundResultText = "Innings 1 Over! Target: $innings1Target Runs!"
                     } else {
                         matchGameOver = true
                         winnerName = if (batterScore >= innings1Target) team2Name else team1Name
@@ -165,7 +163,6 @@ fun HandCricketScreen(
 
     fun handleGestureSelection(choice: Int, isBatter: Boolean) {
         if (roomJoined) {
-            // Remote game gesture submission
             val currentP1 = if (isBatter) choice else p1Choice
             val currentP2 = if (!isBatter) choice else p2Choice
             scope.launch {
@@ -175,71 +172,86 @@ fun HandCricketScreen(
                 )
             }
         } else {
-            // Local game gesture submission
             if (isBatter) p1Choice = choice else p2Choice = choice
             evaluateLocalRound()
         }
     }
 
     GameScaffold(
-        title = "HAND CRICKET 🏏",
-        titleColor = Color(0xFFFFD166),
+        title = "Hand Cricket",
+        titleColor = TextPrimary,
         gameId = "hand_cricket",
         onExitGame = onExitGame
     ) {
         if (selectedGameMode == null) {
-            // Mode Selector
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+                verticalArrangement = Arrangement.Center
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "SELECT PLAY MODE",
-                        color = TextPrimary,
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Black
-                    )
+                Text(
+                    text = "Select Play Mode",
+                    color = TextPrimary,
+                    fontFamily = ModernSansFont,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "Choose 1v1 split screen or online room",
+                    color = TextSecondary,
+                    fontFamily = ModernSansFont,
+                    fontSize = 13.sp
+                )
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        HandCricketGameMode.entries.forEach { mode ->
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(20.dp))
-                                    .background(SurfaceGlassDark)
-                                    .border(1.5.dp, Color(0xFFFFD166), RoundedCornerShape(20.dp))
-                                    .clickable {
-                                        haptics.performTick(composeHaptics)
-                                        selectedGameMode = mode
-                                        if (mode == HandCricketGameMode.TEAM_ROOM) {
-                                            showRemoteSheet = true
-                                        }
+                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    HandCricketGameMode.entries.forEach { mode ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(SurfaceLight)
+                                .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
+                                .clickable {
+                                    haptics.performTick(composeHaptics)
+                                    selectedGameMode = mode
+                                    if (mode == HandCricketGameMode.TEAM_ROOM) {
+                                        showRemoteSheet = true
                                     }
-                                    .padding(20.dp)
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(text = mode.icon, fontSize = 36.sp)
-                                    Spacer(modifier = Modifier.width(16.dp))
-                                    Column {
-                                        Text(
-                                            text = mode.title,
-                                            color = Color(0xFFFFD166),
-                                            fontSize = 17.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                        Text(
-                                            text = mode.subtitle,
-                                            color = TextMuted,
-                                            fontSize = 12.sp
-                                        )
-                                    }
+                                }
+                                .padding(18.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .clip(CircleShape)
+                                        .background(if (mode == HandCricketGameMode.SPLIT_SCREEN) BoardContainer else ActionContainer),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(text = mode.icon, fontSize = 22.sp)
+                                }
+                                Spacer(modifier = Modifier.width(16.dp))
+                                Column {
+                                    Text(
+                                        text = mode.title,
+                                        color = TextPrimary,
+                                        fontFamily = ModernSansFont,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Spacer(modifier = Modifier.height(3.dp))
+                                    Text(
+                                        text = mode.subtitle,
+                                        color = TextSecondary,
+                                        fontFamily = ModernSansFont,
+                                        fontSize = 13.sp
+                                    )
                                 }
                             }
                         }
@@ -247,9 +259,10 @@ fun HandCricketScreen(
                 }
             }
         } else if (!matchGameOver) {
-            // Live Hand Cricket Game Board
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
@@ -257,10 +270,11 @@ fun HandCricketScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(SurfaceGlassDark)
-                        .border(1.dp, BorderGlassDefault, RoundedCornerShape(16.dp))
-                        .padding(14.dp)
+                        .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(18.dp))
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(18.dp))
+                        .padding(16.dp)
                 ) {
                     Column {
                         Row(
@@ -268,38 +282,49 @@ fun HandCricketScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = if (isInnings1) "$team1Name (Batting)" else "$team2Name (Chasing Target $innings1Target)",
-                                color = Color(0xFFFFD166),
+                                text = if (isInnings1) "$team1Name (Batting)" else "$team2Name (Chasing Target: $innings1Target)",
+                                color = BrandPrimary,
+                                fontFamily = ModernSansFont,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             if (roomJoined) {
                                 Text(
-                                    text = "🌐 ROOM: $roomCode",
-                                    color = Color(0xFF00F2FE),
+                                    text = "🌐 Room: $roomCode",
+                                    color = TextSecondary,
+                                    fontFamily = ModernSansFont,
                                     fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Medium
                                 )
                             }
                         }
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "$batterScore Runs  •  $wicketsLost/$maxWickets Wickets",
+                            text = "$batterScore Runs • $wicketsLost/$maxWickets Wickets",
                             color = TextPrimary,
+                            fontFamily = ModernSansFont,
                             fontSize = 18.sp,
-                            fontWeight = FontWeight.Black
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }
 
                 roundResultText?.let { res ->
-                    Text(
-                        text = res,
-                        color = if (res.contains("WICKET")) Color(0xFFFF0055) else Color(0xFF00E676),
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Black,
-                        textAlign = TextAlign.Center
-                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(if (res.contains("WICKET")) AlertContainer else SuccessContainer)
+                            .padding(horizontal = 14.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = res,
+                            color = if (res.contains("WICKET")) AlertRed else SuccessGreen,
+                            fontFamily = ModernSansFont,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
 
                 // Bowler Zone
@@ -307,10 +332,11 @@ fun HandCricketScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
+                        .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
                         .clip(RoundedCornerShape(20.dp))
-                        .background(Color.White.copy(alpha = 0.04f))
-                        .border(1.dp, Color(0xFFFF007F).copy(alpha = 0.5f), RoundedCornerShape(20.dp))
-                        .padding(12.dp),
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
+                        .padding(14.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(
@@ -318,12 +344,13 @@ fun HandCricketScreen(
                         modifier = Modifier.rotate(if (selectedGameMode == HandCricketGameMode.SPLIT_SCREEN) 180f else 0f)
                     ) {
                         Text(
-                            text = "BOWLER (1 - 6)",
-                            color = Color(0xFFFF007F),
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Black
+                            text = "Bowler (1 - 6)",
+                            color = AlertRed,
+                            fontFamily = ModernSansFont,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
                         )
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             (1..6).forEach { num ->
@@ -332,8 +359,8 @@ fun HandCricketScreen(
                                     modifier = Modifier
                                         .size(44.dp)
                                         .clip(CircleShape)
-                                        .background(if (isSel) Color(0xFFFF007F) else SurfaceGlassDark)
-                                        .border(1.dp, Color(0xFFFF007F), CircleShape)
+                                        .background(if (isSel) AlertContainer else SurfaceSubtle)
+                                        .border(1.dp, if (isSel) AlertRed else BorderSubtle, CircleShape)
                                         .clickable {
                                             haptics.performTick(composeHaptics)
                                             handleGestureSelection(num, isBatter = false)
@@ -342,7 +369,8 @@ fun HandCricketScreen(
                                 ) {
                                     Text(
                                         text = "$num",
-                                        color = if (isSel) Color.White else TextPrimary,
+                                        color = if (isSel) AlertRed else TextPrimary,
+                                        fontFamily = ModernSansFont,
                                         fontSize = 16.sp,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -352,27 +380,29 @@ fun HandCricketScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 // Batter Zone
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
+                        .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
                         .clip(RoundedCornerShape(20.dp))
-                        .background(Color.White.copy(alpha = 0.04f))
-                        .border(1.dp, Color(0xFF00F2FE).copy(alpha = 0.5f), RoundedCornerShape(20.dp))
-                        .padding(12.dp),
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
+                        .padding(14.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "BATTER (1 - 6)",
-                            color = Color(0xFF00F2FE),
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Black
+                            text = "Batter (1 - 6)",
+                            color = ActionText,
+                            fontFamily = ModernSansFont,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
                         )
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             (1..6).forEach { num ->
@@ -381,8 +411,8 @@ fun HandCricketScreen(
                                     modifier = Modifier
                                         .size(44.dp)
                                         .clip(CircleShape)
-                                        .background(if (isSel) Color(0xFF00F2FE) else SurfaceGlassDark)
-                                        .border(1.dp, Color(0xFF00F2FE), CircleShape)
+                                        .background(if (isSel) ActionContainer else SurfaceSubtle)
+                                        .border(1.dp, if (isSel) ActionPrimary else BorderSubtle, CircleShape)
                                         .clickable {
                                             haptics.performTick(composeHaptics)
                                             handleGestureSelection(num, isBatter = true)
@@ -391,7 +421,8 @@ fun HandCricketScreen(
                                 ) {
                                     Text(
                                         text = "$num",
-                                        color = if (isSel) Color.Black else TextPrimary,
+                                        color = if (isSel) ActionText else TextPrimary,
+                                        fontFamily = ModernSansFont,
                                         fontSize = 16.sp,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -403,7 +434,7 @@ fun HandCricketScreen(
             }
         } else {
             VictoryCeremonyOverlay(
-                winnerTitle = "WINNER: $winnerName 🎉",
+                winnerTitle = "Winner: $winnerName 🎉",
                 subtitle = "Hand Cricket Champions!",
                 onPlayAgain = {
                     matchGameOver = false
@@ -422,7 +453,7 @@ fun HandCricketScreen(
         if (showRemoteSheet) {
             RemoteRoomSetupSheet(
                 gameId = "hand_cricket",
-                gameName = "Hand Cricket 🏏",
+                gameName = "Hand Cricket",
                 onDismiss = {
                     showRemoteSheet = false
                     if (!roomJoined) selectedGameMode = null
@@ -438,3 +469,4 @@ fun HandCricketScreen(
         }
     }
 }
+

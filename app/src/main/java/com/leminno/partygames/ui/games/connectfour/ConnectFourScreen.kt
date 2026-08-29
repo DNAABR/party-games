@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.leminno.partygames.data.remote.RemoteRoomRepository
 import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.PrimaryPartyButton
 import com.leminno.partygames.ui.components.RemoteRoomSetupSheet
 import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
@@ -36,86 +37,122 @@ fun ConnectFourScreen(
 
     val uiState by viewModel.uiState.collectAsState()
 
-    var selectedMode by remember { mutableStateOf<String?>(null) } // null, LOCAL, REMOTE
+    var selectedMode by remember { mutableStateOf<String?>(null) }
     var showRemoteSheet by remember { mutableStateOf(false) }
     var roomCode by remember { mutableStateOf("") }
 
-    val turnColor by animateColorAsState(
+    val turnContainerColor by animateColorAsState(
         targetValue = when {
-            uiState.winnerPlayer == 1 -> Color(0xFFFF0055)
-            uiState.winnerPlayer == 2 -> Color(0xFFFFD166)
-            uiState.isDraw -> Color.White
-            uiState.isRedTurn -> Color(0xFFFF0055)
-            else -> Color(0xFFFFD166)
+            uiState.winnerPlayer == 1 -> AlertContainer
+            uiState.winnerPlayer == 2 -> BoardContainer
+            uiState.isDraw -> SurfaceSubtle
+            uiState.isRedTurn -> AlertContainer
+            else -> BoardContainer
         },
-        label = "turnColor"
+        label = "turnContainerColor"
+    )
+
+    val turnTextColor by animateColorAsState(
+        targetValue = when {
+            uiState.winnerPlayer == 1 -> AlertRed
+            uiState.winnerPlayer == 2 -> BoardText
+            uiState.isDraw -> TextPrimary
+            uiState.isRedTurn -> AlertRed
+            else -> BoardText
+        },
+        label = "turnTextColor"
     )
 
     GameScaffold(
-        title = "CONNECT FOUR 🔴🟡",
-        titleColor = Color(0xFFFF6B6B),
+        title = "Connect Four",
+        titleColor = TextPrimary,
         gameId = "connect_four",
         onExitGame = onExitGame
     ) {
         if (selectedMode == null) {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+                verticalArrangement = Arrangement.Center
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("SELECT PLAY MODE", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Black)
-                    Spacer(modifier = Modifier.height(20.dp))
+                Text("Select Play Mode", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(6.dp))
+                Text("Choose single device pass or remote multiplayer", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 13.sp)
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.5.dp, Color(0xFFFF6B6B), RoundedCornerShape(20.dp))
-                            .clickable {
-                                selectedMode = "LOCAL"
-                            }
-                            .padding(20.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("📱", fontSize = 36.sp)
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column {
-                                Text("Pass & Play (Same Phone)", color = Color(0xFFFF6B6B), fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                                Text("Shared screen disc drop on single phone", color = TextMuted, fontSize = 12.sp)
-                            }
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
+                        .clickable {
+                            selectedMode = "LOCAL"
+                        }
+                        .padding(18.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(AlertContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("📱", fontSize = 22.sp)
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text("Pass & Play (Same Phone)", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text("Shared screen disc drop on single phone", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 13.sp)
                         }
                     }
+                }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.5.dp, Color(0xFF00F2FE), RoundedCornerShape(20.dp))
-                            .clickable {
-                                selectedMode = "REMOTE"
-                                showRemoteSheet = true
-                            }
-                            .padding(20.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("🌐", fontSize = 36.sp)
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column {
-                                Text("Remote Play (Multi-Device)", color = Color(0xFF00F2FE), fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                                Text("Real-time turn disc drops synced across screens", color = TextMuted, fontSize = 12.sp)
-                            }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
+                        .clickable {
+                            selectedMode = "REMOTE"
+                            showRemoteSheet = true
+                        }
+                        .padding(18.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(ActionContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("🌐", fontSize = 22.sp)
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text("Remote Play (Multi-Device)", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text("Real-time turn disc drops synced across screens", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 13.sp)
                         }
                     }
                 }
             }
         } else if (uiState.winnerPlayer == null && !uiState.isDraw) {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
@@ -123,32 +160,34 @@ fun ConnectFourScreen(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(14.dp))
-                        .background(SurfaceGlassDark)
-                        .border(1.dp, turnColor, RoundedCornerShape(14.dp))
+                        .background(turnContainerColor)
+                        .border(1.dp, turnTextColor.copy(alpha = 0.3f), RoundedCornerShape(14.dp))
                         .padding(horizontal = 18.dp, vertical = 8.dp)
                 ) {
                     Text(
                         text = when {
-                            uiState.isRedTurn -> "RED TURN 🔴"
-                            else -> "YELLOW TURN 🟡"
+                            uiState.isRedTurn -> "Red's Turn 🔴"
+                            else -> "Yellow's Turn 🟡"
                         },
-                        color = turnColor,
-                        fontSize = 14.sp,
+                        color = turnTextColor,
+                        fontFamily = ModernSansFont,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
                 // 6x7 Grid Board
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(7f / 6f)
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Color(0xFF1E293B))
-                        .border(3.dp, Color(0xFF334155), RoundedCornerShape(20.dp))
-                        .padding(12.dp)
+                        .subtleCardShadow(elevation = 4.dp, shape = RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(24.dp))
+                        .padding(14.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxSize(),
@@ -172,18 +211,18 @@ fun ConnectFourScreen(
                             ) {
                                 for (row in 0..5) {
                                     val cellVal = uiState.grid[row][col]
-                                    val cellColor = when (cellVal) {
-                                        1 -> Color(0xFFFF0055) // Red
-                                        2 -> Color(0xFFFFD166) // Yellow
-                                        else -> Color(0xFF0F172A) // Empty Slot
+                                    val (cellColor, borderCol) = when (cellVal) {
+                                        1 -> Pair(AlertRed, AlertRed.copy(alpha = 0.3f))
+                                        2 -> Pair(Color(0xFFEAB308), Color(0xFFCA8A04))
+                                        else -> Pair(SurfaceSubtle, BorderSubtle)
                                     }
 
                                     Box(
                                         modifier = Modifier
-                                            .size(36.dp)
+                                            .size(38.dp)
                                             .clip(CircleShape)
                                             .background(cellColor)
-                                            .border(1.dp, Color(0x33FFFFFF), CircleShape)
+                                            .border(1.dp, borderCol, CircleShape)
                                     )
                                 }
                             }
@@ -191,26 +230,22 @@ fun ConnectFourScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
-                Button(
+                PrimaryPartyButton(
+                    text = "Restart Match",
+                    accentColor = BrandPrimary,
                     onClick = {
                         haptics.performPop()
                         viewModel.resetGame()
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6B6B)),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp)
-                ) {
-                    Text("RESTART MATCH 🔄", color = Color.White, fontWeight = FontWeight.Black)
-                }
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         } else {
             val winnerTitle = when {
-                uiState.winnerPlayer != null -> "PLAYER ${uiState.winnerPlayer} WINS!"
-                else -> "IT'S A DRAW!"
+                uiState.winnerPlayer != null -> "Player ${uiState.winnerPlayer} Wins!"
+                else -> "It's a Draw!"
             }
             VictoryCeremonyOverlay(
                 winnerTitle = winnerTitle,
@@ -223,7 +258,7 @@ fun ConnectFourScreen(
         if (showRemoteSheet) {
             RemoteRoomSetupSheet(
                 gameId = "connect_four",
-                gameName = "Connect Four 🔴🟡",
+                gameName = "Connect Four",
                 onDismiss = {
                     showRemoteSheet = false
                     if (roomCode.isBlank()) selectedMode = null
@@ -237,3 +272,4 @@ fun ConnectFourScreen(
         }
     }
 }
+

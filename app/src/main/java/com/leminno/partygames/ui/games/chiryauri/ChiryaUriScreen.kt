@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.PrimaryPartyButton
 import com.leminno.partygames.ui.theme.*
 import kotlinx.coroutines.delay
 
@@ -48,7 +49,7 @@ fun ChiryaUriScreen(
 
     var currentPrompt by remember { mutableStateOf(flyPrompts.random()) }
     var isRoundActive by remember { mutableStateOf(false) }
-    var statusText by remember { mutableStateOf("ALL PLAYERS: HOLD YOUR CORNER TOUCH TARGETS!") }
+    var statusText by remember { mutableStateOf("All players: Hold your corner touch target!") }
 
     // Multi-touch target tracking for 4 corner zones
     val touchStates = remember { mutableStateListOf(false, false, false, false) }
@@ -58,17 +59,17 @@ fun ChiryaUriScreen(
         if (isRoundActive) {
             delay(1500L)
             currentPrompt = flyPrompts.random()
-            statusText = "${currentPrompt.emoji} ${currentPrompt.name.uppercase()} FLIES!"
+            statusText = "${currentPrompt.emoji} ${currentPrompt.name} Flies!"
             haptics.performPop()
             delay(2000L)
-            statusText = "GET READY FOR NEXT ROUND..."
+            statusText = "Get ready for next round..."
             isRoundActive = false
         }
     }
 
     GameScaffold(
-        title = "Chirya Uri 🦅",
-        titleColor = Color(0xFF00F2FE),
+        title = "Chirya Uri",
+        titleColor = TextPrimary,
         gameId = "chirya_uri",
         onExitGame = onExitGame
     ) {
@@ -79,39 +80,40 @@ fun ChiryaUriScreen(
             Column(
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .padding(horizontal = 24.dp),
+                    .padding(horizontal = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(SurfaceGlassDark)
-                        .border(2.dp, Color(0xFF00F2FE), RoundedCornerShape(20.dp))
-                        .padding(20.dp),
+                        .subtleCardShadow(elevation = 3.dp, shape = RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(24.dp))
+                        .padding(24.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = statusText,
-                        color = Color(0xFF00F2FE),
+                        color = TextPrimary,
+                        fontFamily = ModernSansFont,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(18.dp))
 
-                Button(
+                PrimaryPartyButton(
+                    text = "Next Prompt",
+                    accentColor = BrandPrimary,
                     onClick = {
                         isRoundActive = true
                         haptics.performPop()
                     },
-                    enabled = !isRoundActive,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF007F))
-                ) {
-                    Text("NEXT PROMPT ▶", color = Color.White, fontWeight = FontWeight.Bold)
-                }
+                    modifier = Modifier.fillMaxWidth(0.6f)
+                )
             }
 
             // 4 Corner Multi-Touch Target Zones
@@ -127,11 +129,16 @@ fun ChiryaUriScreen(
                 Box(
                     modifier = Modifier
                         .align(alignment)
-                        .padding(8.dp)
+                        .padding(4.dp)
                         .size(110.dp)
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(if (isTouching) Color(0xFF00E676) else Color(0x33FFFFFF))
-                        .border(2.dp, if (isTouching) Color(0xFF00E676) else BorderGlassDefault, RoundedCornerShape(24.dp))
+                        .subtleCardShadow(elevation = if (isTouching) 3.dp else 1.dp, shape = RoundedCornerShape(22.dp))
+                        .clip(RoundedCornerShape(22.dp))
+                        .background(if (isTouching) SuccessContainer else SurfaceLight)
+                        .border(
+                            1.5.dp,
+                            if (isTouching) SuccessGreen.copy(alpha = 0.5f) else BorderSubtle,
+                            RoundedCornerShape(22.dp)
+                        )
                         .pointerInteropFilter { event ->
                             when (event.actionMasked) {
                                 MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
@@ -149,11 +156,19 @@ fun ChiryaUriScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("P${index + 1}", color = TextPrimary, fontSize = 18.sp, fontWeight = FontWeight.Black)
-                        Text(if (isTouching) "HOLDING 👇" else "TOUCH HERE", color = TextSecondary, fontSize = 10.sp)
+                        Text("P${index + 1}", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            if (isTouching) "Holding 👇" else "Touch Here",
+                            color = if (isTouching) SuccessGreen else TextSecondary,
+                            fontFamily = ModernSansFont,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
                 }
             }
         }
     }
 }
+

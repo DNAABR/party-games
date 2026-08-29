@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -26,8 +27,8 @@ import kotlinx.coroutines.launch
 
 enum class CellState(val symbol: String, val color: Color) {
     EMPTY("", Color.Transparent),
-    PLAYER_X("❌", Color(0xFF00F2FE)),
-    PLAYER_O("⭕", Color(0xFFFF007F))
+    PLAYER_X("❌", Color(0xFF6366F1)),
+    PLAYER_O("⭕", Color(0xFFEC4899))
 }
 
 enum class TttPowerUp(val title: String, val icon: String, val desc: String) {
@@ -50,7 +51,7 @@ fun PowerUpTTTScreen(
     val haptics = remember { HapticFeedbackManager(context) }
     val composeHaptics = LocalHapticFeedback.current
 
-    var gamePhase by remember { mutableStateOf("MODE_SELECT") } // MODE_SELECT, PLAYING
+    var gamePhase by remember { mutableStateOf("MODE_SELECT") }
     var isRemoteMode by remember { mutableStateOf(false) }
     var showRemoteSheet by remember { mutableStateOf(false) }
     var roomCode by remember { mutableStateOf("") }
@@ -165,115 +166,150 @@ fun PowerUpTTTScreen(
     }
 
     GameScaffold(
-        title = "POWER-UP TIC TAC TOE ❌⭕",
-        titleColor = Color(0xFF00F2FE),
+        title = "Power-Up Tic Tac Toe",
+        titleColor = TextPrimary,
         gameId = "ultimate_ttt",
         onExitGame = onExitGame
     ) {
         if (gamePhase == "MODE_SELECT") {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+                verticalArrangement = Arrangement.Center
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("SELECT PLAY MODE", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Black)
-                    Spacer(modifier = Modifier.height(20.dp))
+                Text("Select Play Mode", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(6.dp))
+                Text("Choose single phone duel or live remote room", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 13.sp)
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.5.dp, Color(0xFF00F2FE), RoundedCornerShape(20.dp))
-                            .clickable {
-                                isRemoteMode = false
-                                gamePhase = "PLAYING"
-                            }
-                            .padding(20.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("📱", fontSize = 36.sp)
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column {
-                                Text("Pass & Play (Same Phone)", color = Color(0xFF00F2FE), fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                                Text("Use Erase/Shield power-ups on single device", color = TextMuted, fontSize = 12.sp)
-                            }
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
+                        .clickable {
+                            isRemoteMode = false
+                            gamePhase = "PLAYING"
+                        }
+                        .padding(18.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(ActionContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("📱", fontSize = 22.sp)
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text("Pass & Play (Same Phone)", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text("Use Erase/Shield power-ups on single device", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 13.sp)
                         }
                     }
+                }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.5.dp, Color(0xFFFF007F), RoundedCornerShape(20.dp))
-                            .clickable {
-                                isRemoteMode = true
-                                showRemoteSheet = true
-                            }
-                            .padding(20.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("🌐", fontSize = 36.sp)
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column {
-                                Text("Remote Play (Multi-Device)", color = Color(0xFFFF007F), fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                                Text("Real-time power-up grid moves across 2 phones", color = TextMuted, fontSize = 12.sp)
-                            }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
+                        .clickable {
+                            isRemoteMode = true
+                            showRemoteSheet = true
+                        }
+                        .padding(18.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(MysteryContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("🌐", fontSize = 22.sp)
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text("Remote Play (Multi-Device)", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text("Real-time power-up grid moves across 2 phones", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 13.sp)
                         }
                     }
                 }
             }
         } else if (winner == null) {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 // Turn Indicator Banner
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(SurfaceGlassDark)
-                        .border(1.dp, currentTurnState.color, RoundedCornerShape(14.dp))
-                        .padding(horizontal = 18.dp, vertical = 8.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(if (isPlayerXTurn) ActionContainer else MysteryContainer)
+                        .border(1.dp, if (isPlayerXTurn) ActionBorder else MysteryBorder, RoundedCornerShape(12.dp))
+                        .padding(horizontal = 18.dp, vertical = 6.dp)
                 ) {
                     Text(
-                        text = "TURN: ${currentTurnState.symbol} ${if (isPlayerXTurn) "PLAYER X" else "PLAYER O"}",
-                        color = currentTurnState.color,
+                        text = "Turn: ${currentTurnState.symbol} ${if (isPlayerXTurn) "Player X" else "Player O"}",
+                        color = if (isPlayerXTurn) ActionText else MysteryText,
+                        fontFamily = ModernSansFont,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
 
                 // 3x3 Grid Board
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    for (row in 0..2) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            for (col in 0..2) {
-                                val idx = row * 3 + col
-                                val cell = board[idx]
+                Box(
+                    modifier = Modifier
+                        .subtleCardShadow(elevation = 3.dp, shape = RoundedCornerShape(22.dp))
+                        .clip(RoundedCornerShape(22.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(22.dp))
+                        .padding(14.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        for (row in 0..2) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                for (col in 0..2) {
+                                    val idx = row * 3 + col
+                                    val cell = board[idx]
 
-                                Box(
-                                    modifier = Modifier
-                                        .size(90.dp)
-                                        .clip(RoundedCornerShape(16.dp))
-                                        .background(SurfaceGlassDark)
-                                        .border(
-                                            2.dp,
-                                            if (cell.isShielded) Color(0xFFFFD166) else BorderGlassDefault,
-                                            RoundedCornerShape(16.dp)
+                                    Box(
+                                        modifier = Modifier
+                                            .size(86.dp)
+                                            .clip(RoundedCornerShape(16.dp))
+                                            .background(SurfaceSubtle)
+                                            .border(
+                                                1.dp,
+                                                if (cell.isShielded) BoardBorder else BorderSubtle,
+                                                RoundedCornerShape(16.dp)
+                                            )
+                                            .clickable { handleCellClick(idx) },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = cell.state.symbol + if (cell.isShielded) "🛡️" else "",
+                                            fontSize = 30.sp
                                         )
-                                        .clickable { handleCellClick(idx) },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = cell.state.symbol + if (cell.isShielded) "🛡️" else "",
-                                        fontSize = 32.sp
-                                    )
+                                    }
                                 }
                             }
                         }
@@ -281,31 +317,43 @@ fun PowerUpTTTScreen(
                 }
 
                 // Power Up Inventory Bar
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("ACTIVE POWER-UPS", color = TextMuted, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.height(6.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(18.dp))
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(18.dp))
+                        .padding(12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("Active Power-Ups", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        TttPowerUp.entries.forEach { power ->
-                            val isAvailable = currentPowerInventory.contains(power)
-                            val isSelected = selectedPowerUp == power
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            TttPowerUp.entries.forEach { power ->
+                                val isAvailable = currentPowerInventory.contains(power)
+                                val isSelected = selectedPowerUp == power
 
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(if (isSelected) currentTurnState.color else SurfaceGlassDark)
-                                    .border(1.dp, if (isAvailable) currentTurnState.color else BorderGlassDefault, RoundedCornerShape(12.dp))
-                                    .clickable(enabled = isAvailable) {
-                                        selectedPowerUp = if (isSelected) null else power
-                                    }
-                                    .padding(horizontal = 10.dp, vertical = 6.dp)
-                            ) {
-                                Text(
-                                    text = "${power.icon} ${power.title}",
-                                    color = if (isAvailable) Color.White else TextMuted,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(if (isSelected) BrandPrimaryContainer else if (isAvailable) SurfaceSubtle else SurfaceSubtle.copy(alpha = 0.5f))
+                                        .border(1.dp, if (isSelected) BrandPrimary else BorderSubtle, RoundedCornerShape(10.dp))
+                                        .clickable(enabled = isAvailable) {
+                                            selectedPowerUp = if (isSelected) null else power
+                                        }
+                                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                                    ) {
+                                    Text(
+                                        text = "${power.icon} ${power.title}",
+                                        color = if (isSelected) BrandPrimary else if (isAvailable) TextPrimary else TextMuted,
+                                        fontFamily = ModernSansFont,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
                             }
                         }
                     }
@@ -313,8 +361,8 @@ fun PowerUpTTTScreen(
             }
         } else {
             VictoryCeremonyOverlay(
-                winnerTitle = "WINNER: ${winner?.symbol} 🎉",
-                subtitle = "Power-Up Tic Tac Toe Champions!",
+                winnerTitle = "Winner: ${winner?.symbol} 🎉",
+                subtitle = "Power-Up Tic Tac Toe Completed!",
                 onPlayAgain = {
                     board = List(9) { BoardCell() }
                     isPlayerXTurn = true
@@ -332,7 +380,7 @@ fun PowerUpTTTScreen(
         if (showRemoteSheet) {
             RemoteRoomSetupSheet(
                 gameId = "ultimate_ttt",
-                gameName = "Power-Up Tic Tac Toe ❌⭕",
+                gameName = "Power-Up Tic Tac Toe",
                 onDismiss = {
                     showRemoteSheet = false
                     if (roomCode.isBlank()) gamePhase = "MODE_SELECT"
@@ -348,3 +396,4 @@ fun PowerUpTTTScreen(
         }
     }
 }
+

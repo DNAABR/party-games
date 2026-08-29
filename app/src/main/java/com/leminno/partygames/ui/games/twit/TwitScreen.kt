@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.PrimaryPartyButton
 import com.leminno.partygames.ui.theme.*
 
 data class NumericQuestion(
@@ -58,13 +59,15 @@ fun TwitScreen(
     var selectedBetGuess by remember { mutableStateOf<PlayerGuess?>(null) }
 
     GameScaffold(
-        title = "TWIT (NUMERIC BETTING) 🎰",
-        titleColor = Color(0xFFFFD166),
+        title = "Twit Trivia",
+        titleColor = TextPrimary,
         gameId = "twit",
         onExitGame = onExitGame
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
@@ -72,20 +75,30 @@ fun TwitScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(SurfaceGlassDark)
-                    .border(1.5.dp, Color(0xFFFFD166), RoundedCornerShape(20.dp))
-                    .padding(20.dp),
+                    .subtleCardShadow(elevation = 3.dp, shape = RoundedCornerShape(24.dp))
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(SurfaceLight)
+                    .border(1.dp, BorderSubtle, RoundedCornerShape(24.dp))
+                    .padding(22.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("NUMERICAL TRIVIA QUESTION", color = Color(0xFFFFD166), fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(TriviaContainer)
+                            .border(1.dp, TriviaBorder, RoundedCornerShape(10.dp))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text("NUMERICAL TRIVIA", color = TriviaText, fontFamily = ModernSansFont, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         text = currentQuestion.prompt,
-                        color = Color.White,
+                        color = TextPrimary,
+                        fontFamily = ModernSansFont,
                         fontSize = 20.sp,
-                        fontWeight = FontWeight.Black,
+                        fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -96,28 +109,47 @@ fun TwitScreen(
                 val activePlayerName = "Player ${currentPlayerIdx + 1}"
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(vertical = 8.dp)
                 ) {
-                    Text(
-                        text = "PASS PHONE TO $activePlayerName",
-                        color = Color(0xFF00F2FE),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(BrandPrimaryContainer)
+                            .padding(horizontal = 16.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = "Pass Phone to $activePlayerName",
+                            color = BrandPrimary,
+                            fontFamily = ModernSansFont,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
                     OutlinedTextField(
                         value = inputGuessText,
                         onValueChange = { inputGuessText = it },
-                        label = { Text("Enter your numeric guess") },
+                        placeholder = { Text("Enter your numeric guess", color = TextSecondary, fontFamily = ModernSansFont) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.fillMaxWidth(),
-                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFF00F2FE), unfocusedBorderColor = BorderGlassDefault)
+                        shape = RoundedCornerShape(16.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = SurfaceLight,
+                            unfocusedContainerColor = SurfaceLight,
+                            focusedBorderColor = BrandPrimary,
+                            unfocusedBorderColor = BorderSubtle
+                        )
                     )
                 }
 
-                Button(
+                PrimaryPartyButton(
+                    text = if (currentPlayerIdx + 1 < playerCount) "Submit & Pass Phone ▶" else "Lock Guesses & Bet 🎰",
+                    accentColor = BrandPrimary,
                     onClick = {
                         val num = inputGuessText.toIntOrNull()
                         if (num != null) {
@@ -132,36 +164,30 @@ fun TwitScreen(
                             }
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00F2FE)),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    enabled = inputGuessText.toIntOrNull() != null
-                ) {
-                    Text(
-                        text = if (currentPlayerIdx + 1 < playerCount) "SUBMIT & PASS PHONE ▶" else "LOCK GUESSES & START BETTING 🎰",
-                        color = Color.Black,
-                        fontWeight = FontWeight.Black
-                    )
-                }
+                    enabled = inputGuessText.toIntOrNull() != null,
+                    modifier = Modifier.fillMaxWidth()
+                )
             } else if (gamePhase == "BETTING") {
                 // Spectrum layout betting phase
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(vertical = 8.dp)
                 ) {
                     Text(
-                        text = "BET ON CLOSEST WITHOUT GOING OVER",
-                        color = Color(0xFFFFD166),
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Black
+                        text = "Bet on closest without going over",
+                        color = TextSecondary,
+                        fontFamily = ModernSansFont,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
                     LazyColumn(
-                        modifier = Modifier.height(260.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         items(guessesList) { item ->
@@ -169,9 +195,10 @@ fun TwitScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .background(if (isSelected) Color(0x33FFD166) else SurfaceGlassDark)
-                                    .border(1.5.dp, if (isSelected) Color(0xFFFFD166) else BorderGlassDefault, RoundedCornerShape(14.dp))
+                                    .subtleCardShadow(elevation = 1.dp, shape = RoundedCornerShape(16.dp))
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(if (isSelected) BrandPrimaryContainer else SurfaceLight)
+                                    .border(1.dp, if (isSelected) BrandPrimary else BorderSubtle, RoundedCornerShape(16.dp))
                                     .clickable {
                                         haptics.performPop()
                                         selectedBetGuess = item
@@ -183,12 +210,13 @@ fun TwitScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text("Guess #${guessesList.indexOf(item) + 1}", color = TextPrimary, fontWeight = FontWeight.Bold)
+                                    Text("Guess #${guessesList.indexOf(item) + 1}", color = TextPrimary, fontFamily = ModernSansFont, fontWeight = FontWeight.SemiBold)
                                     Text(
                                         text = "${item.guessValue}",
-                                        color = Color(0xFFFFD166),
+                                        color = if (isSelected) BrandPrimary else TextPrimary,
+                                        fontFamily = ModernSansFont,
                                         fontSize = 20.sp,
-                                        fontWeight = FontWeight.Black
+                                        fontWeight = FontWeight.Bold
                                     )
                                 }
                             }
@@ -196,22 +224,18 @@ fun TwitScreen(
                     }
                 }
 
-                Button(
+                PrimaryPartyButton(
+                    text = "Reveal Truth & Payout 💰",
+                    accentColor = BrandPrimary,
                     onClick = {
                         if (selectedBetGuess != null) {
                             haptics.performHeavyBurst()
                             gamePhase = "REVEAL"
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD166)),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    enabled = selectedBetGuess != null
-                ) {
-                    Text("REVEAL TRUTH & PAYOUT 💰", color = Color.Black, fontWeight = FontWeight.Black)
-                }
+                    enabled = selectedBetGuess != null,
+                    modifier = Modifier.fillMaxWidth()
+                )
             } else {
                 // Reveal & Payout
                 val validGuesses = guessesList.filter { it.guessValue <= currentQuestion.actualAnswer }
@@ -219,27 +243,56 @@ fun TwitScreen(
 
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(vertical = 8.dp)
                 ) {
-                    Text(
-                        text = "ACTUAL ANSWER: ${currentQuestion.actualAnswer}",
-                        color = Color(0xFF00E676),
-                        fontSize = 26.sp,
-                        fontWeight = FontWeight.Black
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .subtleCardShadow(elevation = 3.dp, shape = RoundedCornerShape(22.dp))
+                            .clip(RoundedCornerShape(22.dp))
+                            .background(SurfaceLight)
+                            .border(1.dp, BorderSubtle, RoundedCornerShape(22.dp))
+                            .padding(24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("Actual Answer", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "${currentQuestion.actualAnswer}",
+                                color = SuccessGreen,
+                                fontFamily = ModernSansFont,
+                                fontSize = 36.sp,
+                                fontWeight = FontWeight.Black
+                            )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(16.dp))
 
-                    Text(
-                        text = if (winningGuess != null) "CLOSEST GUESS: ${winningGuess.playerName} (${winningGuess.guessValue}) 🎉" else "ALL GUESSES WENT OVER! 💥",
-                        color = Color.White,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
-                    )
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(if (winningGuess != null) SuccessContainer else AlertContainer)
+                                    .padding(horizontal = 14.dp, vertical = 8.dp)
+                            ) {
+                                Text(
+                                    text = if (winningGuess != null) "Closest: ${winningGuess.playerName} (${winningGuess.guessValue}) 🎉" else "All guesses went over! 💥",
+                                    color = if (winningGuess != null) SuccessGreen else AlertRed,
+                                    fontFamily = ModernSansFont,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    }
                 }
 
-                Button(
+                PrimaryPartyButton(
+                    text = "Next Question ▶",
+                    accentColor = BrandPrimary,
                     onClick = {
                         currentQuestion = twitQuestions.random()
                         currentPlayerIdx = 0
@@ -248,15 +301,10 @@ fun TwitScreen(
                         selectedBetGuess = null
                         gamePhase = "GUESS_INPUT"
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFD166)),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                ) {
-                    Text("NEXT QUESTION ▶", color = Color.Black, fontWeight = FontWeight.Black)
-                }
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }
 }
+

@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.PrimaryPartyButton
 import com.leminno.partygames.ui.theme.*
 import kotlin.math.log10
 
@@ -100,7 +101,6 @@ fun DecibelScreamScreen(
                         viewModel.updateDbLevel(db)
                     }
                 } else {
-                    // Fallback simulated wave generator when mic permission is withheld or bufferSize invalid
                     val simDb = (30..95).random().toFloat()
                     viewModel.updateDbLevel(simDb)
                     Thread.sleep(150)
@@ -121,40 +121,54 @@ fun DecibelScreamScreen(
     }
 
     GameScaffold(
-        title = "DECIBEL SCREAM 🎙️",
-        titleColor = Color(0xFF00E676),
+        title = "Decibel Scream",
+        titleColor = TextPrimary,
         gameId = "decibel_scream",
         onExitGame = onExitGame
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             if (!uiState.isListening && !uiState.challengeComplete) {
-                // Mode Selector Screen
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "SELECT SOUND CHALLENGE",
+                        text = "Select Sound Challenge",
                         color = TextPrimary,
+                        fontFamily = ModernSansFont,
                         fontSize = 20.sp,
-                        fontWeight = FontWeight.Black
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Test who can scream, whisper, or roar loudest!",
+                        color = TextSecondary,
+                        fontFamily = ModernSansFont,
+                        fontSize = 13.sp
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         DecibelChallengeMode.entries.forEach { mode ->
                             val isSel = uiState.selectedMode == mode
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(if (isSel) Color(0x3300E676) else SurfaceGlassDark)
-                                    .border(1.5.dp, if (isSel) Color(0xFF00E676) else BorderGlassDefault, RoundedCornerShape(16.dp))
+                                    .subtleCardShadow(elevation = if (isSel) 3.dp else 1.dp, shape = RoundedCornerShape(18.dp))
+                                    .clip(RoundedCornerShape(18.dp))
+                                    .background(if (isSel) BrandPrimaryContainer else SurfaceLight)
+                                    .border(
+                                        1.5.dp,
+                                        if (isSel) BrandPrimary.copy(alpha = 0.5f) else BorderSubtle,
+                                        RoundedCornerShape(18.dp)
+                                    )
                                     .clickable {
                                         haptics.performTick(composeHaptics)
                                         viewModel.selectMode(mode)
@@ -166,27 +180,38 @@ fun DecibelScreamScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Column {
+                                    Column(modifier = Modifier.weight(1f)) {
                                         Text(
                                             text = mode.title,
-                                            color = if (isSel) Color(0xFF00E676) else TextPrimary,
+                                            color = TextPrimary,
+                                            fontFamily = ModernSansFont,
                                             fontSize = 16.sp,
                                             fontWeight = FontWeight.Bold
                                         )
+                                        Spacer(modifier = Modifier.height(2.dp))
                                         Text(
                                             text = mode.desc,
-                                            color = TextMuted,
+                                            color = TextSecondary,
+                                            fontFamily = ModernSansFont,
                                             fontSize = 12.sp
                                         )
                                     }
 
+                                    Spacer(modifier = Modifier.width(8.dp))
+
                                     Box(
                                         modifier = Modifier
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .background(Color.White.copy(alpha = 0.1f))
-                                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                                            .clip(RoundedCornerShape(10.dp))
+                                            .background(SurfaceSubtle)
+                                            .padding(horizontal = 10.dp, vertical = 6.dp)
                                     ) {
-                                        Text(mode.targetGoal, color = Color(0xFF00E676), fontSize = 11.sp, fontWeight = FontWeight.Black)
+                                        Text(
+                                            mode.targetGoal,
+                                            color = BrandPrimary,
+                                            fontFamily = ModernSansFont,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
                                     }
                                 }
                             }
@@ -194,7 +219,9 @@ fun DecibelScreamScreen(
                     }
                 }
 
-                Button(
+                PrimaryPartyButton(
+                    text = "Start 5-Sec Challenge 🎙️",
+                    accentColor = BrandPrimary,
                     onClick = {
                         if (!hasMicPermission) {
                             permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
@@ -204,57 +231,67 @@ fun DecibelScreamScreen(
                             onChallengeComplete = { haptics.performPop() }
                         )
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E676)),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                ) {
-                    Text("START 5-SEC CHALLENGE 🎙️", color = Color.Black, fontWeight = FontWeight.Black)
-                }
+                    modifier = Modifier.fillMaxWidth()
+                )
             } else if (uiState.isListening) {
                 // Live Sound Meter & Gauge
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
                 ) {
-                    Text(
-                        text = "TIMING: ${uiState.timerRemaining}s",
-                        color = Color(0xFFFF0055),
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Black
-                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(AlertContainer)
+                            .border(1.dp, AlertRed.copy(alpha = 0.3f), RoundedCornerShape(14.dp))
+                            .padding(horizontal = 16.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = "⏱️ Timing: ${uiState.timerRemaining}s",
+                            color = AlertRed,
+                            fontFamily = ModernSansFont,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(28.dp))
 
                     // Circular Gauge Meter Display
                     Box(
                         modifier = Modifier
                             .size(220.dp)
+                            .subtleCardShadow(elevation = 6.dp, shape = CircleShape)
                             .clip(CircleShape)
-                            .background(SurfaceGlassDark)
-                            .border(4.dp, Color(0xFF00E676), CircleShape),
+                            .background(SurfaceLight)
+                            .border(4.dp, BrandPrimaryContainer, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
                                 text = "${uiState.currentDb.toInt()}",
-                                color = Color.White,
-                                fontSize = 64.sp,
+                                color = TextPrimary,
+                                fontFamily = ModernSansFont,
+                                fontSize = 60.sp,
                                 fontWeight = FontWeight.Black
                             )
                             Text(
                                 text = "DECIBELS (dB)",
-                                color = Color(0xFF00E676),
+                                color = BrandPrimary,
+                                fontFamily = ModernSansFont,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "PEAK: ${uiState.peakDb.toInt()} dB",
-                                color = TextMuted,
-                                fontSize = 13.sp
+                                text = "Peak: ${uiState.peakDb.toInt()} dB",
+                                color = TextSecondary,
+                                fontFamily = ModernSansFont,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium
                             )
                         }
                     }
@@ -263,21 +300,24 @@ fun DecibelScreamScreen(
                 Text(
                     text = "Make your noise into the microphone!",
                     color = TextSecondary,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
+                    fontFamily = ModernSansFont,
+                    fontSize = 13.sp
                 )
             } else {
                 // Results Screen
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
                 ) {
                     Text(
-                        text = "CHALLENGE COMPLETE! 🏆",
-                        color = Color(0xFF00E676),
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Black
+                        text = "Challenge Complete! 🏆",
+                        color = TextPrimary,
+                        fontFamily = ModernSansFont,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))
@@ -285,51 +325,52 @@ fun DecibelScreamScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.5.dp, Color(0xFF00E676), RoundedCornerShape(20.dp))
-                            .padding(24.dp),
+                            .subtleCardShadow(elevation = 4.dp, shape = RoundedCornerShape(24.dp))
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(SurfaceLight)
+                            .border(1.dp, BorderSubtle, RoundedCornerShape(24.dp))
+                            .padding(28.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
                                 text = uiState.selectedMode.title,
-                                color = TextMuted,
+                                color = TextSecondary,
+                                fontFamily = ModernSansFont,
                                 fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Medium
                             )
 
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(10.dp))
 
                             Text(
                                 text = "${uiState.peakDb.toInt()} dB",
-                                color = Color(0xFF00E676),
-                                fontSize = 54.sp,
+                                color = BrandPrimary,
+                                fontFamily = ModernSansFont,
+                                fontSize = 56.sp,
                                 fontWeight = FontWeight.Black
                             )
+
+                            Spacer(modifier = Modifier.height(4.dp))
 
                             Text(
                                 text = "Peak Sound Level Recorded",
                                 color = TextSecondary,
+                                fontFamily = ModernSansFont,
                                 fontSize = 13.sp
                             )
                         }
                     }
                 }
 
-                Button(
-                    onClick = {
-                        viewModel.resetChallenge()
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00E676)),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                ) {
-                    Text("TRY AGAIN OR NEXT PLAYER ▶", color = Color.Black, fontWeight = FontWeight.Black)
-                }
+                PrimaryPartyButton(
+                    text = "Try Again or Next Player",
+                    accentColor = BrandPrimary,
+                    onClick = { viewModel.resetChallenge() },
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }
 }
+

@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.leminno.partygames.data.remote.RemoteRoomRepository
 import com.leminno.partygames.ui.components.GameScaffold
+import com.leminno.partygames.ui.components.PrimaryPartyButton
 import com.leminno.partygames.ui.components.RemoteRoomSetupSheet
 import com.leminno.partygames.ui.components.VictoryCeremonyOverlay
 import com.leminno.partygames.ui.theme.*
@@ -53,7 +55,7 @@ fun FakeItScreen(
     val scope = rememberCoroutineScope()
     val haptics = remember { HapticFeedbackManager(context) }
 
-    var gamePhase by remember { mutableStateOf("MODE_SELECT") } // MODE_SELECT, BLUFF_INPUT, VOTING, REVEAL
+    var gamePhase by remember { mutableStateOf("MODE_SELECT") }
     var isRemoteMode by remember { mutableStateOf(false) }
     var showRemoteSheet by remember { mutableStateOf(false) }
     var roomCode by remember { mutableStateOf("") }
@@ -97,71 +99,96 @@ fun FakeItScreen(
     }
 
     GameScaffold(
-        title = "FAKE IT (BLUFF) 🤥",
-        titleColor = Color(0xFFFF007F),
+        title = "Fake It (Bluff)",
+        titleColor = TextPrimary,
         gameId = "fake_it",
         onExitGame = onExitGame
     ) {
         if (gamePhase == "MODE_SELECT") {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+                verticalArrangement = Arrangement.Center
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("SELECT PLAY MODE", color = TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.Black)
-                    Spacer(modifier = Modifier.height(20.dp))
+                Text("Select Play Mode", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(6.dp))
+                Text("Choose single phone pass or multi-device voting", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 13.sp)
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.5.dp, Color(0xFFFF007F), RoundedCornerShape(20.dp))
-                            .clickable {
-                                isRemoteMode = false
-                                gamePhase = "BLUFF_INPUT"
-                            }
-                            .padding(20.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("📱", fontSize = 36.sp)
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column {
-                                Text("Pass & Play (Same Phone)", color = Color(0xFFFF007F), fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                                Text("Type fake bluffs & pass single device", color = TextMuted, fontSize = 12.sp)
-                            }
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
+                        .clickable {
+                            isRemoteMode = false
+                            gamePhase = "BLUFF_INPUT"
+                        }
+                        .padding(18.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(TriviaContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("📱", fontSize = 22.sp)
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text("Pass & Play (Same Phone)", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text("Type fake bluffs & pass single device", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 13.sp)
                         }
                     }
+                }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(SurfaceGlassDark)
-                            .border(1.5.dp, Color(0xFF00F2FE), RoundedCornerShape(20.dp))
-                            .clickable {
-                                isRemoteMode = true
-                                showRemoteSheet = true
-                            }
-                            .padding(20.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("🌐", fontSize = 36.sp)
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column {
-                                Text("Remote Play (Multi-Device)", color = Color(0xFF00F2FE), fontSize = 17.sp, fontWeight = FontWeight.Bold)
-                                Text("Balderdash style! Type bluffs on your screen, group votes", color = TextMuted, fontSize = 12.sp)
-                            }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .subtleCardShadow(elevation = 2.dp, shape = RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(20.dp))
+                        .clickable {
+                            isRemoteMode = true
+                            showRemoteSheet = true
+                        }
+                        .padding(18.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(ActionContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("🌐", fontSize = 22.sp)
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text("Remote Play (Multi-Device)", color = TextPrimary, fontFamily = ModernSansFont, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(3.dp))
+                            Text("Type bluffs on your screen, group votes", color = TextSecondary, fontFamily = ModernSansFont, fontSize = 13.sp)
                         }
                     }
                 }
             }
         } else if (gamePhase != "REVEAL") {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
@@ -169,20 +196,30 @@ fun FakeItScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(SurfaceGlassDark)
-                        .border(1.5.dp, Color(0xFFFF007F), RoundedCornerShape(20.dp))
+                        .subtleCardShadow(elevation = 3.dp, shape = RoundedCornerShape(22.dp))
+                        .clip(RoundedCornerShape(22.dp))
+                        .background(SurfaceLight)
+                        .border(1.dp, BorderSubtle, RoundedCornerShape(22.dp))
                         .padding(20.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("OBSCURE TRIVIA PROMPT", color = Color(0xFFFF007F), fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(TriviaContainer)
+                                .border(1.dp, TriviaBorder, RoundedCornerShape(10.dp))
+                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                        ) {
+                            Text("OBSCURE TRIVIA PROMPT", color = TriviaText, fontFamily = ModernSansFont, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
                         Text(
                             text = currentQuestion.prompt,
-                            color = Color.White,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Black,
+                            color = TextPrimary,
+                            fontFamily = ModernSansFont,
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center
                         )
                     }
@@ -192,27 +229,45 @@ fun FakeItScreen(
                     val activePlayer = "Player ${currentPlayerIdx + 1}"
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 12.dp)
                     ) {
-                        Text(
-                            text = "PASS PHONE TO $activePlayer",
-                            color = Color(0xFFFFD166),
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(BrandPrimaryContainer)
+                                .padding(horizontal = 14.dp, vertical = 6.dp)
+                        ) {
+                            Text(
+                                text = "Pass Phone to $activePlayer",
+                                color = BrandPrimary,
+                                fontFamily = ModernSansFont,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
 
                         Spacer(modifier = Modifier.height(16.dp))
 
                         OutlinedTextField(
                             value = bluffInputText,
                             onValueChange = { bluffInputText = it },
-                            label = { Text("Write a believable fake answer...") },
+                            placeholder = { Text("Write a believable fake answer...", color = TextSecondary, fontFamily = ModernSansFont) },
                             modifier = Modifier.fillMaxWidth(),
-                            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color(0xFFFF007F), unfocusedBorderColor = BorderGlassDefault)
+                            shape = RoundedCornerShape(16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = SurfaceLight,
+                                unfocusedContainerColor = SurfaceLight,
+                                focusedBorderColor = BrandPrimary,
+                                unfocusedBorderColor = BorderSubtle
+                            )
                         )
                     }
 
-                    Button(
+                    PrimaryPartyButton(
+                        text = "Lock Bluff & Pass Device",
+                        accentColor = BrandPrimary,
                         onClick = {
                             if (bluffInputText.isNotBlank()) {
                                 haptics.performPop()
@@ -223,7 +278,6 @@ fun FakeItScreen(
                                 if (currentPlayerIdx < playerCount - 1) {
                                     currentPlayerIdx++
                                 } else {
-                                    // Add Real Answer into list and shuffle
                                     val realCard = AnswerCard(currentQuestion.realAnswer, true, "TRUTH")
                                     playerBluffs = (playerBluffs + realCard).shuffled()
                                     gamePhase = "VOTING"
@@ -231,20 +285,23 @@ fun FakeItScreen(
                                 }
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF007F)),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp)
-                    ) {
-                        Text("LOCK BLUFF & PASS DEVICE ▶", color = Color.White, fontWeight = FontWeight.Black)
-                    }
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 } else if (gamePhase == "VOTING") {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .padding(vertical = 8.dp)
                     ) {
-                        Text("SPOT THE REAL TRUTH!", color = Color(0xFF00F2FE), fontSize = 18.sp, fontWeight = FontWeight.Black)
+                        Text(
+                            text = "Spot The Real Truth!",
+                            color = TextPrimary,
+                            fontFamily = ModernSansFont,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                         Spacer(modifier = Modifier.height(12.dp))
 
                         LazyColumn(
@@ -256,9 +313,14 @@ fun FakeItScreen(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .clip(RoundedCornerShape(14.dp))
-                                        .background(if (isSel) Color(0xFF00F2FE).copy(alpha = 0.3f) else SurfaceGlassDark)
-                                        .border(1.5.dp, if (isSel) Color(0xFF00F2FE) else BorderGlassDefault, RoundedCornerShape(14.dp))
+                                        .subtleCardShadow(elevation = if (isSel) 3.dp else 1.dp, shape = RoundedCornerShape(16.dp))
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .background(if (isSel) BrandPrimaryContainer else SurfaceLight)
+                                        .border(
+                                            1.5.dp,
+                                            if (isSel) BrandPrimary.copy(alpha = 0.5f) else BorderSubtle,
+                                            RoundedCornerShape(16.dp)
+                                        )
                                         .clickable {
                                             haptics.performTick()
                                             selectedVoteCard = card
@@ -268,9 +330,10 @@ fun FakeItScreen(
                                 ) {
                                     Text(
                                         text = card.text,
-                                        color = Color.White,
+                                        color = TextPrimary,
+                                        fontFamily = ModernSansFont,
                                         fontSize = 15.sp,
-                                        fontWeight = FontWeight.Bold,
+                                        fontWeight = FontWeight.SemiBold,
                                         textAlign = TextAlign.Center
                                     )
                                 }
@@ -278,7 +341,9 @@ fun FakeItScreen(
                         }
                     }
 
-                    Button(
+                    PrimaryPartyButton(
+                        text = "Lock Final Vote 🔒",
+                        accentColor = BrandPrimary,
                         onClick = {
                             if (selectedVoteCard != null) {
                                 haptics.performHeavyBurst()
@@ -286,22 +351,15 @@ fun FakeItScreen(
                                 syncRemote(currentQuestion.prompt, currentQuestion.realAnswer, "REVEAL")
                             }
                         },
-                        enabled = selectedVoteCard != null,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00F2FE)),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp)
-                    ) {
-                        Text("LOCK FINAL VOTE 🔒", color = Color.Black, fontWeight = FontWeight.Black)
-                    }
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         } else {
             val isSuccess = selectedVoteCard?.isReal == true
             VictoryCeremonyOverlay(
-                winnerTitle = if (isSuccess) "SPOTTED THE TRUTH! 🏆" else "FOOLED BY A BLUFF! 🤥",
-                subtitle = "Real Answer Was: ${currentQuestion.realAnswer}",
+                winnerTitle = if (isSuccess) "Spotted The Truth! 🏆" else "Fooled By A Bluff! 🤥",
+                subtitle = "Real Answer: ${currentQuestion.realAnswer}",
                 onPlayAgain = {
                     currentQuestion = fakeItQuestions.random()
                     currentPlayerIdx = 0
@@ -317,7 +375,7 @@ fun FakeItScreen(
         if (showRemoteSheet) {
             RemoteRoomSetupSheet(
                 gameId = "fake_it",
-                gameName = "Fake It (Bluff) 🤥",
+                gameName = "Fake It (Bluff)",
                 onDismiss = {
                     showRemoteSheet = false
                     if (roomCode.isBlank()) gamePhase = "MODE_SELECT"
@@ -336,3 +394,4 @@ fun FakeItScreen(
         }
     }
 }
+
