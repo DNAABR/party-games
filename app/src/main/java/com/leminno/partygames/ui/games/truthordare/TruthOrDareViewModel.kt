@@ -11,22 +11,30 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+import com.leminno.partygames.data.repository.UserPreferencesRepository
+
 data class TruthOrDareUiState(
     val playerCount: Int = 4,
+    val players: List<String> = emptyList(),
     val selectedDeck: String = "Clean",
     val timerDurationSec: Int = 60,
     val timeRemaining: Int = 60,
     val isTimerRunning: Boolean = false,
     val isPaused: Boolean = false,
     val isTimesUp: Boolean = false,
-    val currentPlayerTurn: Int = 1,
+    val currentPlayerIndex: Int = 0,
     val activePrompt: String? = null,
     val activePromptType: String? = null, // "TRUTH" or "DARE"
     val truthIndex: Int = 0,
     val dareIndex: Int = 0,
     val truthPrompts: List<String> = emptyList(),
     val darePrompts: List<String> = emptyList()
-)
+) {
+    val currentPlayerName: String
+        get() = players.getOrElse(currentPlayerIndex) { "Player ${currentPlayerIndex + 1}" }
+    val currentPlayerTurn: Int
+        get() = currentPlayerIndex + 1
+}
 
 class TruthOrDareViewModel : ViewModel() {
 
@@ -39,19 +47,22 @@ class TruthOrDareViewModel : ViewModel() {
         timerJob?.cancel()
         val truths = GameContentRepository.getTruthPrompts(deck).shuffled()
         val dares = GameContentRepository.getDarePrompts(deck).shuffled()
+        val activePlayers = UserPreferencesRepository.getActiveRoster(playerCount)
 
         _uiState.update {
             TruthOrDareUiState(
                 playerCount = playerCount.coerceAtLeast(1),
+                players = activePlayers,
                 selectedDeck = deck,
                 timerDurationSec = timerSec,
                 timeRemaining = timerSec,
-                currentPlayerTurn = 1,
+                currentPlayerIndex = 0,
                 truthPrompts = truths,
                 darePrompts = dares
             )
         }
     }
+
 
     fun selectDeck(deck: String) {
         timerJob?.cancel()
@@ -160,7 +171,8 @@ class TruthOrDareViewModel : ViewModel() {
     fun completeFate() {
         timerJob?.cancel()
         _uiState.update { state ->
-            val nextTurn = if (state.playerCount > 0) (state.currentPlayerTurn % state.playerCount) + 1 else 1
+            val numPlayers = state.players.size.coerceAtLeast(1)
+            val nextIndex = (state.currentPlayerIndex + 1) % numPlayers
             state.copy(
                 activePrompt = null,
                 activePromptType = null,
@@ -168,7 +180,7 @@ class TruthOrDareViewModel : ViewModel() {
                 isPaused = false,
                 isTimesUp = false,
                 timeRemaining = state.timerDurationSec,
-                currentPlayerTurn = nextTurn
+                currentPlayerIndex = nextIndex
             )
         }
     }
@@ -176,7 +188,8 @@ class TruthOrDareViewModel : ViewModel() {
     fun nextTurn() {
         timerJob?.cancel()
         _uiState.update { state ->
-            val nextTurn = if (state.playerCount > 0) (state.currentPlayerTurn % state.playerCount) + 1 else 1
+            val numPlayers = state.players.size.coerceAtLeast(1)
+            val nextIndex = (state.currentPlayerIndex + 1) % numPlayers
             state.copy(
                 activePrompt = null,
                 activePromptType = null,
@@ -184,7 +197,7 @@ class TruthOrDareViewModel : ViewModel() {
                 isPaused = false,
                 isTimesUp = false,
                 timeRemaining = state.timerDurationSec,
-                currentPlayerTurn = nextTurn
+                currentPlayerIndex = nextIndex
             )
         }
     }

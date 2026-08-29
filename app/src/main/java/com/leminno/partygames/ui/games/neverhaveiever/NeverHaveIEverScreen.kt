@@ -27,6 +27,10 @@ fun NeverHaveIEverScreen(
     val context = LocalContext.current
     val haptics = remember { HapticFeedbackManager(context) }
 
+    val players = remember(playerCount) {
+        com.leminno.partygames.data.repository.UserPreferencesRepository.getActiveRoster(playerCount)
+    }
+
     val prompts = remember {
         listOf(
             "Never have I ever fallen asleep during a movie at the theater.",
@@ -38,12 +42,27 @@ fun NeverHaveIEverScreen(
             "Never have I ever locked myself out of my own house or car.",
             "Never have I ever accidentally liked an old photo on social media.",
             "Never have I ever tried to cut my own hair.",
-            "Never have I ever sang out loud in the shower."
+            "Never have I ever sang out loud in the shower.",
+            "Never have I ever ghosted someone after a first date.",
+            "Never have I ever stayed up for 24 hours straight.",
+            "Never have I ever lied about my age to get into a venue.",
+            "Never have I ever regifted a present I didn't want.",
+            "Never have I ever looked through someone else's phone without permission."
         ).shuffled()
     }
 
     var currentPromptIndex by remember { mutableIntStateOf(0) }
-    var livesRemaining by remember { mutableIntStateOf(10) }
+    val currentReaderIndex = currentPromptIndex % players.size
+    val currentReaderName = players.getOrElse(currentReaderIndex) { "Player 1" }
+
+    // Map each player to their remaining lives (starts at 5 lives each)
+    var playerLives by remember(players) {
+        mutableStateOf(players.associateWith { 5 })
+    }
+
+    var showScoreboard by remember { mutableStateOf(false) }
+
+    val isGameOver = playerLives.values.all { it <= 0 }
 
     GameScaffold(
         title = "NEVER HAVE I EVER",
@@ -51,48 +70,32 @@ fun NeverHaveIEverScreen(
         gameId = "never_have_i_ever",
         onExitGame = onExitGame
     ) {
-        if (livesRemaining > 0) {
+        if (!isGameOver) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                // Header Lives Badge
-                Box(
-                    modifier = Modifier
-                        .border(2.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
-                        .background(PixelVioletElevated)
-                        .padding(horizontal = 14.dp, vertical = 6.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = PixelIcons.Heart,
-                            contentDescription = null,
-                            tint = PixelAlertRed,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "$livesRemaining LIVES LEFT",
-                            color = PixelAlertRed,
-                            fontFamily = PressStart2PFont,
-                            fontSize = 10.sp
-                        )
-                    }
-                }
+                // Header Player Turn Banner
+                com.leminno.partygames.ui.components.InGamePlayerHeader(
+                    currentPlayerName = currentReaderName,
+                    playerIndex = currentReaderIndex,
+                    totalPlayers = players.size,
+                    onOpenScoreboard = { showScoreboard = true }
+                )
 
                 // CRT Prompt Display Box
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
-                        .padding(vertical = 14.dp)
+                        .padding(vertical = 10.dp)
                         .border(3.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
                         .background(
                             brush = pixelBandedVertical(listOf(PixelVioletElevated, PixelVioletBase))
                         )
                         .crtScanlines()
-                        .padding(20.dp),
+                        .padding(18.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -110,63 +113,92 @@ fun NeverHaveIEverScreen(
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(18.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
                         Text(
                             text = prompts[currentPromptIndex % prompts.size],
                             color = PixelCrtCyan,
                             style = MaterialTheme.typography.bodyLarge,
                             textAlign = TextAlign.Center,
-                            lineHeight = 24.sp
+                            lineHeight = 22.sp
                         )
                     }
                 }
 
-                // Lives Tracker Hearts Display
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                // Player Lives Tap Badges (Who did it? Tap to forfeit life)
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     Text(
-                        text = "TAP HEART IF DONE:",
+                        text = "TAP PLAYER IF THEY DID IT (-1 ❤️):",
                         color = TextMuted,
                         fontFamily = PressStart2PFont,
-                        fontSize = 8.sp
+                        fontSize = 7.sp
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        repeat(10) { index ->
-                            val isAlive = index < livesRemaining
+                        players.forEachIndexed { index, player ->
+                            val lives = playerLives[player] ?: 0
+                            val isAlive = lives > 0
+                            val color = com.leminno.partygames.ui.components.PlayerAvatarColors.getOrElse(index % com.leminno.partygames.ui.components.PlayerAvatarColors.size) { PixelCrtCyan }
+
                             Box(
                                 modifier = Modifier
-                                    .size(28.dp)
-                                    .border(1.5.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
+                                    .weight(1f)
+                                    .border(1.5.dp, if (isAlive) PixelOutlineBlack else PixelAlertRed, RoundedCornerShape(2.dp))
                                     .background(if (isAlive) PixelVioletElevated else PixelVioletDark)
                                     .clickable {
-                                        if (livesRemaining > 0) {
-                                            livesRemaining--
+                                        if (isAlive) {
+                                            val updated = playerLives.toMutableMap()
+                                            updated[player] = lives - 1
+                                            playerLives = updated
                                             haptics.performWarningThud()
                                         }
-                                    },
+                                    }
+                                    .padding(vertical = 6.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(
-                                    imageVector = if (isAlive) PixelIcons.Heart else PixelIcons.HeartBorder,
-                                    contentDescription = null,
-                                    tint = if (isAlive) PixelAlertRed else TextMuted,
-                                    modifier = Modifier.size(14.dp)
-                                )
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        text = player.take(6).uppercase(),
+                                        color = if (isAlive) color else TextMuted,
+                                        fontFamily = PressStart2PFont,
+                                        fontSize = 7.sp,
+                                        maxLines = 1
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = if (isAlive) PixelIcons.Heart else PixelIcons.HeartBorder,
+                                            contentDescription = null,
+                                            tint = if (isAlive) PixelAlertRed else TextMuted,
+                                            modifier = Modifier.size(10.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(2.dp))
+                                        Text(
+                                            text = "$lives",
+                                            color = if (isAlive) TextPrimary else TextMuted,
+                                            fontFamily = PressStart2PFont,
+                                            fontSize = 8.sp
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 // Next Prompt Push Button
                 PrimaryPartyButton(
-                    text = "NEXT PROMPT",
+                    text = "NEXT PROMPT ▶",
                     icon = PixelIcons.Zap,
                     accentColor = PixelCrtCyan,
                     onClick = {
@@ -179,13 +211,21 @@ fun NeverHaveIEverScreen(
         } else {
             VictoryCeremonyOverlay(
                 winnerTitle = "ALL LIVES LOST!",
-                subtitle = "You survived ${currentPromptIndex + 1} rounds!",
+                subtitle = "Party survived ${currentPromptIndex + 1} confession rounds!",
                 onPlayAgain = {
-                    livesRemaining = 10
+                    playerLives = players.associateWith { 5 }
                     currentPromptIndex = 0
                 },
                 onBackToHub = onExitGame
             )
         }
+
+        if (showScoreboard) {
+            com.leminno.partygames.ui.components.InGameScoreboardModal(
+                players = players,
+                onDismissRequest = { showScoreboard = false }
+            )
+        }
     }
 }
+

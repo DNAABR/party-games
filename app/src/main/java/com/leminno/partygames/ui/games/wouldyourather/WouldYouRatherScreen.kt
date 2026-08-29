@@ -33,11 +33,18 @@ data class WouldYouRatherScenario(val optionA: String, val optionB: String, val 
 
 @Composable
 fun WouldYouRatherScreen(
+    playerCount: Int = 4,
     onExitGame: () -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val haptics = remember { HapticFeedbackManager(context) }
+
+    val players = remember(playerCount) {
+        com.leminno.partygames.data.repository.UserPreferencesRepository.getActiveRoster(playerCount)
+    }
+
+    var showScoreboard by remember { mutableStateOf(false) }
 
     val scenarios = remember {
         listOf(
@@ -45,7 +52,10 @@ fun WouldYouRatherScreen(
             WouldYouRatherScenario("Always speak your mind out loud", "Never be able to speak again", 81),
             WouldYouRatherScenario("Live in a world without music", "Live in a world without movies", 74),
             WouldYouRatherScenario("Have infinite free coffee for life", "Have infinite free pizza for life", 58),
-            WouldYouRatherScenario("Explore deep ocean trenches", "Explore outer space planets", 69)
+            WouldYouRatherScenario("Explore deep ocean trenches", "Explore outer space planets", 69),
+            WouldYouRatherScenario("Have the ability to speak to animals", "Speak every human foreign language fluently", 85),
+            WouldYouRatherScenario("Live in a treehouse mansion", "Live in an underwater dome palace", 64),
+            WouldYouRatherScenario("Never have to sleep again", "Never have to work a job again", 78)
         ).shuffled()
     }
 
@@ -56,6 +66,8 @@ fun WouldYouRatherScreen(
     var isHost by remember { mutableStateOf(true) }
 
     var currentIndex by remember { mutableIntStateOf(0) }
+    val activePlayerIndex = currentIndex % players.size
+    val activePlayerName = players.getOrElse(activePlayerIndex) { "Player 1" }
     var selectedOption by remember { mutableStateOf<String?>(null) }
 
     val currentScenario = scenarios[currentIndex % scenarios.size]
@@ -207,21 +219,12 @@ fun WouldYouRatherScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(SurfaceGlassDark)
-                        .border(1.dp, BorderGlassDefault, RoundedCornerShape(12.dp))
-                        .padding(horizontal = 14.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = "DILEMMA #${currentIndex + 1}",
-                        color = TextSecondary,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp
-                    )
-                }
+                com.leminno.partygames.ui.components.InGamePlayerHeader(
+                    currentPlayerName = activePlayerName,
+                    playerIndex = activePlayerIndex,
+                    totalPlayers = players.size,
+                    onOpenScoreboard = { showScoreboard = true }
+                )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
@@ -350,6 +353,11 @@ fun WouldYouRatherScreen(
                         syncRemote(currentIndex, selectedOption)
                     }
                 }
+            )
+        if (showScoreboard) {
+            com.leminno.partygames.ui.components.InGameScoreboardModal(
+                players = players,
+                onDismissRequest = { showScoreboard = false }
             )
         }
     }

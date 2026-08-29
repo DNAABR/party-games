@@ -59,6 +59,12 @@ fun FakeItScreen(
     var roomCode by remember { mutableStateOf("") }
     var isHost by remember { mutableStateOf(true) }
 
+    val players = remember(playerCount) {
+        com.leminno.partygames.data.repository.UserPreferencesRepository.getActiveRoster(playerCount)
+    }
+
+    var showScoreboard by remember { mutableStateOf(false) }
+
     var currentQuestion by remember { mutableStateOf(fakeItQuestions.random()) }
     var currentPlayerIdx by remember { mutableIntStateOf(0) }
     var bluffInputText by remember { mutableStateOf("") }
@@ -189,7 +195,7 @@ fun FakeItScreen(
                 }
 
                 if (gamePhase == "BLUFF_INPUT") {
-                    val activePlayer = "Player ${currentPlayerIdx + 1}"
+                    val activePlayer = players.getOrElse(currentPlayerIdx) { "Player ${currentPlayerIdx + 1}" }
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.fillMaxWidth()
@@ -299,8 +305,14 @@ fun FakeItScreen(
             }
         } else {
             val isSuccess = selectedVoteCard?.isReal == true
+            LaunchedEffect(isSuccess) {
+                if (!isSuccess && selectedVoteCard?.author != null && selectedVoteCard?.author != "TRUTH") {
+                    com.leminno.partygames.data.repository.UserPreferencesRepository.updatePlayerScore(selectedVoteCard!!.author, 2)
+                }
+            }
+
             VictoryCeremonyOverlay(
-                winnerTitle = if (isSuccess) "SPOTTED THE TRUTH! 🏆" else "FOOLED BY A BLUFF! 🤥",
+                winnerTitle = if (isSuccess) "SPOTTED THE TRUTH! 🏆" else "${selectedVoteCard?.author?.uppercase() ?: "BLUFFER"} FOOLED EVERYONE! 🤥",
                 subtitle = "Real Answer Was: ${currentQuestion.realAnswer}",
                 onPlayAgain = {
                     currentQuestion = fakeItQuestions.random()
@@ -308,7 +320,7 @@ fun FakeItScreen(
                     bluffInputText = ""
                     playerBluffs = emptyList()
                     selectedVoteCard = null
-                    gamePhase = "MODE_SELECT"
+                    gamePhase = "BLUFF_INPUT"
                 },
                 onBackToHub = onExitGame
             )
@@ -332,6 +344,13 @@ fun FakeItScreen(
                         syncRemote(currentQuestion.prompt, currentQuestion.realAnswer, "BLUFF_INPUT")
                     }
                 }
+            )
+        }
+
+        if (showScoreboard) {
+            com.leminno.partygames.ui.components.InGameScoreboardModal(
+                players = players,
+                onDismissRequest = { showScoreboard = false }
             )
         }
     }

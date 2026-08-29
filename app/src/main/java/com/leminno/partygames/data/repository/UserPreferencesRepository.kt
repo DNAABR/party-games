@@ -35,6 +35,16 @@ object UserPreferencesRepository {
     private val _savedRoster = MutableStateFlow<List<String>>(emptyList())
     val savedRoster: StateFlow<List<String>> = _savedRoster.asStateFlow()
 
+    private val _sessionScores = MutableStateFlow<Map<String, Int>>(emptyMap())
+    val sessionScores: StateFlow<Map<String, Int>> = _sessionScores.asStateFlow()
+
+    val funPartyNicknames = listOf(
+        "Neon Ninja", "Pixel King", "Chaos Queen", "Glitch Master",
+        "Disco Diva", "Laser Boss", "Retro Rebel", "Vapor Wave",
+        "Arcade Hero", "Cyber Punk", "Ghost Rider", "Sonic Star",
+        "Turbo Champ", "Mega Pixel", "Space Ace", "Wild Card"
+    )
+
     fun init(context: Context) {
         if (prefs == null) {
             val applicationContext = context.applicationContext
@@ -99,4 +109,34 @@ object UserPreferencesRepository {
         _savedRoster.value = cleaned
         prefs?.edit()?.putString(KEY_SAVED_ROSTER, cleaned.joinToString(","))?.apply()
     }
+
+    fun getActiveRoster(targetCount: Int): List<String> {
+        val current = _savedRoster.value.toMutableList()
+        val result = mutableListOf<String>()
+        for (i in 0 until targetCount) {
+            if (i < current.size && current[i].isNotBlank()) {
+                result.add(current[i])
+            } else {
+                result.add("Player ${i + 1}")
+            }
+        }
+        return result
+    }
+
+    fun getRandomNickname(index: Int): String {
+        return funPartyNicknames.getOrNull(index % funPartyNicknames.size) ?: "Player ${index + 1}"
+    }
+
+    fun updatePlayerScore(playerName: String, delta: Int) {
+        val current = _sessionScores.value.toMutableMap()
+        val currentScore = current.getOrDefault(playerName, 0)
+        val newScore = (currentScore + delta).coerceAtLeast(0)
+        current[playerName] = newScore
+        _sessionScores.value = current
+    }
+
+    fun resetPlayerScores() {
+        _sessionScores.value = emptyMap()
+    }
 }
+

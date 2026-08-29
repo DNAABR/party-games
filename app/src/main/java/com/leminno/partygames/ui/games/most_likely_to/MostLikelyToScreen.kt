@@ -62,8 +62,10 @@ fun MostLikelyToScreen(
     var revealResults by remember { mutableStateOf(false) }
 
     val playerNames = remember(playerCount) {
-        List(playerCount) { idx -> "Player ${idx + 1}" }
+        com.leminno.partygames.data.repository.UserPreferencesRepository.getActiveRoster(playerCount)
     }
+
+    var showScoreboard by remember { mutableStateOf(false) }
 
     var votesMap by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
 
@@ -263,6 +265,12 @@ fun MostLikelyToScreen(
             }
         } else {
             val topVoted = votesMap.maxByOrNull { it.value }?.key ?: "Everyone"
+            LaunchedEffect(topVoted) {
+                if (topVoted != "Everyone") {
+                    com.leminno.partygames.data.repository.UserPreferencesRepository.updatePlayerScore(topVoted, 1)
+                }
+            }
+
             VictoryCeremonyOverlay(
                 winnerTitle = "MOST LIKELY: $topVoted! 👑",
                 subtitle = currentPrompt,
@@ -271,7 +279,7 @@ fun MostLikelyToScreen(
                     votingPhase = false
                     revealResults = false
                     votesMap = emptyMap()
-                    gamePhase = "MODE_SELECT"
+                    gamePhase = "PLAYING"
                 },
                 onBackToHub = onExitGame
             )
@@ -300,6 +308,13 @@ fun MostLikelyToScreen(
                         }
                     }
                 }
+            )
+        }
+
+        if (showScoreboard) {
+            com.leminno.partygames.ui.components.InGameScoreboardModal(
+                players = playerNames,
+                onDismissRequest = { showScoreboard = false }
             )
         }
     }

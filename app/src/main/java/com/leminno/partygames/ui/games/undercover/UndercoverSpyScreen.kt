@@ -33,6 +33,12 @@ fun UndercoverSpyScreen(
     val scope = rememberCoroutineScope()
     val haptics = remember { HapticFeedbackManager(context) }
 
+    val players = remember(playerCount) {
+        com.leminno.partygames.data.repository.UserPreferencesRepository.getActiveRoster(playerCount)
+    }
+
+    var showScoreboard by remember { mutableStateOf(false) }
+
     val locations = remember {
         listOf("Submarine", "Airplane", "Space Station", "Movie Studio", "Hospital", "Casino", "Supermarket", "Circus", "Polar Station")
     }
@@ -47,6 +53,7 @@ fun UndercoverSpyScreen(
     var spyIndex by remember { mutableIntStateOf((0 until playerCount).random()) }
 
     var currentPlayerTurn by remember { mutableIntStateOf(0) }
+    val currentName = players.getOrElse(currentPlayerTurn) { "Player ${currentPlayerTurn + 1}" }
     var isRevealingRole by remember { mutableStateOf(false) }
     var isFinished by remember { mutableStateOf(false) }
 
@@ -211,10 +218,10 @@ fun UndercoverSpyScreen(
                         .padding(horizontal = 14.dp, vertical = 6.dp)
                 ) {
                     Text(
-                        text = "PLAYER ${currentPlayerTurn + 1} OF $playerCount",
+                        text = "⚡ PASS TO ${currentName.uppercase()} (${currentPlayerTurn + 1} OF $playerCount)",
                         color = PixelEmeraldGreen,
                         fontFamily = PressStart2PFont,
-                        fontSize = 10.sp
+                        fontSize = 9.sp
                     )
                 }
 
@@ -253,15 +260,15 @@ fun UndercoverSpyScreen(
                                 )
                                 Spacer(modifier = Modifier.height(14.dp))
                                 Text(
-                                    text = if (isSpy) "YOU ARE THE SPY!" else "LOCATION: ${secretLocation.uppercase()}",
+                                    text = if (isSpy) "${currentName.uppercase()}: YOU ARE THE SPY!" else "LOCATION: ${secretLocation.uppercase()}",
                                     color = if (isSpy) PixelAlertRed else PixelEmeraldGreen,
                                     fontFamily = PressStart2PFont,
-                                    fontSize = 12.sp,
+                                    fontSize = 11.sp,
                                     textAlign = TextAlign.Center
                                 )
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Text(
-                                    text = if (isSpy) "Blend in and guess the location!" else "Ask subtle questions to spot the spy!",
+                                    text = if (isSpy) "Blend in and deduce the location!" else "Ask subtle questions to spot the spy!",
                                     color = TextSecondary,
                                     style = MaterialTheme.typography.bodyMedium,
                                     textAlign = TextAlign.Center
@@ -277,10 +284,11 @@ fun UndercoverSpyScreen(
                                 )
                                 Spacer(modifier = Modifier.height(14.dp))
                                 Text(
-                                    text = "HOLD TO SCAN ROLE",
+                                    text = "HOLD TO SCAN FOR ${currentName.uppercase()}",
                                     color = PixelEmeraldGreen,
                                     fontFamily = PressStart2PFont,
-                                    fontSize = 11.sp
+                                    fontSize = 9.sp,
+                                    textAlign = TextAlign.Center
                                 )
                                 Spacer(modifier = Modifier.height(6.dp))
                                 Text(
@@ -293,7 +301,7 @@ fun UndercoverSpyScreen(
                     }
 
                     PrimaryPartyButton(
-                        text = if (currentPlayerTurn < playerCount - 1) "NEXT PLAYER" else "START DISCUSSION",
+                        text = if (currentPlayerTurn < playerCount - 1) "PASS TO ${players.getOrElse(currentPlayerTurn + 1) { "NEXT" }.uppercase()} ▶" else "START DISCUSSION 🎙️",
                         icon = PixelIcons.Zap,
                         accentColor = PixelEmeraldGreen,
                         onClick = {
@@ -353,8 +361,9 @@ fun UndercoverSpyScreen(
                 }
             }
         } else {
+            val spyName = players.getOrElse(spyIndex) { "Player ${spyIndex + 1}" }
             VictoryCeremonyOverlay(
-                winnerTitle = "THE SPY WAS PLAYER ${spyIndex + 1}!",
+                winnerTitle = "THE SPY WAS ${spyName.uppercase()}! 🕵️",
                 subtitle = "Secret Location Was: $secretLocation",
                 onPlayAgain = {
                     secretLocation = locations.random()
@@ -385,6 +394,13 @@ fun UndercoverSpyScreen(
                         syncRemote(secretLocation, spyIndex, "SETUP")
                     }
                 }
+            )
+        }
+
+        if (showScoreboard) {
+            com.leminno.partygames.ui.components.InGameScoreboardModal(
+                players = players,
+                onDismissRequest = { showScoreboard = false }
             )
         }
     }

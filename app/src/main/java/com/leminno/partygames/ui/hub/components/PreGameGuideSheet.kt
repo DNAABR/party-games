@@ -36,6 +36,21 @@ fun PreGameGuideSheet(
     var showAiGenerator by remember { mutableStateOf(false) }
     var customPromptsCount by remember { mutableIntStateOf(0) }
 
+    val isTwoPlayerFixed = game.minPlayers == 2 && game.maxPlayers == 2
+    var playerNames by remember {
+        mutableStateOf(UserPreferencesRepository.getActiveRoster(selectedPlayerCount))
+    }
+
+    // Keep player list in sync with selected player count
+    LaunchedEffect(selectedPlayerCount) {
+        val current = playerNames.toMutableList()
+        while (current.size < selectedPlayerCount) {
+            val idx = current.size
+            current.add("Player ${idx + 1}")
+        }
+        playerNames = current.take(selectedPlayerCount)
+    }
+
     val categoryIcon = when (game.category) {
         GameCategory.TRIVIA -> PixelIcons.Lightbulb
         GameCategory.ACTION -> PixelIcons.Zap
@@ -226,21 +241,38 @@ fun PreGameGuideSheet(
                     fontSize = 8.sp
                 )
 
-                TextButton(onClick = { showAiGenerator = true }) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = PixelIcons.Zap,
-                            contentDescription = null,
-                            tint = PixelCrtCyan,
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Randomize Nicknames Action
+                    TextButton(onClick = {
+                        val shuffled = UserPreferencesRepository.funPartyNicknames.shuffled()
+                        playerNames = (0 until selectedPlayerCount).map { idx ->
+                            shuffled.getOrElse(idx) { "Player ${idx + 1}" }
+                        }
+                    }) {
                         Text(
-                            text = if (customPromptsCount > 0) "CUSTOM ($customPromptsCount)" else "AI PACK",
-                            color = PixelCrtCyan,
+                            text = "🎲 RANDOM",
+                            color = PixelAmberGold,
                             fontFamily = PressStart2PFont,
-                            fontSize = 8.sp
+                            fontSize = 7.sp
                         )
+                    }
+
+                    TextButton(onClick = { showAiGenerator = true }) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = PixelIcons.Zap,
+                                contentDescription = null,
+                                tint = PixelCrtCyan,
+                                modifier = Modifier.size(12.dp)
+                            )
+                            Spacer(modifier = Modifier.width(3.dp))
+                            Text(
+                                text = if (customPromptsCount > 0) "CUSTOM ($customPromptsCount)" else "AI PACK",
+                                color = PixelCrtCyan,
+                                fontFamily = PressStart2PFont,
+                                fontSize = 7.sp
+                            )
+                        }
                     }
                 }
             }
@@ -251,26 +283,101 @@ fun PreGameGuideSheet(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Players:", color = TextSecondary, style = MaterialTheme.typography.bodyMedium)
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(
-                        onClick = { if (selectedPlayerCount > game.minPlayers) selectedPlayerCount-- },
-                        enabled = selectedPlayerCount > game.minPlayers
-                    ) {
-                        Text("-", color = TextPrimary, fontFamily = PressStart2PFont, fontSize = 14.sp)
-                    }
+                Text(
+                    text = if (isTwoPlayerFixed) "2 Players (Duel):" else "Players:",
+                    color = TextSecondary,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                if (isTwoPlayerFixed) {
                     Text(
-                        text = "$selectedPlayerCount",
+                        text = "2 PLAYERS",
                         color = PixelCrtCyan,
                         fontFamily = PressStart2PFont,
-                        fontSize = 12.sp,
-                        modifier = Modifier.padding(horizontal = 8.dp)
+                        fontSize = 9.sp
                     )
-                    IconButton(
-                        onClick = { if (selectedPlayerCount < game.maxPlayers) selectedPlayerCount++ },
-                        enabled = selectedPlayerCount < game.maxPlayers
+                } else {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(
+                            onClick = { if (selectedPlayerCount > game.minPlayers) selectedPlayerCount-- },
+                            enabled = selectedPlayerCount > game.minPlayers
+                        ) {
+                            Text("-", color = TextPrimary, fontFamily = PressStart2PFont, fontSize = 14.sp)
+                        }
+                        Text(
+                            text = "$selectedPlayerCount",
+                            color = PixelCrtCyan,
+                            fontFamily = PressStart2PFont,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+                        IconButton(
+                            onClick = { if (selectedPlayerCount < game.maxPlayers) selectedPlayerCount++ },
+                            enabled = selectedPlayerCount < game.maxPlayers
+                        ) {
+                            Text("+", color = TextPrimary, fontFamily = PressStart2PFont, fontSize = 14.sp)
+                        }
+                    }
+                }
+            }
+
+            // Editable Player Name Tags (Grid / List)
+            Spacer(modifier = Modifier.height(6.dp))
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                playerNames.forEachIndexed { index, name ->
+                    val color = com.leminno.partygames.ui.components.PlayerAvatarColors.getOrElse(index % com.leminno.partygames.ui.components.PlayerAvatarColors.size) { PixelCrtCyan }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .border(1.5.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
+                            .background(PixelVioletDark)
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("+", color = TextPrimary, fontFamily = PressStart2PFont, fontSize = 14.sp)
+                        Box(
+                            modifier = Modifier
+                                .size(22.dp)
+                                .border(1.dp, PixelOutlineBlack)
+                                .background(color),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "${index + 1}",
+                                color = PixelOutlineBlack,
+                                fontFamily = PressStart2PFont,
+                                fontSize = 9.sp
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        OutlinedTextField(
+                            value = name,
+                            onValueChange = { newName ->
+                                val updated = playerNames.toMutableList()
+                                updated[index] = newName.take(16)
+                                playerNames = updated
+                            },
+                            singleLine = true,
+                            placeholder = {
+                                Text(
+                                    text = "Player ${index + 1}",
+                                    color = TextMuted,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = TextPrimary,
+                                unfocusedTextColor = TextPrimary,
+                                focusedBorderColor = Color.Transparent,
+                                unfocusedBorderColor = Color.Transparent,
+                                cursorColor = PixelCrtCyan
+                            ),
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(color = TextPrimary),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(44.dp)
+                        )
                     }
                 }
             }
@@ -340,6 +447,7 @@ fun PreGameGuideSheet(
                 text = "START GAME",
                 accentColor = PixelCrtCyan,
                 onClick = {
+                    UserPreferencesRepository.saveRoster(playerNames)
                     onStartGame(selectedPlayerCount, selectedTimerSec, selectedIntensity)
                 },
                 modifier = Modifier.fillMaxWidth()

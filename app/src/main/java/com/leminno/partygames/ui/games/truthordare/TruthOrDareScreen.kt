@@ -54,6 +54,8 @@ fun TruthOrDareScreen(
         }
     }
 
+    var showScoreboard by remember { mutableStateOf(false) }
+
     GameScaffold(
         title = "TRUTH OR DARE",
         titleColor = PixelCrtCyan,
@@ -98,45 +100,12 @@ fun TruthOrDareScreen(
                 Spacer(modifier = Modifier.height(10.dp))
 
                 // Player Turn Indicator Header
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .border(1.5.dp, PixelOutlineBlack, RoundedCornerShape(2.dp))
-                        .background(PixelVioletDark)
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = PixelIcons.Users,
-                            contentDescription = null,
-                            tint = PixelCrtCyan,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "PLAYER ${uiState.currentPlayerTurn}'S FATE",
-                            color = PixelCrtCyan,
-                            fontFamily = PressStart2PFont,
-                            fontSize = 9.sp
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .border(1.dp, PixelOutlineBlack)
-                            .background(PixelVioletElevated)
-                            .padding(horizontal = 6.dp, vertical = 3.dp)
-                    ) {
-                        Text(
-                            text = "${uiState.playerCount} PLAYERS",
-                            color = TextMuted,
-                            fontFamily = PressStart2PFont,
-                            fontSize = 7.sp
-                        )
-                    }
-                }
+                com.leminno.partygames.ui.components.InGamePlayerHeader(
+                    currentPlayerName = uiState.currentPlayerName,
+                    playerIndex = uiState.currentPlayerIndex,
+                    totalPlayers = uiState.players.size,
+                    onOpenScoreboard = { showScoreboard = true }
+                )
 
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -356,6 +325,7 @@ fun TruthOrDareScreen(
                             accentColor = PixelEmeraldGreen,
                             onClick = {
                                 haptics.performPop()
+                                com.leminno.partygames.data.repository.UserPreferencesRepository.updatePlayerScore(uiState.currentPlayerName, 1)
                                 viewModel.completeFate()
                             },
                             modifier = Modifier.weight(1f)
@@ -425,7 +395,7 @@ fun TruthOrDareScreen(
                         Spacer(modifier = Modifier.height(12.dp))
 
                         Text(
-                            text = "PLAYER ${uiState.currentPlayerTurn} RAN OUT OF TIME!",
+                            text = "${uiState.currentPlayerName.uppercase()} RAN OUT OF TIME!",
                             color = TextPrimary,
                             style = MaterialTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center
@@ -457,5 +427,13 @@ fun TruthOrDareScreen(
                 }
             }
         }
+
+        if (showScoreboard) {
+            com.leminno.partygames.ui.components.InGameScoreboardModal(
+                players = uiState.players,
+                onDismissRequest = { showScoreboard = false }
+            )
+        }
     }
 }
+

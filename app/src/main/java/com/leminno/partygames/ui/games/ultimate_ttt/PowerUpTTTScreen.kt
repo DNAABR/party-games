@@ -43,12 +43,19 @@ data class BoardCell(
 
 @Composable
 fun PowerUpTTTScreen(
+    playerCount: Int = 2,
     onExitGame: () -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val haptics = remember { HapticFeedbackManager(context) }
     val composeHaptics = LocalHapticFeedback.current
+
+    val players = remember {
+        com.leminno.partygames.data.repository.UserPreferencesRepository.getActiveRoster(2)
+    }
+    val playerXName = players.getOrElse(0) { "Player X" }
+    val playerOName = players.getOrElse(1) { "Player O" }
 
     var gamePhase by remember { mutableStateOf("MODE_SELECT") } // MODE_SELECT, PLAYING
     var isRemoteMode by remember { mutableStateOf(false) }
@@ -242,7 +249,7 @@ fun PowerUpTTTScreen(
                         .padding(horizontal = 18.dp, vertical = 8.dp)
                 ) {
                     Text(
-                        text = "TURN: ${currentTurnState.symbol} ${if (isPlayerXTurn) "PLAYER X" else "PLAYER O"}",
+                        text = "TURN: ${if (isPlayerXTurn) "${playerXName.uppercase()} (${currentTurnState.symbol})" else "${playerOName.uppercase()} (${currentTurnState.symbol})"}",
                         color = currentTurnState.color,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
@@ -312,9 +319,16 @@ fun PowerUpTTTScreen(
                 }
             }
         } else {
+            val winName = if (winner == CellState.PLAYER_X) playerXName else playerOName
+            LaunchedEffect(winner) {
+                if (winner != null) {
+                    com.leminno.partygames.data.repository.UserPreferencesRepository.updatePlayerScore(winName, 3)
+                }
+            }
+
             VictoryCeremonyOverlay(
-                winnerTitle = "WINNER: ${winner?.symbol} 🎉",
-                subtitle = "Power-Up Tic Tac Toe Champions!",
+                winnerTitle = "WINNER: ${winName.uppercase()}! 🏆",
+                subtitle = "$playerXName vs $playerOName Power-Up Duel",
                 onPlayAgain = {
                     board = List(9) { BoardCell() }
                     isPlayerXTurn = true

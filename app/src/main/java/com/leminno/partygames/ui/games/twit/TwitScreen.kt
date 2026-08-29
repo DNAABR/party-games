@@ -50,6 +50,12 @@ fun TwitScreen(
     val context = LocalContext.current
     val haptics = remember { HapticFeedbackManager(context) }
 
+    val players = remember(playerCount) {
+        com.leminno.partygames.data.repository.UserPreferencesRepository.getActiveRoster(playerCount)
+    }
+
+    var showScoreboard by remember { mutableStateOf(false) }
+
     var currentQuestion by remember { mutableStateOf(twitQuestions.random()) }
     var gamePhase by remember { mutableStateOf("GUESS_INPUT") } // GUESS_INPUT, BETTING, REVEAL
     var currentPlayerIdx by remember { mutableIntStateOf(0) }
@@ -93,7 +99,7 @@ fun TwitScreen(
 
             if (gamePhase == "GUESS_INPUT") {
                 // Input secret guess per player
-                val activePlayerName = "Player ${currentPlayerIdx + 1}"
+                val activePlayerName = players.getOrElse(currentPlayerIdx) { "Player ${currentPlayerIdx + 1}" }
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()
@@ -217,6 +223,12 @@ fun TwitScreen(
                 val validGuesses = guessesList.filter { it.guessValue <= currentQuestion.actualAnswer }
                 val winningGuess = validGuesses.maxByOrNull { it.guessValue }
 
+                LaunchedEffect(winningGuess) {
+                    if (winningGuess != null) {
+                        com.leminno.partygames.data.repository.UserPreferencesRepository.updatePlayerScore(winningGuess.playerName, 2)
+                    }
+                }
+
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()
@@ -231,7 +243,7 @@ fun TwitScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = if (winningGuess != null) "CLOSEST GUESS: ${winningGuess.playerName} (${winningGuess.guessValue}) 🎉" else "ALL GUESSES WENT OVER! 💥",
+                        text = if (winningGuess != null) "CLOSEST GUESS: ${winningGuess.playerName} (${winningGuess.guessValue}) 🎉 (+2 PTS)" else "ALL GUESSES WENT OVER! 💥",
                         color = Color.White,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
@@ -257,6 +269,13 @@ fun TwitScreen(
                     Text("NEXT QUESTION ▶", color = Color.Black, fontWeight = FontWeight.Black)
                 }
             }
+        }
+
+        if (showScoreboard) {
+            com.leminno.partygames.ui.components.InGameScoreboardModal(
+                players = players,
+                onDismissRequest = { showScoreboard = false }
+            )
         }
     }
 }
