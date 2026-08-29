@@ -76,8 +76,10 @@ private fun NavGraphBuilder.mvpGameRoutes(navController: NavHostController) {
 
     composable("game/truth_or_dare/{playerCount}/{timerSec}", arguments = gameRouteArgs) { backStackEntry ->
         val playerCount = backStackEntry.arguments?.getInt("playerCount") ?: 4
+        val timerSec = backStackEntry.arguments?.getInt("timerSec") ?: 60
         TruthOrDareScreen(
             playerCount = playerCount,
+            timerSec = timerSec,
             onExitGame = { navController.popBackStack() }
         )
     }
@@ -110,14 +112,18 @@ private fun NavGraphBuilder.mvpGameRoutes(navController: NavHostController) {
         )
     }
 
-    composable("game/would_you_rather/{playerCount}/{timerSec}", arguments = gameRouteArgs) {
+    composable("game/would_you_rather/{playerCount}/{timerSec}", arguments = gameRouteArgs) { backStackEntry ->
+        val playerCount = backStackEntry.arguments?.getInt("playerCount") ?: 4
         WouldYouRatherScreen(
+            playerCount = playerCount,
             onExitGame = { navController.popBackStack() }
         )
     }
 
-    composable("game/connect_four/{playerCount}/{timerSec}", arguments = gameRouteArgs) {
+    composable("game/connect_four/{playerCount}/{timerSec}", arguments = gameRouteArgs) { backStackEntry ->
+        val playerCount = backStackEntry.arguments?.getInt("playerCount") ?: 2
         ConnectFourScreen(
+            playerCount = playerCount,
             onExitGame = { navController.popBackStack() }
         )
     }
@@ -125,8 +131,10 @@ private fun NavGraphBuilder.mvpGameRoutes(navController: NavHostController) {
 
 private fun NavGraphBuilder.phase2GameRoutes(navController: NavHostController) {
     composable("game/charades/{playerCount}/{timerSec}", arguments = gameRouteArgs) { backStackEntry ->
+        val playerCount = backStackEntry.arguments?.getInt("playerCount") ?: 4
         val timerSec = backStackEntry.arguments?.getInt("timerSec") ?: 60
         CharadesScreen(
+            playerCount = playerCount,
             timerSec = timerSec,
             onExitGame = { navController.popBackStack() }
         )
@@ -166,8 +174,10 @@ private fun NavGraphBuilder.phase2GameRoutes(navController: NavHostController) {
         )
     }
 
-    composable("game/ultimate_ttt/{playerCount}/{timerSec}", arguments = gameRouteArgs) {
+    composable("game/ultimate_ttt/{playerCount}/{timerSec}", arguments = gameRouteArgs) { backStackEntry ->
+        val playerCount = backStackEntry.arguments?.getInt("playerCount") ?: 2
         PowerUpTTTScreen(
+            playerCount = playerCount,
             onExitGame = { navController.popBackStack() }
         )
     }
@@ -234,8 +244,10 @@ private fun NavGraphBuilder.phase3GameRoutes(navController: NavHostController) {
         )
     }
 
-    composable("game/battleship/{playerCount}/{timerSec}", arguments = gameRouteArgs) {
+    composable("game/battleship/{playerCount}/{timerSec}", arguments = gameRouteArgs) { backStackEntry ->
+        val playerCount = backStackEntry.arguments?.getInt("playerCount") ?: 2
         BattleshipScreen(
+            playerCount = playerCount,
             onExitGame = { navController.popBackStack() }
         )
     }

@@ -47,6 +47,14 @@ fun TwoTruthsAndALieScreen(
     val haptics = remember { HapticFeedbackManager(context) }
     val composeHaptics = LocalHapticFeedback.current
 
+    val players = remember(playerCount) {
+        com.leminno.partygames.data.repository.UserPreferencesRepository.getActiveRoster(playerCount)
+    }
+
+    var activePlayerIndex by remember { mutableIntStateOf(0) }
+    val activePlayerName = players.getOrElse(activePlayerIndex % players.size) { "Player 1" }
+    var showScoreboard by remember { mutableStateOf(false) }
+
     var gamePhase by remember { mutableStateOf("MODE_SELECT") } // MODE_SELECT, INPUT, VOTING, REVEAL
     var isRemoteMode by remember { mutableStateOf(false) }
     var showRemoteSheet by remember { mutableStateOf(false) }
@@ -164,15 +172,24 @@ fun TwoTruthsAndALieScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
+                com.leminno.partygames.ui.components.InGamePlayerHeader(
+                    currentPlayerName = activePlayerName,
+                    playerIndex = activePlayerIndex % players.size,
+                    totalPlayers = players.size,
+                    onOpenScoreboard = { showScoreboard = true }
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
                 if (gamePhase == "INPUT") {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "ACTIVE PLAYER ENTRY",
+                            text = "PASS PHONE TO $activePlayerName",
                             color = Color(0xFFFF007F),
-                            fontSize = 14.sp,
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.Black
                         )
                         Spacer(modifier = Modifier.height(4.dp))
@@ -182,7 +199,7 @@ fun TwoTruthsAndALieScreen(
                             fontSize = 12.sp,
                             textAlign = TextAlign.Center
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(14.dp))
 
                         OutlinedTextField(
                             value = truth1,
@@ -335,12 +352,13 @@ fun TwoTruthsAndALieScreen(
                     } else {
                         Button(
                             onClick = {
+                                activePlayerIndex++
                                 truth1 = ""
                                 truth2 = ""
                                 lieInput = ""
                                 selectedVoteIndex = null
                                 shuffledStatements = emptyList()
-                                gamePhase = "MODE_SELECT"
+                                gamePhase = "INPUT"
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF007F)),
                             shape = RoundedCornerShape(16.dp),
@@ -348,7 +366,7 @@ fun TwoTruthsAndALieScreen(
                                 .fillMaxWidth()
                                 .height(56.dp)
                         ) {
-                            Text("PLAY NEXT PLAYER ROUND 🔄", color = Color.White, fontWeight = FontWeight.Black)
+                            Text("NEXT PLAYER TURN (${players.getOrElse((activePlayerIndex + 1) % players.size) { "Player" }}) 🔄", color = Color.White, fontWeight = FontWeight.Black)
                         }
                     }
                 }
@@ -370,6 +388,13 @@ fun TwoTruthsAndALieScreen(
                     gamePhase = "INPUT"
                     showRemoteSheet = false
                 }
+            )
+        }
+
+        if (showScoreboard) {
+            com.leminno.partygames.ui.components.InGameScoreboardModal(
+                players = players,
+                onDismissRequest = { showScoreboard = false }
             )
         }
     }

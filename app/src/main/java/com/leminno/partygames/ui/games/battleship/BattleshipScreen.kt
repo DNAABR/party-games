@@ -30,11 +30,18 @@ enum class BattleCellState {
 
 @Composable
 fun BattleshipScreen(
+    playerCount: Int = 2,
     onExitGame: () -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val haptics = remember { HapticFeedbackManager(context) }
+
+    val players = remember {
+        com.leminno.partygames.data.repository.UserPreferencesRepository.getActiveRoster(2)
+    }
+    val p1Name = players.getOrElse(0) { "Player 1" }
+    val p2Name = players.getOrElse(1) { "Player 2" }
 
     val gridSize = 6 // 6x6 grid for fast mobile party play
     var player1Board by remember { mutableStateOf(List(gridSize * gridSize) { BattleCellState.EMPTY }) }
@@ -209,7 +216,7 @@ fun BattleshipScreen(
 
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = if (isP1) "PLAYER 1: DEPLOY FLEET" else "PLAYER 2: DEPLOY FLEET",
+                            text = if (isP1) "${p1Name.uppercase()}: DEPLOY FLEET" else "${p2Name.uppercase()}: DEPLOY FLEET",
                             color = Color(0xFF00F2FE),
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Black
@@ -272,7 +279,7 @@ fun BattleshipScreen(
                             .height(56.dp),
                         enabled = shipCount == 4
                     ) {
-                        Text(if (isRemoteMode) "CONFIRM FLEET 🚀" else "LOCK FLEET & PASS DEVICE ▶", color = Color.Black, fontWeight = FontWeight.Black)
+                        Text(if (isRemoteMode) "CONFIRM FLEET 🚀" else "LOCK FLEET & PASS TO ${if (isP1) p2Name.uppercase() else p1Name.uppercase()} ▶", color = Color.Black, fontWeight = FontWeight.Black)
                     }
                 } else if (gamePhase == "BATTLE_P1" || gamePhase == "P2_BATTLE") {
                     val isP1Turn = gamePhase == "BATTLE_P1"
@@ -280,9 +287,9 @@ fun BattleshipScreen(
 
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = if (isP1Turn) "PLAYER 1: CALL SALVO STRIKE 💥" else "PLAYER 2: CALL SALVO STRIKE 💥",
+                            text = if (isP1Turn) "${p1Name.uppercase()}: CALL SALVO STRIKE 💥" else "${p2Name.uppercase()}: CALL SALVO STRIKE 💥",
                             color = Color(0xFFFF0055),
-                            fontSize = 18.sp,
+                            fontSize = 17.sp,
                             fontWeight = FontWeight.Black
                         )
                         Spacer(modifier = Modifier.height(4.dp))
@@ -334,7 +341,9 @@ fun BattleshipScreen(
                                                     val remainingHitsNeeded = updated.count { it == BattleCellState.SHIP }
                                                     var targetPhase = gamePhase
                                                     if (remainingHitsNeeded == 0) {
-                                                        winnerText = if (isP1Turn) "PLAYER 1 SUNK THE FLEET! VICTORY! 🏆" else "PLAYER 2 SUNK THE FLEET! VICTORY! 🏆"
+                                                        val winnerName = if (isP1Turn) p1Name else p2Name
+                                                        winnerText = "${winnerName.uppercase()} SUNK THE FLEET! VICTORY! ⚓🏆"
+                                                        com.leminno.partygames.data.repository.UserPreferencesRepository.updatePlayerScore(winnerName, 3)
                                                         targetPhase = "GAME_OVER"
                                                         gamePhase = "GAME_OVER"
                                                     }
@@ -363,14 +372,14 @@ fun BattleshipScreen(
                             .fillMaxWidth()
                             .height(56.dp)
                     ) {
-                        Text(if (isRemoteMode) "PASS TURN TO OPPONENT 🔒" else "END TURN & PASS PHONE 🔒", color = Color.White, fontWeight = FontWeight.Black)
+                        Text(if (isRemoteMode) "PASS TURN TO OPPONENT 🔒" else "END TURN & PASS TO ${if (isP1Turn) p2Name.uppercase() else p1Name.uppercase()} 🔒", color = Color.White, fontWeight = FontWeight.Black)
                     }
                 }
             }
         } else {
             VictoryCeremonyOverlay(
                 winnerTitle = winnerText ?: "VICTORY! 🏆",
-                subtitle = "Supreme Naval Commander!",
+                subtitle = "$p1Name vs $p2Name Naval Battle",
                 onPlayAgain = {
                     player1Board = List(gridSize * gridSize) { BattleCellState.EMPTY }
                     player2Board = List(gridSize * gridSize) { BattleCellState.EMPTY }

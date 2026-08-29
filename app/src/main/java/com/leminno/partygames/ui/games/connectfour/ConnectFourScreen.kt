@@ -27,12 +27,19 @@ import com.leminno.partygames.ui.theme.*
 
 @Composable
 fun ConnectFourScreen(
+    playerCount: Int = 2,
     viewModel: ConnectFourViewModel = viewModel(),
     onExitGame: () -> Unit
 ) {
     val context = LocalContext.current
     val haptics = remember { HapticFeedbackManager(context) }
     val composeHaptics = LocalHapticFeedback.current
+
+    val players = remember {
+        com.leminno.partygames.data.repository.UserPreferencesRepository.getActiveRoster(2)
+    }
+    val p1Name = players.getOrElse(0) { "Player 1" }
+    val p2Name = players.getOrElse(1) { "Player 2" }
 
     val uiState by viewModel.uiState.collectAsState()
 
@@ -129,8 +136,8 @@ fun ConnectFourScreen(
                 ) {
                     Text(
                         text = when {
-                            uiState.isRedTurn -> "RED TURN 🔴"
-                            else -> "YELLOW TURN 🟡"
+                            uiState.isRedTurn -> "${p1Name.uppercase()}'S TURN 🔴"
+                            else -> "${p2Name.uppercase()}'S TURN 🟡"
                         },
                         color = turnColor,
                         fontSize = 14.sp,
@@ -209,12 +216,21 @@ fun ConnectFourScreen(
             }
         } else {
             val winnerTitle = when {
-                uiState.winnerPlayer != null -> "PLAYER ${uiState.winnerPlayer} WINS!"
-                else -> "IT'S A DRAW!"
+                uiState.winnerPlayer == 1 -> "${p1Name.uppercase()} WINS! 🔴👑"
+                uiState.winnerPlayer == 2 -> "${p2Name.uppercase()} WINS! 🟡👑"
+                else -> "IT'S A DRAW! 🤝"
             }
+            LaunchedEffect(uiState.winnerPlayer) {
+                if (uiState.winnerPlayer == 1) {
+                    com.leminno.partygames.data.repository.UserPreferencesRepository.updatePlayerScore(p1Name, 3)
+                } else if (uiState.winnerPlayer == 2) {
+                    com.leminno.partygames.data.repository.UserPreferencesRepository.updatePlayerScore(p2Name, 3)
+                }
+            }
+
             VictoryCeremonyOverlay(
                 winnerTitle = winnerTitle,
-                subtitle = "Connect Four Champions",
+                subtitle = "$p1Name vs $p2Name Duel",
                 onPlayAgain = { viewModel.resetGame() },
                 onBackToHub = onExitGame
             )

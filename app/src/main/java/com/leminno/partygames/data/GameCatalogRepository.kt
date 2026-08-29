@@ -31,19 +31,19 @@ object GameCatalogRepository {
         GameItem(
             id = "truth_or_dare",
             title = "Truth or Dare",
-            tagLine = "Physics bottle spinner & prompts",
-            description = "Spin the physical canvas bottle with realistic haptics! Pick your intensity deck from Clean to Extreme.",
+            tagLine = "Risk vs reward party challenges",
+            description = "Take turns facing spicy truths and wild dares! Pick your risk level from Clean to Extreme and beat the countdown timer.",
             category = GameCategory.TRIVIA,
             setupType = SetupType.PASS_AND_PLAY,
             minPlayers = 2,
             maxPlayers = 10,
             estTimeMinutes = 15,
             isMvp = true,
-            antiCheatNotice = "Player selected by bottle MUST answer or complete dare!",
+            antiCheatNotice = "Active player must answer honestly or perform the dare before time runs out!",
             rules = listOf(
-                GameRuleStep(1, "Flick to Spin", "Swipe across screen to spin the bottle with realistic physics.", "local_bar"),
-                GameRuleStep(2, "Select Challenge", "Chosen player picks Truth or Dare from deck.", "style"),
-                GameRuleStep(3, "Execute or Pass", "Complete prompt to earn group approval!", "local_fire_department")
+                GameRuleStep(1, "Pick Risk Deck", "Choose Clean (Safe), Party (Balanced), or Extreme (High Risk) on your turn.", "style"),
+                GameRuleStep(2, "Truth or Dare", "Draw your prompt and complete the challenge before the countdown timer expires.", "timer"),
+                GameRuleStep(3, "Score or Forfeit", "Tap DONE to claim points or FORFEIT to pass with a deck penalty.", "emoji_events")
             )
         ),
         // MVP Game 3
