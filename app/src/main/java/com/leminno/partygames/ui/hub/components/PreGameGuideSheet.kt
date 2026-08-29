@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.leminno.partygames.data.model.GameCategory
+import com.leminno.partygames.data.repository.UserPreferencesRepository
 import com.leminno.partygames.ui.components.AiPromptGeneratorSheet
 import com.leminno.partygames.ui.components.PrimaryPartyButton
 import com.leminno.partygames.ui.components.SecondaryPartyButton
@@ -38,14 +39,14 @@ fun PreGameGuideSheet(
 
     val isTwoPlayerFixed = game.minPlayers == 2 && game.maxPlayers == 2
     var playerNames by remember {
-        mutableStateOf(UserPreferencesRepository.getActiveRoster(selectedPlayerCount))
+        mutableStateOf<List<String>>(UserPreferencesRepository.getActiveRoster(selectedPlayerCount))
     }
 
     // Keep player list in sync with selected player count
     LaunchedEffect(selectedPlayerCount) {
         val current = playerNames.toMutableList()
-        while (current.size < selectedPlayerCount) {
-            val idx = current.size
+        while (current.count() < selectedPlayerCount) {
+            val idx = current.count()
             current.add("Player ${idx + 1}")
         }
         playerNames = current.take(selectedPlayerCount)

@@ -335,11 +335,7 @@ fun TruthOrDareScreen(
             }
 
             // Retro "TIME'S UP / FATE FORFEIT" Modal Overlay
-            AnimatedVisibility(
-                visible = uiState.isTimesUp,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
+            if (uiState.isTimesUp) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()

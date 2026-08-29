@@ -354,6 +354,8 @@ fun WouldYouRatherScreen(
                     }
                 }
             )
+        }
+
         if (showScoreboard) {
             com.leminno.partygames.ui.components.InGameScoreboardModal(
                 players = players,
