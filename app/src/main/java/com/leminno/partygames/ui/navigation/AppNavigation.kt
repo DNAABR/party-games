@@ -76,8 +76,10 @@ private fun NavGraphBuilder.mvpGameRoutes(navController: NavHostController) {
 
     composable("game/truth_or_dare/{playerCount}/{timerSec}", arguments = gameRouteArgs) { backStackEntry ->
         val playerCount = backStackEntry.arguments?.getInt("playerCount") ?: 4
+        val timerSec = backStackEntry.arguments?.getInt("timerSec") ?: 60
         TruthOrDareScreen(
             playerCount = playerCount,
+            timerSec = timerSec,
             onExitGame = { navController.popBackStack() }
         )
     }
