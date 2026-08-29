@@ -34,6 +34,33 @@ data class TruthOrDareUiState(
         get() = players.getOrElse(currentPlayerIndex) { "Player ${currentPlayerIndex + 1}" }
     val currentPlayerTurn: Int
         get() = currentPlayerIndex + 1
+
+    val truthPoints: Int
+        get() = when (selectedDeck) {
+            "Extreme" -> 2
+            else -> 1
+        }
+
+    val darePoints: Int
+        get() = when (selectedDeck) {
+            "Extreme" -> 3
+            "Party" -> 2
+            else -> 1
+        }
+
+    val penaltyPoints: Int
+        get() = when (selectedDeck) {
+            "Extreme" -> 2
+            "Party" -> 1
+            else -> 0
+        }
+
+    val activePointsEarned: Int
+        get() = when (activePromptType) {
+            "DARE" -> darePoints
+            "TRUTH" -> truthPoints
+            else -> 0
+        }
 }
 
 class TruthOrDareViewModel : ViewModel() {
