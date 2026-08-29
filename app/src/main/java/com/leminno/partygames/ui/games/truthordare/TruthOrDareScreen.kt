@@ -41,10 +41,22 @@ fun TruthOrDareScreen(
         viewModel.initGame(playerCount = playerCount, timerSec = timerSec)
     }
 
-    // Haptic cues on critical timer states
+    var showScoreboard by remember { mutableStateOf(false) }
+    var pointCelebration by remember { mutableStateOf<String?>(null) }
+
+    // Haptic cues and score penalty on critical timer states
     LaunchedEffect(uiState.isTimesUp) {
         if (uiState.isTimesUp) {
             haptics.performHeavyBurst()
+            com.leminno.partygames.data.repository.UserPreferencesRepository.updatePlayerScore(uiState.currentPlayerName, -1)
+            pointCelebration = "💔 -1 PT TIME-OUT PENALTY!"
+        }
+    }
+
+    LaunchedEffect(pointCelebration) {
+        if (pointCelebration != null) {
+            kotlinx.coroutines.delay(2600L)
+            pointCelebration = null
         }
     }
 
@@ -53,8 +65,6 @@ fun TruthOrDareScreen(
             haptics.performWarningThud()
         }
     }
-
-    var showScoreboard by remember { mutableStateOf(false) }
 
     GameScaffold(
         title = "TRUTH OR DARE",
@@ -181,6 +191,7 @@ fun TruthOrDareScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 val promptColor = if (uiState.activePromptType == "TRUTH") PixelCrtCyan else PixelMagentaHot
+                                val ptsLabel = if (uiState.activePromptType == "DARE") "+2 PTS" else "+1 PT"
                                 Box(
                                     modifier = Modifier
                                         .border(1.5.dp, PixelOutlineBlack)
@@ -189,10 +200,10 @@ fun TruthOrDareScreen(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = uiState.activePromptType ?: "",
+                                        text = "${uiState.activePromptType ?: ""} ($ptsLabel)",
                                         color = PixelOutlineBlack,
                                         fontFamily = PressStart2PFont,
-                                        fontSize = 9.sp
+                                        fontSize = 8.sp
                                     )
                                 }
 
@@ -283,7 +294,7 @@ fun TruthOrDareScreen(
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         PrimaryPartyButton(
-                            text = "TRUTH",
+                            text = "TRUTH (+1)",
                             icon = PixelIcons.Lightbulb,
                             accentColor = PixelCrtCyan,
                             onClick = {
@@ -294,7 +305,7 @@ fun TruthOrDareScreen(
                         )
 
                         PrimaryPartyButton(
-                            text = "DARE",
+                            text = "DARE (+2)",
                             icon = PixelIcons.Zap,
                             accentColor = PixelMagentaHot,
                             onClick = {
@@ -305,30 +316,69 @@ fun TruthOrDareScreen(
                         )
                     }
                 } else {
+                    val earnedPts = if (uiState.activePromptType == "DARE") 2 else 1
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         SecondaryPartyButton(
-                            text = if (uiState.isPaused) "RESUME" else "PAUSE",
+                            text = "FORFEIT (-1)",
+                            icon = PixelIcons.Close,
+                            onClick = {
+                                haptics.performWarningThud()
+                                com.leminno.partygames.data.repository.UserPreferencesRepository.updatePlayerScore(uiState.currentPlayerName, -1)
+                                pointCelebration = "💔 -1 PT FORFEITED"
+                                viewModel.nextTurn()
+                            },
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        SecondaryPartyButton(
+                            text = if (uiState.isPaused) "PLAY" else "PAUSE",
                             icon = PixelIcons.Clock,
                             onClick = {
                                 haptics.performTick(composeHaptics)
                                 viewModel.togglePauseTimer()
                             },
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(0.9f)
                         )
 
                         PrimaryPartyButton(
-                            text = "DONE",
+                            text = "DONE (+$earnedPts)",
                             icon = PixelIcons.Trophy,
                             accentColor = PixelEmeraldGreen,
                             onClick = {
-                                haptics.performPop()
-                                com.leminno.partygames.data.repository.UserPreferencesRepository.updatePlayerScore(uiState.currentPlayerName, 1)
+                                haptics.performHeavyBurst()
+                                com.leminno.partygames.data.repository.UserPreferencesRepository.updatePlayerScore(uiState.currentPlayerName, earnedPts)
+                                pointCelebration = "🎉 +$earnedPts PTS TO ${uiState.currentPlayerName.uppercase()}! 🔥"
                                 viewModel.completeFate()
                             },
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1.3f)
+                        )
+                    }
+                }
+            }
+
+            // Floating Points Celebration Toast
+            if (pointCelebration != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .border(2.dp, PixelAmberGold, RoundedCornerShape(4.dp))
+                            .background(Color(0xFA140B24))
+                            .padding(horizontal = 14.dp, vertical = 8.dp)
+                    ) {
+                        Text(
+                            text = pointCelebration ?: "",
+                            color = PixelAmberGold,
+                            fontFamily = PressStart2PFont,
+                            fontSize = 9.sp,
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
@@ -381,10 +431,10 @@ fun TruthOrDareScreen(
                         Spacer(modifier = Modifier.height(6.dp))
 
                         Text(
-                            text = "FATE FORFEITED!",
+                            text = "FATE FORFEITED (-1 PT) 💔",
                             color = PixelAmberGold,
                             fontFamily = PressStart2PFont,
-                            fontSize = 10.sp,
+                            fontSize = 9.sp,
                             textAlign = TextAlign.Center
                         )
 
