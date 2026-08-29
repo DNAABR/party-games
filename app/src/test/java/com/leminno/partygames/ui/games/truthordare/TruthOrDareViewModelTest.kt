@@ -116,4 +116,31 @@ class TruthOrDareViewModelTest {
         assertNull(state.activePrompt)
         assertFalse(state.isTimerRunning)
     }
+
+    @Test
+    fun `all decks have at least 50 prompts for both truth and dare`() {
+        listOf("Clean", "Party", "Extreme").forEach { deck ->
+            val truths = com.leminno.partygames.data.repository.GameContentRepository.getTruthPrompts(deck)
+            val dares = com.leminno.partygames.data.repository.GameContentRepository.getDarePrompts(deck)
+            assertTrue("Expected at least 50 truths for deck $deck but was ${truths.size}", truths.size >= 50)
+            assertTrue("Expected at least 50 dares for deck $deck but was ${dares.size}", dares.size >= 50)
+        }
+    }
+
+    @Test
+    fun `drawing beyond deck size automatically reshuffles and continues without errors`() {
+        viewModel.initGame(playerCount = 4, deck = "Clean", timerSec = 60)
+        val initialSize = viewModel.uiState.value.truthPrompts.size
+
+        // Draw entire deck
+        repeat(initialSize) {
+            viewModel.drawTruth()
+        }
+        assertEquals(initialSize, viewModel.uiState.value.truthIndex)
+
+        // Draw 1 more (triggers reshuffle cycle)
+        viewModel.drawTruth()
+        assertEquals(1, viewModel.uiState.value.truthIndex)
+        assertNotNull(viewModel.uiState.value.activePrompt)
+    }
 }

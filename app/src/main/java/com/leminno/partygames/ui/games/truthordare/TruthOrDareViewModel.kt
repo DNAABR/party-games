@@ -79,12 +79,31 @@ class TruthOrDareViewModel : ViewModel() {
         val state = _uiState.value
         if (state.truthPrompts.isEmpty()) return
 
-        val prompt = state.truthPrompts[state.truthIndex % state.truthPrompts.size]
+        val currentPrompts = state.truthPrompts
+        val currentIndex = state.truthIndex
+
+        val (activeList, nextIndex, prompt) = if (currentIndex >= currentPrompts.size) {
+            val lastPrompt = currentPrompts.lastOrNull()
+            var reshuffled = currentPrompts.shuffled()
+            if (reshuffled.size > 1 && reshuffled.first() == lastPrompt) {
+                val swapIdx = (1 until reshuffled.size).random()
+                val mutable = reshuffled.toMutableList()
+                val temp = mutable[0]
+                mutable[0] = mutable[swapIdx]
+                mutable[swapIdx] = temp
+                reshuffled = mutable
+            }
+            Triple(reshuffled, 1, reshuffled[0])
+        } else {
+            Triple(currentPrompts, currentIndex + 1, currentPrompts[currentIndex])
+        }
+
         _uiState.update {
             it.copy(
+                truthPrompts = activeList,
                 activePromptType = "TRUTH",
                 activePrompt = prompt,
-                truthIndex = it.truthIndex + 1,
+                truthIndex = nextIndex,
                 isTimesUp = false,
                 isPaused = false,
                 timeRemaining = it.timerDurationSec,
@@ -98,12 +117,31 @@ class TruthOrDareViewModel : ViewModel() {
         val state = _uiState.value
         if (state.darePrompts.isEmpty()) return
 
-        val prompt = state.darePrompts[state.dareIndex % state.darePrompts.size]
+        val currentPrompts = state.darePrompts
+        val currentIndex = state.dareIndex
+
+        val (activeList, nextIndex, prompt) = if (currentIndex >= currentPrompts.size) {
+            val lastPrompt = currentPrompts.lastOrNull()
+            var reshuffled = currentPrompts.shuffled()
+            if (reshuffled.size > 1 && reshuffled.first() == lastPrompt) {
+                val swapIdx = (1 until reshuffled.size).random()
+                val mutable = reshuffled.toMutableList()
+                val temp = mutable[0]
+                mutable[0] = mutable[swapIdx]
+                mutable[swapIdx] = temp
+                reshuffled = mutable
+            }
+            Triple(reshuffled, 1, reshuffled[0])
+        } else {
+            Triple(currentPrompts, currentIndex + 1, currentPrompts[currentIndex])
+        }
+
         _uiState.update {
             it.copy(
+                darePrompts = activeList,
                 activePromptType = "DARE",
                 activePrompt = prompt,
-                dareIndex = it.dareIndex + 1,
+                dareIndex = nextIndex,
                 isTimesUp = false,
                 isPaused = false,
                 timeRemaining = it.timerDurationSec,
