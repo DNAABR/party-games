@@ -67,7 +67,7 @@ fun RemoteRoomSetupSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         containerColor = SurfaceLight,
-        scrimColor = Color(0x660F172A),
+        scrimColor = ScrimModal,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
         dragHandle = {
             Box(
@@ -299,7 +299,7 @@ fun RemoteRoomSetupSheet(
                                     modifier = Modifier
                                         .size(8.dp)
                                         .clip(CircleShape)
-                                        .background(if (player.connected) SuccessGreen else Color.Gray)
+                                        .background(if (player.connected) SuccessGreen else TextMuted)
                                 )
                             }
                         }

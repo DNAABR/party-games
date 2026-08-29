@@ -51,7 +51,7 @@ fun PreGameGuideSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
         containerColor = SurfaceLight,
-        scrimColor = Color(0x660F172A),
+        scrimColor = ScrimModal,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
         dragHandle = {
             Box(
@@ -117,7 +117,7 @@ fun PreGameGuideSheet(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
                         .background(WarningContainer)
-                        .border(1.dp, Color(0xFFFDE68A), RoundedCornerShape(16.dp))
+                        .border(1.dp, WarningAmber.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
                         .padding(12.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -130,7 +130,7 @@ fun PreGameGuideSheet(
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
                             text = game.antiCheatNotice,
-                            color = Color(0xFF92400E),
+                            color = BoardText,
                             fontFamily = ModernSansFont,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Medium

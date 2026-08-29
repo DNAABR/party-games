@@ -213,7 +213,7 @@ fun ConnectFourScreen(
                                     val cellVal = uiState.grid[row][col]
                                     val (cellColor, borderCol) = when (cellVal) {
                                         1 -> Pair(AlertRed, AlertRed.copy(alpha = 0.3f))
-                                        2 -> Pair(Color(0xFFEAB308), Color(0xFFCA8A04))
+                                        2 -> Pair(WarningAmber, WarningAmber.copy(alpha = 0.4f))
                                         else -> Pair(SurfaceSubtle, BorderSubtle)
                                     }
 

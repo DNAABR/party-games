@@ -15,6 +15,8 @@ val SurfaceElevatedLight  = Color(0xFFFFFFFF) // Modal & sheet background
 val BorderSubtle          = Color(0xFFE2E8F0) // Clean hairline border (slate-200)
 val BorderSubtleLight     = Color(0xFFF1F5F9) // Extra soft border for nested elements
 val BorderFocus           = Color(0xFFCBD5E1) // Active/Hover stroke border
+val ScrimModal            = Color(0x660F172A) // 40% translucent slate backdrop
+val ScrimOverlay          = Color(0x800F172A) // 50% translucent slate overlay
 
 // --- Typography Hierarchy ---
 val TextPrimary           = Color(0xFF0F172A) // Deep charcoal slate (slate-900)

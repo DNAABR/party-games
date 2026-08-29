@@ -245,7 +245,7 @@ fun WhoAmIScreen(
                         modifier = Modifier
                             .clip(RoundedCornerShape(14.dp))
                             .background(WarningContainer)
-                            .border(1.dp, Color(0xFFFDE68A), RoundedCornerShape(14.dp))
+                            .border(1.dp, WarningAmber.copy(alpha = 0.3f), RoundedCornerShape(14.dp))
                             .padding(horizontal = 14.dp, vertical = 8.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -258,7 +258,7 @@ fun WhoAmIScreen(
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = "Score: ${uiState.score}",
-                                color = Color(0xFF92400E),
+                                color = BoardText,
                                 fontFamily = ModernSansFont,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp

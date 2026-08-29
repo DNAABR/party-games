@@ -28,7 +28,7 @@ fun InGameRulesSheet(
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         containerColor = SurfaceLight,
-        scrimColor = Color(0x660F172A),
+        scrimColor = ScrimModal,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
         dragHandle = {
             Box(
@@ -161,7 +161,7 @@ fun InGameRulesSheet(
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(16.dp))
                                 .background(WarningContainer)
-                                .border(1.dp, Color(0xFFFDE68A), RoundedCornerShape(16.dp))
+                                .border(1.dp, WarningAmber.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
                                 .padding(14.dp)
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -174,7 +174,7 @@ fun InGameRulesSheet(
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Text(
                                     text = notice,
-                                    color = Color(0xFF92400E),
+                                    color = BoardText,
                                     fontFamily = ModernSansFont,
                                     fontWeight = FontWeight.Medium,
                                     fontSize = 13.sp

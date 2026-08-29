@@ -27,8 +27,8 @@ import kotlinx.coroutines.launch
 
 enum class CellState(val symbol: String, val color: Color) {
     EMPTY("", Color.Transparent),
-    PLAYER_X("❌", Color(0xFF6366F1)),
-    PLAYER_O("⭕", Color(0xFFEC4899))
+    PLAYER_X("❌", BrandPrimary),
+    PLAYER_O("⭕", ActionPrimary)
 }
 
 enum class TttPowerUp(val title: String, val icon: String, val desc: String) {

@@ -36,7 +36,7 @@ fun AiPromptGeneratorSheet(
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         containerColor = SurfaceLight,
-        scrimColor = Color(0x660F172A),
+        scrimColor = ScrimModal,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
         dragHandle = {
             Box(

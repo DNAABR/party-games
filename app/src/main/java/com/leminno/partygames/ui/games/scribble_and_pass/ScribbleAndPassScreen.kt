@@ -64,12 +64,12 @@ fun ScribbleAndPassScreen(
     // Canvas drawing state
     var paths by remember { mutableStateOf<List<DrawPathState>>(emptyList()) }
     var currentPath by remember { mutableStateOf<List<Offset>>(emptyList()) }
-    var selectedColor by remember { mutableStateOf(Color(0xFF1E293B)) }
+    var selectedColor by remember { mutableStateOf(TextPrimary) }
     var strokeWidth by remember { mutableFloatStateOf(8f) }
 
     val colorPalette = listOf(
-        Color(0xFF1E293B), Color(0xFF6366F1), Color(0xFFEC4899),
-        Color(0xFFF59E0B), Color(0xFF10B981), Color(0xFF06B6D4)
+        TextPrimary, BrandPrimary, ActionPrimary,
+        WarningAmber, SuccessGreen, TriviaPrimary
     )
 
     // Observe Remote Game State

@@ -43,7 +43,7 @@ fun PrimaryPartyButton(
     val haptics = remember { HapticFeedbackManager(context) }
     val interactionSource = remember { MutableInteractionSource() }
 
-    val bgColor = if (enabled) accentColor else Color(0xFFE2E8F0)
+    val bgColor = if (enabled) accentColor else BorderSubtle
     val contentColor = if (enabled) TextOnPrimary else TextMuted
 
     Box(

@@ -296,7 +296,7 @@ fun HangmanScreen(
                         Canvas(modifier = Modifier.fillMaxSize()) {
                             val w = size.width
                             val h = size.height
-                            val gallowsCol = Color(0xFF94A3B8)
+                            val gallowsCol = TextMuted
                             val bodyCol = AlertRed
 
                             drawLine(gallowsCol, Offset(20f, h - 14f), Offset(w - 20f, h - 14f), strokeWidth = 3.dp.toPx(), cap = StrokeCap.Round)

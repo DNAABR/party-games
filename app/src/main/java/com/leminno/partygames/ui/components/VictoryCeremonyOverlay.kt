@@ -27,7 +27,7 @@ fun VictoryCeremonyOverlay(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0x800F172A))
+            .background(ScrimOverlay)
             .padding(24.dp),
         contentAlignment = Alignment.Center
     ) {

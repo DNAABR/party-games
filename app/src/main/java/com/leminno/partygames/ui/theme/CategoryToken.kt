@@ -35,11 +35,11 @@ data class CategoryThemeToken(
         val TriviaToken = CategoryThemeToken(
             category = GameCategory.TRIVIA,
             primaryAccent = TriviaPrimary,
-            secondaryAccent = Color(0xFFA78BFA),
+            secondaryAccent = TriviaPrimary.copy(alpha = 0.7f),
             containerColor = TriviaContainer,
             textColor = TriviaText,
             surfaceBorder = TriviaBorder,
-            backgroundGlow = Color(0x1A8B5CF6),
+            backgroundGlow = TriviaPrimary.copy(alpha = 0.1f),
             cornerRadius = 20.dp,
             motionPersonality = MotionPersonality.SPRING_BOUNCY,
             hapticProfile = HapticProfile.PLAYFUL_POPS
@@ -48,11 +48,11 @@ data class CategoryThemeToken(
         val ActionToken = CategoryThemeToken(
             category = GameCategory.ACTION,
             primaryAccent = ActionPrimary,
-            secondaryAccent = Color(0xFF38BDF8),
+            secondaryAccent = ActionPrimary.copy(alpha = 0.7f),
             containerColor = ActionContainer,
             textColor = ActionText,
             surfaceBorder = ActionBorder,
-            backgroundGlow = Color(0x1A0284C7),
+            backgroundGlow = ActionPrimary.copy(alpha = 0.1f),
             cornerRadius = 18.dp,
             motionPersonality = MotionPersonality.HIGH_VELOCITY,
             hapticProfile = HapticProfile.REACTIVE_PULSE
@@ -61,11 +61,11 @@ data class CategoryThemeToken(
         val MysteryToken = CategoryThemeToken(
             category = GameCategory.MYSTERY,
             primaryAccent = MysteryPrimary,
-            secondaryAccent = Color(0xFF34D399),
+            secondaryAccent = MysteryPrimary.copy(alpha = 0.7f),
             containerColor = MysteryContainer,
             textColor = MysteryText,
             surfaceBorder = MysteryBorder,
-            backgroundGlow = Color(0x1A059669),
+            backgroundGlow = MysteryPrimary.copy(alpha = 0.1f),
             cornerRadius = 20.dp,
             motionPersonality = MotionPersonality.SLOW_AMBIENT,
             hapticProfile = HapticProfile.MYSTERIOUS_RUMBLE
@@ -74,11 +74,11 @@ data class CategoryThemeToken(
         val BoardToken = CategoryThemeToken(
             category = GameCategory.BOARD,
             primaryAccent = BoardPrimary,
-            secondaryAccent = Color(0xFFFB923C),
+            secondaryAccent = BoardPrimary.copy(alpha = 0.7f),
             containerColor = BoardContainer,
             textColor = BoardText,
             surfaceBorder = BoardBorder,
-            backgroundGlow = Color(0x1AEA580C),
+            backgroundGlow = BoardPrimary.copy(alpha = 0.1f),
             cornerRadius = 18.dp,
             motionPersonality = MotionPersonality.DELIBERATE_SLIDE,
             hapticProfile = HapticProfile.TACTILE_CLICK
